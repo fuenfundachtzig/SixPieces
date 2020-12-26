@@ -3,9 +3,13 @@
 // 
 // (85)
 //
-// $Id: make_materials.ts 3715 2020-12-26 15:31:46Z zwo $
+// $Id: make_materials.ts 3716 2020-12-26 23:07:54Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
+
+export var materials: StandardMaterial[][];
+
+let scene: Scene;
 
 const colors = [
     "green",
@@ -15,6 +19,7 @@ const colors = [
     "violet",
     "orange"
 ];
+// TODO: type shape = "square" | "circle" | ...
 
 const texture_w = 256;
 const texture_h = 256;
@@ -88,7 +93,7 @@ function drawShape(ctx: CanvasRenderingContext2D, shape_idx: number) {
 export function makeMaterials(scene: Scene) {
     // prepare a 6x6 matrix of materials
 
-    const materials = Array();
+    materials = Array();
 
     for (let shape_idx = 0; shape_idx < 6; ++shape_idx) {
         const materials_colors = Array();

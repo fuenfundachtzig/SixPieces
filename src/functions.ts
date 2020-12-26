@@ -1,6 +1,5 @@
-import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4, PickingInfo } from '@babylonjs/core'
+import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4 } from '@babylonjs/core'
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
-import { Nullable } from '@babylonjs/core/types'
 import '@babylonjs/inspector'
 import { Piece } from './world'
 
@@ -68,7 +67,7 @@ function pointerMove() {
   if (currentGPos.length() > 30) {
     if (currentGPos.length() > 33) {
       // add back to home
-      p.setPosition(currentMesh)
+      p.setPosition(currentMesh, 20) // HARK, FIXME
     } else {
       // 
       let f = (currentGPos.length()-30)/3;
@@ -86,12 +85,11 @@ function pointerMove() {
     currentMesh.position.y = 0.31;
   }
 
-
-
 }
 
-export const createScene = () => {
-  scene = new Scene(engine)
+// export const createScene = () => {
+export function createScene() {
+    scene = new Scene(engine)
 
   scene.clearColor = new Color4(0.8, 0.8, 0.8, 1)
 

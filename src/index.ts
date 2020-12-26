@@ -3,12 +3,13 @@
 // 
 // (85)
 //
-// $Id: index.ts 3715 2020-12-26 15:31:46Z zwo $
+// $Id: index.ts 3716 2020-12-26 23:07:54Z zwo $
 
 
 import 'pepjs'
 
 import { createEngine, createScene } from './functions'
+import { makeMaterials } from './make_materials'
 import { World } from './world'
 
 // Import stylesheets
@@ -17,6 +18,7 @@ import { World } from './world'
 const canvas: HTMLCanvasElement = document.getElementById('root') as HTMLCanvasElement
 const engine = createEngine(canvas)
 const scene = createScene()
+makeMaterials(scene);
 const world = new World(scene)
 
 // main function that is async so we can call the scene manager with await
