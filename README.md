@@ -10,3 +10,5 @@ npm start
 ```
 If the installation (first step) is succesful, the second step will open a web browser and the `localhost:3000`.
 Both take some time.
+
+Note that npm7 takes offense with some dependencies. npm6 doesn't.

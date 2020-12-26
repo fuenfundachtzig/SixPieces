@@ -2,6 +2,7 @@ import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4, PickingIn
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import { Nullable } from '@babylonjs/core/types'
 import '@babylonjs/inspector'
+import { Piece } from './world'
 
 export let canvas: HTMLCanvasElement
 export let engine: Engine
@@ -24,6 +25,7 @@ let currentMesh: any
 
 // functions for picking and moving objects: https://playground.babylonjs.com/#7CBW04
 function getGroundPosition() {
+  // TODO: faster if only checking ground with intersectsMesh?
   var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh.name == "ground"; });
   if (pickinfo && pickinfo.hit) {
       return pickinfo.pickedPoint;
@@ -50,20 +52,42 @@ function pointerUp() {
 }
 
 function pointerMove() {
-  if (!startingPoint) {
+  if (!currentMesh)
+    return;
+  if (!startingPoint)
       return;
-  }
-  var current = getGroundPosition();
-  if (!current) {
+  var currentGPos = getGroundPosition();
+  if (!currentGPos) 
       return;
+
+  var diff = currentGPos.subtract(startingPoint);
+  startingPoint = currentGPos;
+  // currentMesh.position.addInPlace(diff);
+  var p = currentMesh.metadata as Piece;
+  // console.log(currentMesh.position.length())
+  if (currentGPos.length() > 30) {
+    if (currentGPos.length() > 33) {
+      // add back to home
+      p.setPosition(currentMesh)
+    } else {
+      // 
+      let f = (currentGPos.length()-30)/3;
+      // move and rotate
+      currentMesh.position.addInPlace(diff);
+      let angle = Math.PI * p.home_x! / 10;
+      let rotv = new Vector3(-Math.PI/2, -angle+Math.PI/2, 0);
+      currentMesh.position.y = 0.31 + (1-0.31)*f;
+      currentMesh.rotation = rotv.scale(f);
+    }
+  } else {
+    currentMesh.rotation = new Vector3(0, 0, 0);
+    diff.y = 0; // don't allow to move up or down 
+    currentMesh.moveWithCollisions(diff);
+    currentMesh.position.y = 0.31;
   }
 
-  var diff = current.subtract(startingPoint);
-  startingPoint = current;
-  diff.y = 0; // don't allow to move up or down 
-  // currentMesh.position.addInPlace(diff);
-  currentMesh.moveWithCollisions(diff);
-  currentMesh.position.y = 0.31;
+
+
 }
 
 export const createScene = () => {
@@ -77,7 +101,7 @@ export const createScene = () => {
 
   // show the inspector when pressing shift + alt + I
   scene.onKeyboardObservable.add(({ event }) => {
-    if (event.ctrlKey && event.shiftKey && event.code === 'KeyI') {
+    if (event.ctrlKey && event.shiftKey && event.code === 'KeyX') {
       if (scene.debugLayer.isVisible()) {
         scene.debugLayer.hide()
       } else {
@@ -109,7 +133,8 @@ export const createArcRotateCamera = () => {
     const startAlpha  = 230/180*Math.PI
     const startBeta   =  50/180*Math.PI
     const startRadius = 30
-    const startPosition = new Vector3(0, 8, 0)
+    // const startPosition = new Vector3(0, 8, 0)
+    const startPosition = new Vector3(-37, 8, -37)
 
     camera = new ArcRotateCamera('camera', startAlpha, startBeta, startRadius, startPosition, scene, true)
     camera.attachControl(canvas, false)
@@ -144,3 +169,14 @@ export const createPBRSkybox = () => {
   
   return skyboxMesh
 }
+
+export function shuffleArray<T>(array: Array<T>) {
+  // Durstenfeld shuffle, from https://stackoverflow.com/a/12646864/143931
+  for (var i = array.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+  }
+}
+

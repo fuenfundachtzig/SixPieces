@@ -1,6 +1,6 @@
 //
 // This creates a rounded cube to babylon.js as a mesh.
-// Note that his is not a cube with bevel but a "superellipsoid" -- which means that it doesn't have flat surfaces, but they are slightly curved.
+// Note that this is not a cube with bevel but a "superellipsoid" -- which means that it doesn't have flat surfaces, but they are slightly curved.
 // 
 // Original idea ("superello1") taken from https://www.babylonjs-playground.com/#14VFYX#37
 // Improved by reducing number of vertices and removing overlaps (basically rewriting the creating of the UV sphere).
@@ -8,7 +8,7 @@
 //
 // (85)
 // 
-// $Id: superello.ts 3713 2020-12-25 22:08:49Z zwo $
+// $Id: superello.ts 3715 2020-12-26 15:31:46Z zwo $
 
 import { Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
