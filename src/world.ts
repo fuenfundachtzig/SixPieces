@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3717 2020-12-27 00:04:41Z zwo $
+// $Id: world.ts 3720 2020-12-27 11:28:55Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, StandardMaterial, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -14,62 +14,71 @@ import { createSuperEllipsoid } from './superello'
 // y positions of pieces
 const piece_y_lie = 0.31;
 const piece_y_stand = 1;
+const piece_size = 2.0;
 export let world: World;
 
-export class Piece {
+// interface IPiece {
+//   color: number = 0,
+//   shape: number = 0,
+//  // grid position
+//   grid_x: Nullable<number> = null,
+//   grid_y: Nullable<number> = null,
+//  // home position
+//   home_x: Nullable<number> = null,
 
+// }
+
+
+export class Piece {
   constructor(
     // type
     public color: number = 0,
     public shape: number = 0,
-    public mesh: Nullable<Mesh> = null,
-    // grid position
-    public grid_x: Nullable<number> = null,
-    public grid_y: Nullable<number> = null,
     // home position
     public home_x: Nullable<number> = null,
+  ) { };
+
+}
+
+
+export class PieceMesh extends Piece {
+  // a piece in the scene
+  public mesh: Mesh;
+  constructor(
+    scene: Scene,
+    p: Piece,
     // flags
     public glows = false,
     private isSelected = false,
-  ) { };
+  ) {
+    super();
+    Object.assign(this, p)
 
-  setPosition(m: Mesh, field_size: number = 0) {
-    // compute position for piece
-    if (this.home_x != null) {
+    // init mesh
+    this.mesh = createSuperEllipsoid(8, 0.2, 0.2, piece_size / 2, 0.3, piece_size / 2, scene);
+    this.mesh.material = materials[this.shape][this.color];
+    this.mesh.checkCollisions = true;
+    this.mesh.ellipsoid = new Vector3(0.99, 100, 0.99)
+    this.mesh.metadata = this;
+  }
+
+  setGrid(xy: gridPos) {
+      // set mesh on field
+      this.mesh.position = world.toGroundCoord(xy)
+      this.mesh.rotation = new Vector3;
+  }
+
+  setHome(i: number = -1, field_size = 0) {
       // set mesh in home position 
-      let angle = Math.PI * this.home_x / 10;
+      if (i < 0)
+        i = this.home_x as number;
+      let angle = Math.PI * i / 10;
       let x = -field_size - 10 + 10 * Math.cos(angle);
       let y = -field_size - 10 + 10 * Math.sin(angle);
-      m.position.set(x, piece_y_stand, y);
-      m.rotation.set(-Math.PI / 2, -angle + Math.PI / 2, 0)
-      m.isPickable = true;
-    } else if ((this.grid_x != null) && (this.grid_y != null)) {
-      // set mesh on field
-      m.position.set(this.grid_x, piece_y_lie, this.grid_y);
-      m.rotation = new Vector3;
-    }
-  }
-
-  setGrid(x: number, y: number, scene: Scene) {
-    this.grid_x = x;
-    this.grid_y = y;
-    this.mesh = this.makeMesh(scene);
-    this.setPosition(this.mesh);
-  }
-
-  setHome(i: number, scene: Scene) {
-    this.home_x = i;
-    this.mesh = this.makeMesh(scene);
-    this.setPosition(this.mesh);
-  }
-
-  makeMesh(scene: Scene) {
-    const mesh = createSuperEllipsoid(8, 0.2, 0.2, 1, 0.3, 1, scene);
-    mesh.material = materials[this.shape][this.color];
-    mesh.checkCollisions = true;
-    mesh.ellipsoid = new Vector3(0.99, 100, 0.99)
-    mesh.metadata = this;
-    return mesh;
+      this.mesh.position.set(x, piece_y_stand, y);
+      this.mesh.rotation.set(-Math.PI / 2, -angle + Math.PI / 2, 0)
+      this.mesh.isPickable = true;
+      this.home_x = i;
   }
 
   click() {
@@ -78,6 +87,7 @@ export class Piece {
   }
 
   select() {
+    // mark piece as selected
     if (this.mesh) {
       this.mesh.visibility = 0.5;
       this.isSelected = true;
@@ -85,19 +95,28 @@ export class Piece {
   }
 
   unselect() {
+    // mark piece as unselected
     if (this.mesh)
       this.mesh.visibility = 1.0;
     this.isSelected = false;
   }
 
   updatePos(newPosition: Vector3) {
+    // move piece (mesh)
     if (!this.mesh)
       return;
-    let newPosAndRot = world.field.snap(newPosition); // TODO: use TransformNode?
-    this.mesh.position = newPosAndRot.position;
-    this.mesh.rotation = newPosAndRot.rotation;
-  }
+    if (world.withinField(newPosition)) {
+      // is within field: check if can snap to empty field
+      let xy = world.snap(newPosition); // TODO: use TransformNode?
+      if (world.field.isEmpty(xy)) {
+        this.mesh.position = world.toGroundCoord(xy);
+        this.mesh.rotation = new Vector3();
+      }
+    } else {
+      this.mesh.position = newPosition;
+    }
 
+  }
 }
 
 
@@ -122,22 +141,19 @@ class Bag {
 }
 
 
-interface placedPiece {
-  piece: Piece;
-  x: number;
-  y: number;
-}
-
 interface posAndRot {
   position: Vector3,
   rotation: Vector3
 }
 
+interface gridPos {
+  x: number,
+  y: number
+}
 
 class Field {
 
-  // private field: Array<[Piece, number, number]> = []; // pieces in the game -- typescript cannot handle arrays of tuples, https://stackoverflow.com/a/63660413/143931
-  private field: Array<placedPiece> = [];
+  private field = new Map<number, Piece>();
   private field_minx = 0;
   private field_miny = 0;
   private field_maxx = 0;
@@ -151,22 +167,21 @@ class Field {
     return this.field_maxy - this.field_miny + 1;
   }
 
-  placePiece(p: Piece, x: number, y: number) {
-    // this.field.push([p, x, y]);
-    var n = { piece: p, x: x, y: y };
-    this.field.push(n);
-    (this.field_minx < x) || (this.field_minx = x);
+  getIndex(xy: gridPos): number {
+    return xy.x * 1000 + xy.y;
   }
 
-  snap(position: Vector3): posAndRot {
-    // snap tile position based on ground position
-    if (position.length() < 10) {
-      position.x = Math.round(position.x);
-      position.y = piece_y_lie;
-      position.z = Math.round(position.z);
-    }
-    let rotation = new Vector3();
-    return {position, rotation}
+  placePiece(p: Piece, xy: gridPos) {
+    this.field.set(this.getIndex(xy), p);
+    (this.field_minx < xy.x) || (this.field_minx = xy.x); // TODO
+  }
+
+  unplace(xy: gridPos) {
+    this.field.delete(this.getIndex(xy));
+  }
+
+  isEmpty(xy: gridPos): boolean {
+    return !this.field.has(this.getIndex(xy));
   }
 
 }
@@ -174,6 +189,7 @@ class Field {
 
 export function createWorld(scene: Scene) {
   world = new World(scene);
+  return world;
 }
 
 
@@ -181,8 +197,9 @@ export class World {
 
   bag = new Bag;
   field = new Field;
-  hand: Piece[] = [];
-  sel_piece: Nullable<Piece> = null;
+  hand: PieceMesh[] = [];
+  sel_piece: Nullable<PieceMesh> = null;
+  shadowGenerator: ShadowGenerator;
 
   constructor(scene: Scene) {
 
@@ -203,8 +220,8 @@ export class World {
     light_dir2.intensity = 0.5;
 
     // add shadow
-    var shadowGenerator = new ShadowGenerator(1024, light_dir1);
-    shadowGenerator.useExponentialShadowMap = true;
+    this.shadowGenerator = new ShadowGenerator(1024, light_dir1);
+    this.shadowGenerator.useExponentialShadowMap = true;
 
     // add glow
     var glow_layer = new GlowLayer("glow", scene);
@@ -243,38 +260,6 @@ export class World {
     groundMesh.freezeWorldMatrix() // since we are not going to be moving the ground, we freeze it for better performance
     groundMesh.receiveShadows = true;
 
-    // cubeMesh.material = mat
-
-    // more cubes
-    /*
-    for (let i = 0; i < 6; ++i) {
-      for (let j = 0; j < 6; ++j) {
-        // const cubeMesh = MeshBuilder.CreateBox('cube', { size: 2 }, scene)
-        const cubeMesh = createSuperEllipsoid(8, 0.2, 0.2, 1, 0.3, 1, scene);
-        cubeMesh.material = materials[i][j];
-        cubeMesh.position = new Vector3(i * 2, piece_y_lie, j * 2);
-        cubeMesh.checkCollisions = true;
-        // cubeMesh.showBoundingBox = true;
-        cubeMesh.ellipsoid = new Vector3(0.99, 100, 0.99)
-        shadowGenerator.addShadowCaster(cubeMesh);
-        // cubeMesh.enableEdgesRendering();
-        cubeMesh.isPickable = false;
-      }
-    }
-    */
-
-    // test piece
-    var p = this.bag.draw() as Piece;
-    p.setGrid(0, 0, scene);
-    shadowGenerator.addShadowCaster(p.mesh as Mesh);
-
-    // home
-    for (let i = 0; i < 6; ++i) {
-      var p = this.bag.draw() as Piece;
-      p.setHome(i, scene);
-      shadowGenerator.addShadowCaster(p.mesh as Mesh);
-      this.hand.push(p);
-    }
 
     // TODO: group pieces:
     // let parent = new BABYLON.Mesh("parent", scene);
@@ -294,18 +279,63 @@ export class World {
 
   }
 
-  click(p: Piece) {
+  click(p: PieceMesh) {
+    // handle when piece has been clicked on
     if (this.sel_piece) {
       this.sel_piece.unselect();
+      // handle unselect
+      if (this.withinField(this.sel_piece.mesh.position)) {
+        // check 
+        this.field.placePiece(this.sel_piece, this.snap(this.sel_piece.mesh.position));
+      } else {
+        this.sel_piece.setHome();
+      }
       if (this.sel_piece == p) {
-        // unselect selected piece
+        // clicked on selected piece -> don't select again
         this.sel_piece = null;
         return;
       }
     }
-    // select new piece
+    // select clicked piece
     this.sel_piece = p;
     p.select();
+    this.field.unplace(this.snap(p.mesh.position));
+  }
+
+  init() {
+    // test pieces
+    for (let i = 0; i < 3; ++i) {
+      var p = new PieceMesh(scene, this.bag.draw() as Piece);
+      p.setGrid({x:i, y:i});
+      this.field.placePiece(p, { x: i, y: i })
+      this.shadowGenerator.addShadowCaster(p.mesh);
+      p.mesh.isPickable = false;
+    }
+
+    // home
+    for (let i = 0; i < 6; ++i) {
+      let p = new PieceMesh(scene, this.bag.draw() as Piece);
+      p.setHome(i);
+      this.shadowGenerator.addShadowCaster(p.mesh);
+      this.hand.push(p);
+    }
+
+  }
+
+  withinField(coord: Vector3): boolean {
+    return (coord.length() < 10);
+  }
+
+  snap(position: Vector3): gridPos {
+    // compute tile position from ground position
+    return {
+      x: Math.round(position.x / piece_size),
+      y: Math.round(position.z / piece_size)
+    }
+  }
+
+  toGroundCoord(xy: gridPos): Vector3 {
+    return new Vector3(xy.x * piece_size, piece_y_lie, xy.y * piece_size);
   }
 
 }

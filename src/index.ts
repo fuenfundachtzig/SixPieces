@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: index.ts 3716 2020-12-26 23:07:54Z zwo $
+// $Id: index.ts 3720 2020-12-27 11:28:55Z zwo $
 
 
 import 'pepjs'
@@ -19,7 +19,8 @@ const canvas: HTMLCanvasElement = document.getElementById('root') as HTMLCanvasE
 const engine = createEngine(canvas)
 const scene = createScene()
 makeMaterials(scene);
-createWorld(scene)
+var world = createWorld(scene)
+world.init();
 
 // main function that is async so we can call the scene manager with await
 const main = async () => {

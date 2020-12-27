@@ -1,7 +1,7 @@
 import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4, Nullable } from '@babylonjs/core'
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import '@babylonjs/inspector'
-import { Piece } from './world'
+import { PieceMesh } from './world'
 
 export let canvas: HTMLCanvasElement
 export let engine: Engine
@@ -22,7 +22,7 @@ export const createEngine = (hostCanvas: HTMLCanvasElement) => {
 
 let startingPoint: any
 let currentMesh: any
-let currentPiece: Nullable<Piece> = null
+let currentPiece: Nullable<PieceMesh> = null
 
 // functions for picking and moving objects: https://playground.babylonjs.com/#7CBW04
 function getGroundPosition() {
@@ -64,12 +64,12 @@ function pointerMove() {
   var diff = currentGPos.subtract(startingPoint);
   startingPoint = currentGPos;
   // currentMesh.position.addInPlace(diff);
-  var p = currentMesh.metadata as Piece;
+  var p = currentMesh.metadata as PieceMesh;
   // console.log(currentMesh.position.length())
   if (currentGPos.length() > 30) {
     if (currentGPos.length() > 33) {
       // add back to home
-      p.setPosition(currentMesh, 20) // HARK, FIXME
+      p.setHome(10) // HARK, FIXME
     } else {
       // 
       let f = (currentGPos.length() - 30) / 3;
@@ -140,7 +140,7 @@ export function createScene() {
     switch (pointerInfo.type) {
       case PointerEventTypes.POINTERPICK:
         if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh && pointerInfo.pickInfo.pickedMesh.metadata) {
-          let p = pointerInfo.pickInfo.pickedMesh.metadata as Piece;
+          let p = pointerInfo.pickInfo.pickedMesh.metadata as PieceMesh;
           if (p.click())
             currentPiece = p;
           else currentPiece = null;
@@ -160,7 +160,8 @@ export const createArcRotateCamera = () => {
   const startBeta = 50 / 180 * Math.PI
   const startRadius = 30
   // const startPosition = new Vector3(0, 8, 0)
-  const startPosition = new Vector3(-37, 8, -37)
+  // const startPosition = new Vector3(-37, 8, -37)
+  const startPosition = new Vector3(-10, 8, -12)
 
   camera = new ArcRotateCamera('camera', startAlpha, startBeta, startRadius, startPosition, scene, true)
   camera.attachControl(canvas, false)
