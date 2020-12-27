@@ -3,13 +3,11 @@
 // 
 // (85)
 //
-// $Id: make_materials.ts 3716 2020-12-26 23:07:54Z zwo $
+// $Id: make_materials.ts 3717 2020-12-27 00:04:41Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
 
 export var materials: StandardMaterial[][];
-
-let scene: Scene;
 
 const colors = [
     "green",

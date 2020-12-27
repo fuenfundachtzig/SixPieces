@@ -3,9 +3,9 @@
 // 
 // (85)
 //
-// $Id: world.ts 3716 2020-12-26 23:07:54Z zwo $
+// $Id: world.ts 3717 2020-12-27 00:04:41Z zwo $
 
-import { Color3, DirectionalLight, HemisphericLight, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, Vector3 } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, StandardMaterial, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, shuffleArray } from "./functions";
 import { materials } from "./make_materials";
@@ -27,6 +27,7 @@ export class Piece {
     public grid_y: Nullable<number> = null,
     // home position
     public home_x: Nullable<number> = null,
+    public glows = false
   ) { };
 
   setPosition(m: Mesh, field_size: number = 0) {
@@ -131,6 +132,7 @@ export class World {
 
   bag = new Bag;
   field = new Field;
+  hand: Piece[] = [];
 
   constructor(scene: Scene) {
 
@@ -153,6 +155,29 @@ export class World {
     // add shadow
     var shadowGenerator = new ShadowGenerator(1024, light_dir1);
     shadowGenerator.useExponentialShadowMap = true;
+
+    // add glow
+    var glow_layer = new GlowLayer("glow", scene);
+    // glow_layer.customEmissiveColorSelector = function (mesh, _subMesh, _material, result) {
+    //   if (mesh.metadata && mesh.metadata.glows) {
+    //     result.set(0.2, 0.5, 0.2, 0.5);
+    //   } else {
+    //     result.set(0, 0, 0, 0);
+    //   }
+    // }
+    glow_layer.customEmissiveColorSelector = (function () {
+      var x = 0;
+      return function (mesh: Mesh, _subMesh: SubMesh, _material: Material, result: Color4) {
+        if (mesh.metadata && mesh.metadata.glows) {
+          if (++x == 100)
+            x = 0;
+          result.set(0.2, 0.5, 0.2, x / 100);
+        } else {
+          result.set(0, 0, 0, 0);
+        }
+      }
+    }
+    )();
 
     // add ground
     const groundMesh = MeshBuilder.CreatePlane('ground', { size: 100 }, scene)
@@ -198,11 +223,24 @@ export class World {
       var p = this.bag.draw() as Piece;
       p.setHome(i, scene);
       shadowGenerator.addShadowCaster(p.mesh as Mesh);
+      this.hand.push(p);
     }
 
     // TODO: group pieces:
     // let parent = new BABYLON.Mesh("parent", scene);
     // or var root = new TransformNode();
+
+    scene.onKeyboardObservable.add(({ event }) => {
+      if (event.code === 'KeyM') {
+        this.hand.forEach(p => {
+          // if (p.mesh) 
+          // p.mesh.visibility = 0.5;
+          p.glows = !p.glows;
+        });
+        event.stopImmediatePropagation();
+      }
+    })
+
 
   }
 
