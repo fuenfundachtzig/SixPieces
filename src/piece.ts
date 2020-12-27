@@ -23,12 +23,14 @@ export class PieceMesh extends Piece {
   constructor(
     scene: Scene,
     p: Piece,
-    // home position
-    public home_x: number  = -1,
+    // position
+    public gridxy: gridPos = {x: 0, y: 0},
     public isHand: boolean = true, // true = is on hand, false = is on field
+    public home_x: number  = -1,
     // flags
-    public glows = false,
-    private isSelected = false
+    public fix         = false, // can no longer be moved
+    public glows       = false, // glows
+    private isSelected = false  // is selected
   ) {
     super();
     Object.assign(this, p);
@@ -87,9 +89,9 @@ export class PieceMesh extends Piece {
       return;
     if (world.withinField(newPosition)) {
       // is within field: check if can snap to empty field
-      let xy = world.snap(newPosition); // TODO: use TransformNode?
-      if (world.field.isEmpty(xy)) {
-        this.mesh.position = world.toGroundCoord(xy);
+      this.gridxy = world.snap(newPosition); // TODO: use TransformNode?
+      if (world.field.isEmpty(this.gridxy)) {
+        this.mesh.position = world.toGroundCoord(this.gridxy);
         this.mesh.rotation = new Vector3();
       }
       this.isHand = false;

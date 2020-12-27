@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3721 2020-12-27 21:52:31Z zwo $
+// $Id: world.ts 3722 2020-12-27 23:57:22Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SolidParticleSystem, StandardMaterial, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -42,57 +42,109 @@ class Bag {
 }
 
 
-interface posAndRot {
-  position: Vector3,
-  rotation: Vector3
-}
 
 export interface gridPos {
   x: number,
   y: number
 }
 
-class Field {
+function translate(xy: gridPos, dx: number = 0, dy: number = 0): gridPos {
+  return {x: xy.x + dx, y: xy.y + dy}
+}
 
-  private field      = new Map<number, PieceMesh>(); // placed
-  private field_turn = new Map<number, PieceMesh>(); // current
-  public field_minx = 0;
-  public field_miny = 0;
-  public field_maxx = 0;
-  public field_maxy = 0;
 
-  getIndex(xy: gridPos): number {
-    // will fail once abs(y) >= 500
-    return xy.x * 1000 + xy.y;
+
+class Field<T> {
+
+  readonly maxsize = 100;
+
+  constructor(
+    private field: Array<Array<T | undefined>> = [],
+    private count = 0
+  ) {
+    for (let i = 0; i < this.maxsize; ++i)
+      this.field.push(new Array(this.maxsize));
   }
-  indexToXY(idx: number): gridPos {
-    let x = Math.round(idx / 1000);
-    let y = idx - x * 1000;
-    return { x, y };
+
+  X(x: number): number {
+    while (x < 0)
+      x += this.maxsize;
+    return x;
+  }
+
+  Y(y: number): number {
+    while (y < 0)
+      y += this.maxsize;
+    return y;
+  }
+
+  set(xy: gridPos, p: T | undefined) {
+    if ((p !== undefined) && !this.has(xy))
+      ++this.count;
+    this.field[this.X(xy.x)][this.Y(xy.y)] = p;
+  }
+
+  get(xy: gridPos): T | undefined {
+    return this.field[this.X(xy.x)][this.Y(xy.y)];
+  }
+
+  remove(xy: gridPos): T | undefined {
+    let res = this.get(xy);
+    this.set(xy, undefined);
+    if (res !== undefined)
+      --this.count;
+    return res;
+  }
+
+  has(xy: gridPos): boolean {
+    return this.get(xy) !== undefined;
+  }
+
+  empty(): boolean {
+    return (this.count == 0);
+  }
+
+  getN(): number {
+    return this.count;
+  }
+
+}
+
+const neighbors = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+
+class FieldLogic {
+
+  constructor(
+    private field = new Field<PieceMesh>(),
+    public field_minx = 0,
+    public field_miny = 0,
+    public field_maxx = 0,
+    public field_maxy = 0,
+  ) {
   }
 
   placePiece(p: PieceMesh, xy: gridPos) {
-    this.field_turn.set(this.getIndex(xy), p);
+    this.field.set(xy, p);
   }
 
   unplace(xy: gridPos) {
-    this.field_turn.delete(this.getIndex(xy));
+    this.field.remove(xy);
   }
 
   isEmpty(xy: gridPos): boolean {
-    let idx = this.getIndex(xy);
-    return !(this.field.has(idx) || this.field_turn.has(idx));
+    return !this.field.has(xy);
   }
 
-  isValidMove(): boolean {
+  isValidMove(played: PieceMesh[]): boolean {
     // check if move valid
 
-    if (!this.field_turn.size)
-      // no piece played
+    // no piece played
+    if (played.length == 0)
       return false;
 
     // check all new pieces are in one row or column... ergo need to get x, y arrays back
-    let xyarray: gridPos[] = Array.from(this.field_turn.keys()).map(this.indexToXY);
+    let xyarray: gridPos[] = played.map(p => p.gridxy);
     let xarray: number[] = xyarray.map((xy) => xy.x);
     let yarray: number[] = xyarray.map((xy) => xy.y);
     let minx = Math.min(...xarray);
@@ -104,18 +156,44 @@ class Field {
       return false;
     }
 
-    // every new piece must have a neighbor
-    for (var key of Array.from(this.field_turn.keys())) {
-      if (this.field.size + this.field_turn.size > 1) {
-        if (![1, +1, -1000, 1000].some(disp => (this.field.has(key + disp) || this.field_turn.has(key + disp)))) {
-          console.log("disconnected " + key);
+    // every new piece must have a neighbor (and one must be old)
+    if (this.field.getN() > 1) {
+      let old = false;
+      for (let p of played) {
+        if (!neighbors.some(disp => this.field.has(translate(p.gridxy, ...disp)))) {
+          console.log("disconnected " + p);
           return false;
         }
-        //   if (this.field.has(key+disp) || this.field_turn.has(key+disp)) {
-        //     found = true;
-        //     break;
-        //   }
-        // }
+        for (let disp of neighbors) {
+          let op = this.field.get(translate(p.gridxy, ...disp));
+          if (op && op.fix) {
+            old = true;
+            break;
+          }
+        }
+        // old ||= [[1, 0], [-1, 0], [0, 1], [0, -1]].reduce(
+        //   (acc, curr) =>  {
+        //     let op = this.field.get({ x: p.gridxy.x + curr[0], y: p.gridxy.y + curr[1] });
+        //     if (op)
+        //       return acc || op.fix;
+        //     else
+        //       return acc as boolean;
+        //   },
+        //   old);
+      }
+      if (!old) {
+        console.log("disconnected from prev. ");
+        return false;
+      }
+    }
+
+    // every new piece must have a neighbor
+    if (this.field.getN() > 1) {
+      for (let p of played) {
+        if (!neighbors.some(disp => this.field.has(translate(p.gridxy, ...disp)))) {
+          console.log("disconnected " + p);
+          return false;
+        }
       }
     }
 
@@ -125,33 +203,36 @@ class Field {
         return false;
       return (p1.shape != p2.shape) && (p1.color != p2.color);
     }
-    for (var key of Array.from(this.field_turn.keys())) {
-      for (var disp of [1, +1, -1000, 1000]) {
+    for (var p of played) {
+      for (var disp of neighbors) {
         let found = false;
-        if (mismatch(this.field_turn.get(key), this.field.get(key + disp)) || mismatch(this.field_turn.get(key), this.field_turn.get(key + disp))) {
-          console.log("does not match " + key + " " + (key + disp));
+        if (mismatch(p, this.field.get(translate(p.gridxy, ...disp)))) {
+          console.log("does not match " + p + " " + this.field.get(translate(p.gridxy, ...disp)));
           return false;
         }
       }
     }
+    
 
     return true;
   }
 
-  endTurn() {
-    if (!this.isValidMove()) // TODO: should never happen
+  endTurn(played: PieceMesh[]) {
+    if (!this.isValidMove(played)) {
+      console.warn("Should never happen 33324");
       return false;
+    }
     // adds pieces from field_turn to field, updates field boundaries
-    this.field_turn.forEach((p: PieceMesh, idx: number) => {
+    played.forEach((p) => {
       p.mesh.isPickable = false;
-      this.field.set(idx, p);
-      let xy = this.indexToXY(idx);
+      p.fix = true;
+      let xy = p.gridxy;
+      console.log(xy)
       this.field_minx = Math.min(this.field_minx, xy.x);
       this.field_maxx = Math.max(this.field_maxx, xy.x);
       this.field_miny = Math.min(this.field_miny, xy.y);
       this.field_maxy = Math.max(this.field_maxy, xy.y);
     });
-    this.field_turn.clear();
     return true;
   }
 
@@ -167,7 +248,7 @@ export function createWorld(scene: Scene) {
 export class World {
 
   bag = new Bag;
-  field = new Field;
+  field = new FieldLogic;
   hands: Array<Array<PieceMesh>> = [];
   sel_piece: Nullable<PieceMesh> = null;
   shadowGenerator: ShadowGenerator;
@@ -283,7 +364,7 @@ export class World {
 
     // FIXME: here used to init next turn
     this.hands[curr_player].forEach(p => {
-      p.mesh.isVisible = true;
+      p.mesh.isVisible  = true;
       p.mesh.isPickable = true;
     });
 
@@ -312,12 +393,14 @@ export class World {
       this.shadowGenerator.addShadowCaster(p.mesh);
       this.hands[player_idx].push(p);
       p.setHome(this.getFreeHandSlot(this.hands[player_idx]));
+      p.mesh.isVisible = false;
     }
   }
 
   withinField(coord: Vector3): boolean {
     let topleft = this.toGroundCoord({ x: this.field.field_minx - 5, y: this.field.field_miny - 5 });
     let botright = this.toGroundCoord({ x: this.field.field_maxx + 5, y: this.field.field_maxy + 5 });
+    console.log(topleft, botright);
     return (coord.x > topleft.x) && (coord.x < botright.x) &&
       (coord.z > topleft.z) && (coord.z < botright.z);
   }
@@ -335,11 +418,12 @@ export class World {
   }
 
   endTurn(): boolean {
-    if (!this.field.isValidMove())
+    let played = this.hands[curr_player].filter(p => !p.isHand);
+    if (!this.field.isValidMove(played))
       return false;
     // move pieces from hands array to field
+    this.field.endTurn(played);
     this.hands[curr_player] = this.hands[curr_player].filter(p => p.isHand);
-    this.field.endTurn();
     // fill up
     this.fillHand(curr_player);
     // disable hand
