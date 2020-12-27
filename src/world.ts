@@ -7,13 +7,14 @@
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, StandardMaterial, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { createPBRSkybox, createArcRotateCamera, shuffleArray } from "./functions";
+import { createPBRSkybox, createArcRotateCamera, shuffleArray, scene } from "./functions";
 import { materials } from "./make_materials";
 import { createSuperEllipsoid } from './superello'
 
 // y positions of pieces
 const piece_y_lie = 0.31;
 const piece_y_stand = 1;
+export let world: World;
 
 export class Piece {
 
@@ -27,7 +28,9 @@ export class Piece {
     public grid_y: Nullable<number> = null,
     // home position
     public home_x: Nullable<number> = null,
-    public glows = false
+    // flags
+    public glows = false,
+    private isSelected = false,
   ) { };
 
   setPosition(m: Mesh, field_size: number = 0) {
@@ -69,6 +72,32 @@ export class Piece {
     return mesh;
   }
 
+  click() {
+    world.click(this);
+    return this.isSelected;
+  }
+
+  select() {
+    if (this.mesh) {
+      this.mesh.visibility = 0.5;
+      this.isSelected = true;
+    }
+  }
+
+  unselect() {
+    if (this.mesh)
+      this.mesh.visibility = 1.0;
+    this.isSelected = false;
+  }
+
+  updatePos(newPosition: Vector3) {
+    if (!this.mesh)
+      return;
+    let newPosAndRot = world.field.snap(newPosition); // TODO: use TransformNode?
+    this.mesh.position = newPosAndRot.position;
+    this.mesh.rotation = newPosAndRot.rotation;
+  }
+
 }
 
 
@@ -99,6 +128,11 @@ interface placedPiece {
   y: number;
 }
 
+interface posAndRot {
+  position: Vector3,
+  rotation: Vector3
+}
+
 
 class Field {
 
@@ -124,7 +158,22 @@ class Field {
     (this.field_minx < x) || (this.field_minx = x);
   }
 
+  snap(position: Vector3): posAndRot {
+    // snap tile position based on ground position
+    if (position.length() < 10) {
+      position.x = Math.round(position.x);
+      position.y = piece_y_lie;
+      position.z = Math.round(position.z);
+    }
+    let rotation = new Vector3();
+    return {position, rotation}
+  }
 
+}
+
+
+export function createWorld(scene: Scene) {
+  world = new World(scene);
 }
 
 
@@ -133,6 +182,7 @@ export class World {
   bag = new Bag;
   field = new Field;
   hand: Piece[] = [];
+  sel_piece: Nullable<Piece> = null;
 
   constructor(scene: Scene) {
 
@@ -244,7 +294,19 @@ export class World {
 
   }
 
-
+  click(p: Piece) {
+    if (this.sel_piece) {
+      this.sel_piece.unselect();
+      if (this.sel_piece == p) {
+        // unselect selected piece
+        this.sel_piece = null;
+        return;
+      }
+    }
+    // select new piece
+    this.sel_piece = p;
+    p.select();
+  }
 
 }
 

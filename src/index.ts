@@ -10,7 +10,7 @@ import 'pepjs'
 
 import { createEngine, createScene } from './functions'
 import { makeMaterials } from './make_materials'
-import { World } from './world'
+import { createWorld } from './world'
 
 // Import stylesheets
 // import './index.css';
@@ -19,7 +19,7 @@ const canvas: HTMLCanvasElement = document.getElementById('root') as HTMLCanvasE
 const engine = createEngine(canvas)
 const scene = createScene()
 makeMaterials(scene);
-const world = new World(scene)
+createWorld(scene)
 
 // main function that is async so we can call the scene manager with await
 const main = async () => {
