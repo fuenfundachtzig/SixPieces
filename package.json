@@ -11,7 +11,8 @@
     "@babylonjs/core": "^4.1.0",
     "@babylonjs/inspector": "^4.1.0",
     "@babylonjs/loaders": "^4.1.0",
-    "pepjs": "^0.5.2"
+    "pepjs": "^0.5.2",
+    "boardgame.io": "^0.42.2"
   },
   "devDependencies": {
     "@types/jest": "^26.0.10",

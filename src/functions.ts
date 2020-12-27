@@ -1,7 +1,8 @@
-import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4, Nullable } from '@babylonjs/core'
+import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4, Nullable, KeyboardEventTypes } from '@babylonjs/core'
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import '@babylonjs/inspector'
-import { PieceMesh } from './world'
+import { PieceMesh } from "./piece"
+import { world } from './world'
 
 export let canvas: HTMLCanvasElement
 export let engine: Engine
@@ -110,13 +111,21 @@ export function createScene() {
   scene.autoClearDepthAndStencil = false
 
   // show the inspector when pressing shift + alt + I
-  scene.onKeyboardObservable.add(({ event }) => {
-    if (event.ctrlKey && event.shiftKey && event.code === 'KeyX') {
+  scene.onKeyboardObservable.add((kbinfo) => {
+    if (kbinfo.event.ctrlKey && kbinfo.event.shiftKey && kbinfo.event.code === 'KeyX') {
       if (scene.debugLayer.isVisible()) {
         scene.debugLayer.hide()
       } else {
         scene.debugLayer.show()
       }
+    }
+    if ((kbinfo.type == KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyT')) {
+      // end turn
+      console.log(currentPiece);
+      if (currentPiece != null)
+        // TODO: notify player that piece needs to be set
+        return;
+      world.endTurn();
     }
   })
 
@@ -143,7 +152,8 @@ export function createScene() {
           let p = pointerInfo.pickInfo.pickedMesh.metadata as PieceMesh;
           if (p.click())
             currentPiece = p;
-          else currentPiece = null;
+          else
+            currentPiece = null;
         }
         break
       case PointerEventTypes.POINTERMOVE:

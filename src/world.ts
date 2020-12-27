@@ -3,122 +3,23 @@
 // 
 // (85)
 //
-// $Id: world.ts 3720 2020-12-27 11:28:55Z zwo $
+// $Id: world.ts 3721 2020-12-27 21:52:31Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, StandardMaterial, SubMesh, Vector3 } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SolidParticleSystem, StandardMaterial, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
+import { CreateGameReducer } from "boardgame.io/dist/types/src/core/reducer";
 import { createPBRSkybox, createArcRotateCamera, shuffleArray, scene } from "./functions";
-import { materials } from "./make_materials";
-import { createSuperEllipsoid } from './superello'
+import { Piece, PieceMesh } from "./piece";
 
 // y positions of pieces
 const piece_y_lie = 0.31;
-const piece_y_stand = 1;
-const piece_size = 2.0;
+export const piece_y_stand = 1;
+export const piece_size = 2.0;
 export let world: World;
 
-// interface IPiece {
-//   color: number = 0,
-//   shape: number = 0,
-//  // grid position
-//   grid_x: Nullable<number> = null,
-//   grid_y: Nullable<number> = null,
-//  // home position
-//   home_x: Nullable<number> = null,
-
-// }
-
-
-export class Piece {
-  constructor(
-    // type
-    public color: number = 0,
-    public shape: number = 0,
-    // home position
-    public home_x: Nullable<number> = null,
-  ) { };
-
-}
-
-
-export class PieceMesh extends Piece {
-  // a piece in the scene
-  public mesh: Mesh;
-  constructor(
-    scene: Scene,
-    p: Piece,
-    // flags
-    public glows = false,
-    private isSelected = false,
-  ) {
-    super();
-    Object.assign(this, p)
-
-    // init mesh
-    this.mesh = createSuperEllipsoid(8, 0.2, 0.2, piece_size / 2, 0.3, piece_size / 2, scene);
-    this.mesh.material = materials[this.shape][this.color];
-    this.mesh.checkCollisions = true;
-    this.mesh.ellipsoid = new Vector3(0.99, 100, 0.99)
-    this.mesh.metadata = this;
-  }
-
-  setGrid(xy: gridPos) {
-      // set mesh on field
-      this.mesh.position = world.toGroundCoord(xy)
-      this.mesh.rotation = new Vector3;
-  }
-
-  setHome(i: number = -1, field_size = 0) {
-      // set mesh in home position 
-      if (i < 0)
-        i = this.home_x as number;
-      let angle = Math.PI * i / 10;
-      let x = -field_size - 10 + 10 * Math.cos(angle);
-      let y = -field_size - 10 + 10 * Math.sin(angle);
-      this.mesh.position.set(x, piece_y_stand, y);
-      this.mesh.rotation.set(-Math.PI / 2, -angle + Math.PI / 2, 0)
-      this.mesh.isPickable = true;
-      this.home_x = i;
-  }
-
-  click() {
-    world.click(this);
-    return this.isSelected;
-  }
-
-  select() {
-    // mark piece as selected
-    if (this.mesh) {
-      this.mesh.visibility = 0.5;
-      this.isSelected = true;
-    }
-  }
-
-  unselect() {
-    // mark piece as unselected
-    if (this.mesh)
-      this.mesh.visibility = 1.0;
-    this.isSelected = false;
-  }
-
-  updatePos(newPosition: Vector3) {
-    // move piece (mesh)
-    if (!this.mesh)
-      return;
-    if (world.withinField(newPosition)) {
-      // is within field: check if can snap to empty field
-      let xy = world.snap(newPosition); // TODO: use TransformNode?
-      if (world.field.isEmpty(xy)) {
-        this.mesh.position = world.toGroundCoord(xy);
-        this.mesh.rotation = new Vector3();
-      }
-    } else {
-      this.mesh.position = newPosition;
-    }
-
-  }
-}
-
+// temporary test
+const n_players = 2;
+var curr_player = 0;
 
 class Bag {
 
@@ -146,42 +47,112 @@ interface posAndRot {
   rotation: Vector3
 }
 
-interface gridPos {
+export interface gridPos {
   x: number,
   y: number
 }
 
 class Field {
 
-  private field = new Map<number, Piece>();
-  private field_minx = 0;
-  private field_miny = 0;
-  private field_maxx = 0;
-  private field_maxy = 0;
-
-  getFieldSizeX(): number {
-    return this.field_maxx - this.field_minx + 1;
-  }
-
-  getFieldSizeY(): number {
-    return this.field_maxy - this.field_miny + 1;
-  }
+  private field      = new Map<number, PieceMesh>(); // placed
+  private field_turn = new Map<number, PieceMesh>(); // current
+  public field_minx = 0;
+  public field_miny = 0;
+  public field_maxx = 0;
+  public field_maxy = 0;
 
   getIndex(xy: gridPos): number {
+    // will fail once abs(y) >= 500
     return xy.x * 1000 + xy.y;
   }
+  indexToXY(idx: number): gridPos {
+    let x = Math.round(idx / 1000);
+    let y = idx - x * 1000;
+    return { x, y };
+  }
 
-  placePiece(p: Piece, xy: gridPos) {
-    this.field.set(this.getIndex(xy), p);
-    (this.field_minx < xy.x) || (this.field_minx = xy.x); // TODO
+  placePiece(p: PieceMesh, xy: gridPos) {
+    this.field_turn.set(this.getIndex(xy), p);
   }
 
   unplace(xy: gridPos) {
-    this.field.delete(this.getIndex(xy));
+    this.field_turn.delete(this.getIndex(xy));
   }
 
   isEmpty(xy: gridPos): boolean {
-    return !this.field.has(this.getIndex(xy));
+    let idx = this.getIndex(xy);
+    return !(this.field.has(idx) || this.field_turn.has(idx));
+  }
+
+  isValidMove(): boolean {
+    // check if move valid
+
+    if (!this.field_turn.size)
+      // no piece played
+      return false;
+
+    // check all new pieces are in one row or column... ergo need to get x, y arrays back
+    let xyarray: gridPos[] = Array.from(this.field_turn.keys()).map(this.indexToXY);
+    let xarray: number[] = xyarray.map((xy) => xy.x);
+    let yarray: number[] = xyarray.map((xy) => xy.y);
+    let minx = Math.min(...xarray);
+    let maxx = Math.max(...xarray);
+    let miny = Math.min(...yarray);
+    let maxy = Math.max(...yarray);
+    if ((minx != maxx) && (miny != maxy)) {
+      console.log(`diagonal ${minx} ${maxx} ${miny} ${maxy}`);
+      return false;
+    }
+
+    // every new piece must have a neighbor
+    for (var key of Array.from(this.field_turn.keys())) {
+      if (this.field.size + this.field_turn.size > 1) {
+        if (![1, +1, -1000, 1000].some(disp => (this.field.has(key + disp) || this.field_turn.has(key + disp)))) {
+          console.log("disconnected " + key);
+          return false;
+        }
+        //   if (this.field.has(key+disp) || this.field_turn.has(key+disp)) {
+        //     found = true;
+        //     break;
+        //   }
+        // }
+      }
+    }
+
+    // no new piece must differ in both color and shape from any neighbor
+    function mismatch(p1: Piece | undefined, p2: Piece | undefined) {
+      if ((p1 === undefined) || (p2 === undefined))
+        return false;
+      return (p1.shape != p2.shape) && (p1.color != p2.color);
+    }
+    for (var key of Array.from(this.field_turn.keys())) {
+      for (var disp of [1, +1, -1000, 1000]) {
+        let found = false;
+        if (mismatch(this.field_turn.get(key), this.field.get(key + disp)) || mismatch(this.field_turn.get(key), this.field_turn.get(key + disp))) {
+          console.log("does not match " + key + " " + (key + disp));
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  endTurn() {
+    if (!this.isValidMove()) // TODO: should never happen
+      return false;
+    // adds pieces from field_turn to field, updates field boundaries
+    this.field_turn.forEach((p: PieceMesh, idx: number) => {
+      p.mesh.isPickable = false;
+      this.field.set(idx, p);
+      let xy = this.indexToXY(idx);
+      this.field_minx = Math.min(this.field_minx, xy.x);
+      this.field_maxx = Math.max(this.field_maxx, xy.x);
+      this.field_miny = Math.min(this.field_miny, xy.y);
+      this.field_maxy = Math.max(this.field_maxy, xy.y);
+    });
+    this.field_turn.clear();
+    return true;
   }
 
 }
@@ -197,7 +168,7 @@ export class World {
 
   bag = new Bag;
   field = new Field;
-  hand: PieceMesh[] = [];
+  hands: Array<Array<PieceMesh>> = [];
   sel_piece: Nullable<PieceMesh> = null;
   shadowGenerator: ShadowGenerator;
 
@@ -225,13 +196,6 @@ export class World {
 
     // add glow
     var glow_layer = new GlowLayer("glow", scene);
-    // glow_layer.customEmissiveColorSelector = function (mesh, _subMesh, _material, result) {
-    //   if (mesh.metadata && mesh.metadata.glows) {
-    //     result.set(0.2, 0.5, 0.2, 0.5);
-    //   } else {
-    //     result.set(0, 0, 0, 0);
-    //   }
-    // }
     glow_layer.customEmissiveColorSelector = (function () {
       var x = 0;
       return function (mesh: Mesh, _subMesh: SubMesh, _material: Material, result: Color4) {
@@ -265,14 +229,13 @@ export class World {
     // let parent = new BABYLON.Mesh("parent", scene);
     // or var root = new TransformNode();
 
-    scene.onKeyboardObservable.add(({ event }) => {
-      if (event.code === 'KeyM') {
-        this.hand.forEach(p => {
+    scene.onKeyboardObservable.add((kbinfo) => {
+      if ((kbinfo.type == KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyM')) {
+        this.hands[curr_player].forEach(p => {
           // if (p.mesh) 
           // p.mesh.visibility = 0.5;
           p.glows = !p.glows;
         });
-        event.stopImmediatePropagation();
       }
     })
 
@@ -285,7 +248,7 @@ export class World {
       this.sel_piece.unselect();
       // handle unselect
       if (this.withinField(this.sel_piece.mesh.position)) {
-        // check 
+        // check
         this.field.placePiece(this.sel_piece, this.snap(this.sel_piece.mesh.position));
       } else {
         this.sel_piece.setHome();
@@ -303,27 +266,60 @@ export class World {
   }
 
   init() {
-    // test pieces
-    for (let i = 0; i < 3; ++i) {
-      var p = new PieceMesh(scene, this.bag.draw() as Piece);
-      p.setGrid({x:i, y:i});
-      this.field.placePiece(p, { x: i, y: i })
-      this.shadowGenerator.addShadowCaster(p.mesh);
-      p.mesh.isPickable = false;
-    }
+    // // test pieces
+    // for (let i = 0; i < 3; ++i) {
+    //   var p = new PieceMesh(scene, this.bag.draw() as Piece);
+    //   p.setGrid({ x: i, y: i });
+    //   this.field.placePiece(p, { x: i, y: i })
+    //   this.shadowGenerator.addShadowCaster(p.mesh);
+    //   p.isHand = false;
+    // }
 
     // home
-    for (let i = 0; i < 6; ++i) {
-      let p = new PieceMesh(scene, this.bag.draw() as Piece);
-      p.setHome(i);
-      this.shadowGenerator.addShadowCaster(p.mesh);
-      this.hand.push(p);
+    for (let n = 0; n < n_players; ++n) {
+      this.hands.push([]);
+      this.fillHand(n);
     }
+
+    // FIXME: here used to init next turn
+    this.hands[curr_player].forEach(p => {
+      p.mesh.isVisible = true;
+      p.mesh.isPickable = true;
+    });
+
 
   }
 
+  private getFreeHandSlot(hand: Array<PieceMesh>): number {
+    // find empty slot on hand and return index
+    for (let i = 0; i < 6; ++i) {
+      for (var idx = 0; idx < hand.length; ++idx) {
+        if (hand[idx].home_x == i)
+          break;
+      }
+      if (idx == hand.length)
+        return i;
+    }
+    return -1;
+  }
+
+  private fillHand(player_idx: number) {
+    // fill hand
+    while (this.hands[player_idx].length < 6) {
+      let p = new PieceMesh(scene, this.bag.draw() as Piece);
+      if (!p)
+        break;
+      this.shadowGenerator.addShadowCaster(p.mesh);
+      this.hands[player_idx].push(p);
+      p.setHome(this.getFreeHandSlot(this.hands[player_idx]));
+    }
+  }
+
   withinField(coord: Vector3): boolean {
-    return (coord.length() < 10);
+    let topleft = this.toGroundCoord({ x: this.field.field_minx - 5, y: this.field.field_miny - 5 });
+    let botright = this.toGroundCoord({ x: this.field.field_maxx + 5, y: this.field.field_maxy + 5 });
+    return (coord.x > topleft.x) && (coord.x < botright.x) &&
+      (coord.z > topleft.z) && (coord.z < botright.z);
   }
 
   snap(position: Vector3): gridPos {
@@ -336,6 +332,30 @@ export class World {
 
   toGroundCoord(xy: gridPos): Vector3 {
     return new Vector3(xy.x * piece_size, piece_y_lie, xy.y * piece_size);
+  }
+
+  endTurn(): boolean {
+    if (!this.field.isValidMove())
+      return false;
+    // move pieces from hands array to field
+    this.hands[curr_player] = this.hands[curr_player].filter(p => p.isHand);
+    this.field.endTurn();
+    // fill up
+    this.fillHand(curr_player);
+    // disable hand
+    this.hands[curr_player].forEach(p => {
+      p.mesh.isVisible = false;
+      p.mesh.isPickable = false;
+    });
+    // next player
+    if (++curr_player == n_players)
+      curr_player = 0;
+    // enable hand
+    this.hands[curr_player].forEach(p => {
+      p.mesh.isVisible = true;
+      p.mesh.isPickable = true;
+    });
+    return true;
   }
 
 }
