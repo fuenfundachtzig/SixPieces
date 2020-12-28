@@ -28,7 +28,7 @@ let currentPiece: Nullable<PieceMesh> = null
 // functions for picking and moving objects: https://playground.babylonjs.com/#7CBW04
 function getGroundPosition() {
   // TODO: faster if only checking ground with intersectsMesh?
-  var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh.name == "ground"; });
+  var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh.name === "ground"; });
   if (pickinfo && pickinfo.hit) {
     return pickinfo.pickedPoint;
   }
@@ -119,7 +119,7 @@ export function createScene() {
         scene.debugLayer.show()
       }
     }
-    if ((kbinfo.type == KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyT')) {
+    if ((kbinfo.type === KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyT')) {
       // end turn
       console.log(currentPiece);
       if (currentPiece != null)

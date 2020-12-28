@@ -49,7 +49,7 @@ export class PieceMesh extends Piece {
   setGrid(xy: gridPos) {
     // set mesh on field
     this.mesh.position = world.toGroundCoord(xy);
-    this.mesh.rotation = new Vector3;
+    this.mesh.rotation = new Vector3();
   }
 
   setHome(i: number = -1, field_size = 0) {

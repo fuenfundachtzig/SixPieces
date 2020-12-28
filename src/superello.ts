@@ -53,9 +53,9 @@ export function createSuperEllipsoid1(samples: number, exp1: any, exp2: any, sca
     var normals = [];
     // two loops, outer for phi, inner for beta
     var phi = -Math.PI / 2;
-    for (var j = 0; j <= samples / 2; j++) { 
-        var beta = -Math.PI;
-        for (var i = 0; i <= samples; i++) {
+    for (let j = 0; j <= samples / 2; j++) { 
+        let beta = -Math.PI;
+        for (let i = 0; i <= samples; i++) {
             // triangle #1
             vertices.push(sampleSuperEllipsoid(phi     , beta     , exp1, exp2, scalex, scaley, scalez));
             normals.push(calculateNormal      (phi     , beta     , exp1, exp2, scalex, scaley, scalez));
@@ -83,7 +83,7 @@ export function createSuperEllipsoid1(samples: number, exp1: any, exp2: any, sca
     shapeReturned.uvs = [];
     var indice = 0;
 
-    for (var i = 0; i < vertices.length; i++) {
+    for (let i = 0; i < vertices.length; i++) {
         shapeReturned.indices.push(indice++);
         shapeReturned.positions.push(vertices[i].x);
         shapeReturned.positions.push(vertices[i].y);
@@ -186,7 +186,7 @@ export function createSuperEllipsoid(samples: number, exp1: any, exp2: any, scal
     shapeReturned.uvs = new Array(vertices.length * 2);
     const num_rows = 2;
     for (var j = 0; j < nj*num_rows+2; ++j) { // nj top facets + the top + the bottom vertex
-        if (j == nj*num_rows)
+        if (j === nj*num_rows)
             continue; // skip bottom vertex (which has index vertices.length-2)
         let idx_u = vertices.length - 2 - nj*num_rows + j;
         shapeReturned.uvs[idx_u*2  ] = vertices[idx_u].x/scalex/2+0.5;

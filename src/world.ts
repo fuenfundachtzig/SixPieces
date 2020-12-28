@@ -5,12 +5,12 @@
 //
 // $Id: world.ts 3723 2020-12-28 01:28:46Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SolidParticleSystem, StandardMaterial, SubMesh, Vector3 } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { CreateGameReducer } from "boardgame.io/dist/types/src/core/reducer";
 import { createPBRSkybox, createArcRotateCamera, shuffleArray, scene } from "./functions";
 import { Field, gridPos, neighbors, translate } from "./field";
 import { Piece, PieceMesh } from "./piece";
+import { colors, Shape } from "./make_materials";
 
 // y positions of pieces
 const piece_y_lie = 0.31;
@@ -56,7 +56,7 @@ class FieldLogic {
   }
 
   placePiece(p: PieceMesh, xy: gridPos) {
-    console.log("place on " + xy.x + ","+ xy.y)
+    console.log("place " + colors[p.color] + " " + Shape[p.shape] + " on " + xy.x + ","+ xy.y)
     this.field.set(xy, p);
   }
 
@@ -129,7 +129,6 @@ class FieldLogic {
     }
     for (var p of played) {
       for (var disp of neighbors) {
-        let found = false;
         if (mismatch(p, this.field.get(translate(p.gridxy, ...disp)))) {
           console.log("does not match " + p + " " + this.field.get(translate(p.gridxy, ...disp)));
           return false;
@@ -154,8 +153,8 @@ class FieldLogic {
         }
         let ushapes = new Set(shapes);
         let ucolors = new Set(colors);
-        if ((ushapes.size < shapes.length) && (ushapes.size > 1) ||
-            (ucolors.size < colors.length) && (ucolors.size > 1)) {
+        if (((ushapes.size < shapes.length) && (ushapes.size > 1)) ||
+            ((ucolors.size < colors.length) && (ucolors.size > 1))) {
           console.log("wrong row for " + p);
           console.log("shapes " + shapes);
           console.log("colors " + colors);
@@ -196,8 +195,8 @@ export function createWorld(scene: Scene) {
 
 export class World {
 
-  bag = new Bag;
-  field = new FieldLogic;
+  bag = new Bag();
+  field = new FieldLogic();
   hands: Array<Array<PieceMesh>> = [];
   sel_piece: Nullable<PieceMesh> = null;
   shadowGenerator: ShadowGenerator;
@@ -292,7 +291,8 @@ export class World {
     // select clicked piece
     this.sel_piece = p;
     p.select();
-    this.field.unplace(p.gridxy);
+    if (!p.isHand)
+      this.field.unplace(p.gridxy);
   }
 
   init() {
@@ -308,15 +308,9 @@ export class World {
     // home
     for (let n = 0; n < n_players; ++n) {
       this.hands.push([]);
-      this.fillHand(n);
     }
 
-    // FIXME: here used to init next turn
-    this.hands[curr_player].forEach(p => {
-      p.mesh.isVisible = true;
-      p.mesh.isPickable = true;
-    });
-
+    this.beginTurn();
 
   }
 
@@ -372,8 +366,6 @@ export class World {
     // move pieces from hands array to field
     this.field.endTurn(played);
     this.hands[curr_player] = this.hands[curr_player].filter(p => p.isHand);
-    // fill up
-    this.fillHand(curr_player);
     // disable hand
     this.hands[curr_player].forEach(p => {
       p.mesh.isVisible = false;
@@ -383,14 +375,24 @@ export class World {
     if (++curr_player == n_players)
       curr_player = 0;
     // enable hand
+    this.beginTurn();
+    return true;
+  }
+
+  private beginTurn() {
+    // init next turn
+
+    // fill up
+    this.fillHand(curr_player);
+
+    // show
     this.hands[curr_player].forEach(p => {
       p.mesh.isVisible = true;
       p.mesh.isPickable = true;
       p.setHome();
     });
-    return true;
   }
-
+    
 }
 
 
