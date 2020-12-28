@@ -3,12 +3,13 @@
 // 
 // (85)
 //
-// $Id: world.ts 3722 2020-12-27 23:57:22Z zwo $
+// $Id: world.ts 3723 2020-12-28 01:28:46Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SolidParticleSystem, StandardMaterial, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { CreateGameReducer } from "boardgame.io/dist/types/src/core/reducer";
 import { createPBRSkybox, createArcRotateCamera, shuffleArray, scene } from "./functions";
+import { Field, gridPos, neighbors, translate } from "./field";
 import { Piece, PieceMesh } from "./piece";
 
 // y positions of pieces
@@ -43,76 +44,6 @@ class Bag {
 
 
 
-export interface gridPos {
-  x: number,
-  y: number
-}
-
-function translate(xy: gridPos, dx: number = 0, dy: number = 0): gridPos {
-  return {x: xy.x + dx, y: xy.y + dy}
-}
-
-
-
-class Field<T> {
-
-  readonly maxsize = 100;
-
-  constructor(
-    private field: Array<Array<T | undefined>> = [],
-    private count = 0
-  ) {
-    for (let i = 0; i < this.maxsize; ++i)
-      this.field.push(new Array(this.maxsize));
-  }
-
-  X(x: number): number {
-    while (x < 0)
-      x += this.maxsize;
-    return x;
-  }
-
-  Y(y: number): number {
-    while (y < 0)
-      y += this.maxsize;
-    return y;
-  }
-
-  set(xy: gridPos, p: T | undefined) {
-    if ((p !== undefined) && !this.has(xy))
-      ++this.count;
-    this.field[this.X(xy.x)][this.Y(xy.y)] = p;
-  }
-
-  get(xy: gridPos): T | undefined {
-    return this.field[this.X(xy.x)][this.Y(xy.y)];
-  }
-
-  remove(xy: gridPos): T | undefined {
-    let res = this.get(xy);
-    this.set(xy, undefined);
-    if (res !== undefined)
-      --this.count;
-    return res;
-  }
-
-  has(xy: gridPos): boolean {
-    return this.get(xy) !== undefined;
-  }
-
-  empty(): boolean {
-    return (this.count == 0);
-  }
-
-  getN(): number {
-    return this.count;
-  }
-
-}
-
-const neighbors = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-
-
 class FieldLogic {
 
   constructor(
@@ -125,10 +56,12 @@ class FieldLogic {
   }
 
   placePiece(p: PieceMesh, xy: gridPos) {
+    console.log("place on " + xy.x + ","+ xy.y)
     this.field.set(xy, p);
   }
 
   unplace(xy: gridPos) {
+    console.log("unplace on " + xy.x + ","+ xy.y)
     this.field.remove(xy);
   }
 
@@ -161,7 +94,7 @@ class FieldLogic {
       let old = false;
       for (let p of played) {
         if (!neighbors.some(disp => this.field.has(translate(p.gridxy, ...disp)))) {
-          console.log("disconnected " + p);
+          console.log("disconnected " + p.gridxy.x + ", " + p.gridxy.y);
           return false;
         }
         for (let disp of neighbors) {
@@ -171,17 +104,8 @@ class FieldLogic {
             break;
           }
         }
-        // old ||= [[1, 0], [-1, 0], [0, 1], [0, -1]].reduce(
-        //   (acc, curr) =>  {
-        //     let op = this.field.get({ x: p.gridxy.x + curr[0], y: p.gridxy.y + curr[1] });
-        //     if (op)
-        //       return acc || op.fix;
-        //     else
-        //       return acc as boolean;
-        //   },
-        //   old);
       }
-      if (!old) {
+      if ((this.field.getN() > played.length) && !old) {
         console.log("disconnected from prev. ");
         return false;
       }
@@ -212,7 +136,33 @@ class FieldLogic {
         }
       }
     }
-    
+
+    // finally check rows and cols make sense
+    for (let p of played) {
+      for (let dir of [[1, 0], [0, 1]]) {
+        let shapes = [p.shape];
+        let colors = [p.color];
+        for (let sgn of [1, -1]) {
+          dir[0] = dir[0] * sgn;
+          dir[1] = dir[1] * sgn;
+          let xy = translate(p.gridxy, ...dir);
+          while (this.field.has(xy)) {
+            shapes.push(this.field.get(xy)!.shape);
+            colors.push(this.field.get(xy)!.color);
+            xy = translate(xy, ...dir);
+          }
+        }
+        let ushapes = new Set(shapes);
+        let ucolors = new Set(colors);
+        if ((ushapes.size < shapes.length) && (ushapes.size > 1) ||
+            (ucolors.size < colors.length) && (ucolors.size > 1)) {
+          console.log("wrong row for " + p);
+          console.log("shapes " + shapes);
+          console.log("colors " + colors);
+          return false;
+        }
+      }
+    }
 
     return true;
   }
@@ -227,7 +177,6 @@ class FieldLogic {
       p.mesh.isPickable = false;
       p.fix = true;
       let xy = p.gridxy;
-      console.log(xy)
       this.field_minx = Math.min(this.field_minx, xy.x);
       this.field_maxx = Math.max(this.field_maxx, xy.x);
       this.field_miny = Math.min(this.field_miny, xy.y);
@@ -330,7 +279,7 @@ export class World {
       // handle unselect
       if (this.withinField(this.sel_piece.mesh.position)) {
         // check
-        this.field.placePiece(this.sel_piece, this.snap(this.sel_piece.mesh.position));
+        this.field.placePiece(this.sel_piece, this.sel_piece.gridxy);
       } else {
         this.sel_piece.setHome();
       }
@@ -343,7 +292,7 @@ export class World {
     // select clicked piece
     this.sel_piece = p;
     p.select();
-    this.field.unplace(this.snap(p.mesh.position));
+    this.field.unplace(p.gridxy);
   }
 
   init() {
@@ -364,7 +313,7 @@ export class World {
 
     // FIXME: here used to init next turn
     this.hands[curr_player].forEach(p => {
-      p.mesh.isVisible  = true;
+      p.mesh.isVisible = true;
       p.mesh.isPickable = true;
     });
 
@@ -392,7 +341,7 @@ export class World {
         break;
       this.shadowGenerator.addShadowCaster(p.mesh);
       this.hands[player_idx].push(p);
-      p.setHome(this.getFreeHandSlot(this.hands[player_idx]));
+      p.setHome(this.getFreeHandSlot(this.hands[player_idx]), this.field.field_minx);
       p.mesh.isVisible = false;
     }
   }
@@ -400,7 +349,6 @@ export class World {
   withinField(coord: Vector3): boolean {
     let topleft = this.toGroundCoord({ x: this.field.field_minx - 5, y: this.field.field_miny - 5 });
     let botright = this.toGroundCoord({ x: this.field.field_maxx + 5, y: this.field.field_maxy + 5 });
-    console.log(topleft, botright);
     return (coord.x > topleft.x) && (coord.x < botright.x) &&
       (coord.z > topleft.z) && (coord.z < botright.z);
   }
@@ -438,6 +386,7 @@ export class World {
     this.hands[curr_player].forEach(p => {
       p.mesh.isVisible = true;
       p.mesh.isPickable = true;
+      p.setHome();
     });
     return true;
   }

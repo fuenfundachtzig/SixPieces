@@ -1,10 +1,11 @@
 
 
-import { Nullable, Scene, Vector3 } from "@babylonjs/core";
+import { Scene, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { materials } from "./make_materials";
 import { createSuperEllipsoid } from './superello';
-import { piece_size, gridPos, world, piece_y_stand } from "./world";
+import { piece_size, world, piece_y_stand } from "./world";
+import { gridPos } from "./field";
 
 
 export class Piece {
@@ -24,12 +25,13 @@ export class PieceMesh extends Piece {
     scene: Scene,
     p: Piece,
     // position
-    public gridxy: gridPos = {x: 0, y: 0},
+    public gridxy: gridPos = { x: 0, y: 0 },
     public isHand: boolean = true, // true = is on hand, false = is on field
-    public home_x: number  = -1,
+    public home_x: number = -1,
+    public field_size: number = 0, // cache field size
     // flags
-    public fix         = false, // can no longer be moved
-    public glows       = false, // glows
+    public fix = false, // can no longer be moved
+    public glows = false, // glows
     private isSelected = false  // is selected
   ) {
     super();
@@ -37,9 +39,9 @@ export class PieceMesh extends Piece {
 
     // init mesh
     this.mesh = createSuperEllipsoid(8, 0.2, 0.2, piece_size / 2, 0.3, piece_size / 2, scene);
-    this.mesh.material   = materials[this.shape][this.color];
-    this.mesh.ellipsoid  = new Vector3(0.99, 100, 0.99);
-    this.mesh.metadata   = this;
+    this.mesh.material = materials[this.shape][this.color];
+    this.mesh.ellipsoid = new Vector3(0.99, 100, 0.99);
+    this.mesh.metadata = this;
     this.mesh.isPickable = false;
     // this.mesh.checkCollisions = true; -- manual now
   }
@@ -52,6 +54,8 @@ export class PieceMesh extends Piece {
 
   setHome(i: number = -1, field_size = 0) {
     // set mesh in home position 
+    if (field_size > 0)
+      this.field_size = field_size;
     if (i < 0)
       i = this.home_x as number;
     let angle = Math.PI * i / 10;
@@ -89,10 +93,12 @@ export class PieceMesh extends Piece {
       return;
     if (world.withinField(newPosition)) {
       // is within field: check if can snap to empty field
-      this.gridxy = world.snap(newPosition); // TODO: use TransformNode?
-      if (world.field.isEmpty(this.gridxy)) {
-        this.mesh.position = world.toGroundCoord(this.gridxy);
+      let xy = world.snap(newPosition); // TODO: use TransformNode?
+      if (world.field.isEmpty(xy)) {
+        this.gridxy = xy;
+        this.mesh.position = world.toGroundCoord(xy);
         this.mesh.rotation = new Vector3();
+        console.log("set gridxy " + xy.x + ","+ xy.y)
       }
       this.isHand = false;
     } else {

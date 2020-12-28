@@ -70,7 +70,7 @@ function pointerMove() {
   if (currentGPos.length() > 30) {
     if (currentGPos.length() > 33) {
       // add back to home
-      p.setHome(10) // HARK, FIXME
+      p.setHome();
     } else {
       // 
       let f = (currentGPos.length() - 30) / 3;
