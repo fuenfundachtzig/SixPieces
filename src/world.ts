@@ -3,14 +3,13 @@
 // 
 // (85)
 //
-// $Id: world.ts 3723 2020-12-28 01:28:46Z zwo $
+// $Id: world.ts 3725 2020-12-28 12:26:21Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, shuffleArray, scene } from "./functions";
-import { Field, gridPos, neighbors, translate } from "./field";
+import { Grid, gridCube, gridPos, gridRect, neighbors, translate } from "./field";
 import { Piece, PieceMesh } from "./piece";
-import { colors, Shape } from "./make_materials";
 
 // y positions of pieces
 const piece_y_lie = 0.31;
@@ -19,7 +18,7 @@ export const piece_size = 2.0;
 export let world: World;
 
 // temporary test
-const n_players = 2;
+const n_players = 4;
 var curr_player = 0;
 
 class Bag {
@@ -47,26 +46,40 @@ class Bag {
 class FieldLogic {
 
   constructor(
-    private field = new Field<PieceMesh>(),
-    public field_minx = 0,
-    public field_miny = 0,
-    public field_maxx = 0,
-    public field_maxy = 0,
+    private grid = new Grid<PieceMesh>(),
+    public grid_minx = 0, // size of fixed pieces
+    public grid_miny = 0,
+    public grid_maxx = 0,
+    public grid_maxy = 0,
   ) {
   }
 
   placePiece(p: PieceMesh, xy: gridPos) {
-    console.log("place " + colors[p.color] + " " + Shape[p.shape] + " on " + xy.x + ","+ xy.y)
-    this.field.set(xy, p);
+    console.log("place " + p.identify() + " on " + xy.x + "," + xy.y)
+    this.grid.set(xy, p);
   }
 
   unplace(xy: gridPos) {
-    console.log("unplace on " + xy.x + ","+ xy.y)
-    this.field.remove(xy);
+    console.log("unplace on " + xy.x + "," + xy.y)
+    this.grid.remove(xy);
   }
 
   isEmpty(xy: gridPos): boolean {
-    return !this.field.has(xy);
+    return !this.grid.has(xy);
+  }
+
+  updateGridSize(xy: gridPos) {
+    // when piece is fixed (not placed!) 
+    this.grid_minx = Math.min(this.grid_minx, xy.x);
+    this.grid_maxx = Math.max(this.grid_maxx, xy.x);
+    this.grid_miny = Math.min(this.grid_miny, xy.y);
+    this.grid_maxy = Math.max(this.grid_maxy, xy.y);
+  }
+
+  getGridSize(margin: number): gridRect {
+    let tl = { x: this.grid_minx - margin, y: this.grid_miny - margin };
+    let br = { x: this.grid_maxx + margin, y: this.grid_maxy + margin };
+    return {tl: tl, br: br}
   }
 
   isValidMove(played: PieceMesh[]): boolean {
@@ -90,47 +103,47 @@ class FieldLogic {
     }
 
     // every new piece must have a neighbor (and one must be old)
-    if (this.field.getN() > 1) {
+    if (this.grid.getN() > 1) {
       let old = false;
       for (let p of played) {
-        if (!neighbors.some(disp => this.field.has(translate(p.gridxy, ...disp)))) {
-          console.log("disconnected " + p.gridxy.x + ", " + p.gridxy.y);
+        if (!neighbors.some(disp => this.grid.has(translate(p.gridxy, ...disp)))) {
+          console.log("disconnected " + p.identify());
           return false;
         }
         for (let disp of neighbors) {
-          let op = this.field.get(translate(p.gridxy, ...disp));
+          let op = this.grid.get(translate(p.gridxy, ...disp));
           if (op && op.fix) {
             old = true;
             break;
           }
         }
       }
-      if ((this.field.getN() > played.length) && !old) {
+      if ((this.grid.getN() > played.length) && !old) {
         console.log("disconnected from prev. ");
         return false;
       }
     }
 
     // every new piece must have a neighbor
-    if (this.field.getN() > 1) {
+    if (this.grid.getN() > 1) {
       for (let p of played) {
-        if (!neighbors.some(disp => this.field.has(translate(p.gridxy, ...disp)))) {
-          console.log("disconnected " + p);
+        if (!neighbors.some(disp => this.grid.has(translate(p.gridxy, ...disp)))) {
+          console.log("disconnected " + p.identify());
           return false;
         }
       }
     }
 
-    // no new piece must differ in both color and shape from any neighbor
+    // no new piece must differ in both (or neither) color and shape from any neighbor
     function mismatch(p1: Piece | undefined, p2: Piece | undefined) {
       if ((p1 === undefined) || (p2 === undefined))
         return false;
-      return (p1.shape != p2.shape) && (p1.color != p2.color);
+      return (p1.shape != p2.shape) == (p1.color != p2.color);
     }
     for (var p of played) {
       for (var disp of neighbors) {
-        if (mismatch(p, this.field.get(translate(p.gridxy, ...disp)))) {
-          console.log("does not match " + p + " " + this.field.get(translate(p.gridxy, ...disp)));
+        if (mismatch(p, this.grid.get(translate(p.gridxy, ...disp)))) {
+          console.log("does not match " + p.identify() + " " + this.grid.get(translate(p.gridxy, ...disp))!.identify());
           return false;
         }
       }
@@ -145,24 +158,24 @@ class FieldLogic {
           dir[0] = dir[0] * sgn;
           dir[1] = dir[1] * sgn;
           let xy = translate(p.gridxy, ...dir);
-          while (this.field.has(xy)) {
-            shapes.push(this.field.get(xy)!.shape);
-            colors.push(this.field.get(xy)!.color);
+          while (this.grid.has(xy)) {
+            shapes.push(this.grid.get(xy)!.shape);
+            colors.push(this.grid.get(xy)!.color);
             xy = translate(xy, ...dir);
           }
         }
         let ushapes = new Set(shapes);
         let ucolors = new Set(colors);
         if (((ushapes.size < shapes.length) && (ushapes.size > 1)) ||
-            ((ucolors.size < colors.length) && (ucolors.size > 1))) {
-          console.log("wrong row for " + p);
+          ((ucolors.size < colors.length) && (ucolors.size > 1))) {
+          console.log("wrong row for " + p.identify());
           console.log("shapes " + shapes);
           console.log("colors " + colors);
           return false;
         }
       }
     }
-
+    
     return true;
   }
 
@@ -175,11 +188,7 @@ class FieldLogic {
     played.forEach((p) => {
       p.mesh.isPickable = false;
       p.fix = true;
-      let xy = p.gridxy;
-      this.field_minx = Math.min(this.field_minx, xy.x);
-      this.field_maxx = Math.max(this.field_maxx, xy.x);
-      this.field_miny = Math.min(this.field_miny, xy.y);
-      this.field_maxy = Math.max(this.field_maxy, xy.y);
+      this.updateGridSize(p.gridxy);
     });
     return true;
   }
@@ -280,7 +289,7 @@ export class World {
         // check
         this.field.placePiece(this.sel_piece, this.sel_piece.gridxy);
       } else {
-        this.sel_piece.setHome();
+        this.sel_piece.moveHome();
       }
       if (this.sel_piece == p) {
         // clicked on selected piece -> don't select again
@@ -333,18 +342,25 @@ export class World {
       let p = new PieceMesh(scene, this.bag.draw() as Piece);
       if (!p)
         break;
-      this.shadowGenerator.addShadowCaster(p.mesh);
+      this.shadowGenerator.addShadowCaster(p.mesh); // therefore, we need to be in World...
       this.hands[player_idx].push(p);
-      p.setHome(this.getFreeHandSlot(this.hands[player_idx]), this.field.field_minx);
-      p.mesh.isVisible = false;
+      p.home_x = this.getFreeHandSlot(this.hands[player_idx]);
     }
   }
 
-  withinField(coord: Vector3): boolean {
-    let topleft = this.toGroundCoord({ x: this.field.field_minx - 5, y: this.field.field_miny - 5 });
-    let botright = this.toGroundCoord({ x: this.field.field_maxx + 5, y: this.field.field_maxy + 5 });
-    return (coord.x > topleft.x) && (coord.x < botright.x) &&
-      (coord.z > topleft.z) && (coord.z < botright.z);
+  toGroundCoord(xy: gridPos): Vector3 {
+    return new Vector3(xy.x * piece_size, 0, xy.y * piece_size);
+  }
+
+  getFieldSize(margin: number): gridCube {
+    let r = this.field.getGridSize(margin);
+    return {tl: this.toGroundCoord(r.tl), br: this.toGroundCoord(r.br) };
+  }
+  
+  withinField(coord: Vector3, margin: number = 5): boolean {
+    let fieldsize = this.getFieldSize(margin);
+    return (coord.x > fieldsize.tl.x) && (coord.x < fieldsize.br.x) &&
+      (coord.z > fieldsize.tl.z) && (coord.z < fieldsize.br.z);
   }
 
   snap(position: Vector3): gridPos {
@@ -353,10 +369,6 @@ export class World {
       x: Math.round(position.x / piece_size),
       y: Math.round(position.z / piece_size)
     }
-  }
-
-  toGroundCoord(xy: gridPos): Vector3 {
-    return new Vector3(xy.x * piece_size, piece_y_lie, xy.y * piece_size);
   }
 
   endTurn(): boolean {
@@ -385,14 +397,26 @@ export class World {
     // fill up
     this.fillHand(curr_player);
 
-    // show
+    // (re-)compute home position for meshes and show hand
+    let fieldsize = Math.max( // TODO: use getFieldSize
+      this.field.grid_maxx - this.field.grid_minx,
+      this.field.grid_maxy - this.field.grid_miny
+    )
+    let angle1 = Math.PI / 4 + Math.PI / 2 * (curr_player - curr_player - 2); // would include rotation of field for multiplayer
     this.hands[curr_player].forEach(p => {
+      let angle2 = angle1 + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
+      let angle3 = -angle2 + Math.PI / 2;
+      let x = Math.cos(angle1) * (fieldsize + 28) + 10 * Math.cos(angle2);
+      let y = Math.sin(angle1) * (fieldsize + 28) + 10 * Math.sin(angle2);
+      p.homexy = { x: x, y: y }
+      p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
+      p.moveHome();
+      // make visible and clickable
       p.mesh.isVisible = true;
       p.mesh.isPickable = true;
-      p.setHome();
     });
   }
-    
+
 }
 
 

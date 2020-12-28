@@ -35,6 +35,7 @@ function getGroundPosition() {
   return null;
 }
 
+/*
 function pointerDown(mesh: any) {
   currentMesh = mesh
   startingPoint = getGroundPosition()
@@ -70,7 +71,7 @@ function pointerMove() {
   if (currentGPos.length() > 30) {
     if (currentGPos.length() > 33) {
       // add back to home
-      p.setHome();
+      p.moveHome();
     } else {
       // 
       let f = (currentGPos.length() - 30) / 3;
@@ -89,7 +90,7 @@ function pointerMove() {
   }
 
 }
-
+*/
 
 function pointerMovePiece() {
   if (!currentPiece)
@@ -166,12 +167,10 @@ export function createScene() {
 }
 
 export const createArcRotateCamera = () => {
-  const startAlpha = 230 / 180 * Math.PI
-  const startBeta = 50 / 180 * Math.PI
-  const startRadius = 30
-  // const startPosition = new Vector3(0, 8, 0)
-  // const startPosition = new Vector3(-37, 8, -37)
-  const startPosition = new Vector3(-10, 8, -12)
+  const startAlpha  = 225 / 180 * Math.PI
+  const startBeta   = 60 / 180 * Math.PI
+  const startRadius = 20
+  const startPosition = new Vector3(-20, 8, -20)
 
   camera = new ArcRotateCamera('camera', startAlpha, startBeta, startRadius, startPosition, scene, true)
   camera.attachControl(canvas, false)
