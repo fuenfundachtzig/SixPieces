@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: index.ts 3730 2020-12-29 11:01:25Z zwo $
+// $Id: index.ts 3731 2020-12-29 13:43:23Z zwo $
 
 
 import 'pepjs'
@@ -11,7 +11,6 @@ import { gameClient } from './client'
 
 import { createEngine, createScene } from './functions'
 import { makeMaterials } from './make_materials'
-import { GameState } from './types/GameState'
 import { createWorld } from './world'
 
 
@@ -36,12 +35,12 @@ const main = async () => {
 
 // start game client
 gameClient.subscribe((state) => {
-  if (state)
+  if (state) {
+    world.setCurrPlayer(state.ctx.currentPlayer);
     world.unpack(state.G)
-}
-);
+  }
+});
 gameClient.start();
-
 
 // start the GUI
 main()

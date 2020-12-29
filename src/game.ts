@@ -1,16 +1,20 @@
+
+import { pbrDebug } from '@babylonjs/core/Shaders/ShadersInclude/pbrDebug';
+import { Ctx } from 'boardgame.io';
+import { INVALID_MOVE } from 'boardgame.io/core';
 import { fillHand } from './logic';
+import { identify, PieceMesh } from './PieceMesh';
 import { createBag } from './types/Bag';
-import { PieceOnGrid, Player } from './types/GameState';
+import { GameState, PieceOnGrid, Player } from './types/GameState';
+import { world } from './world';
 
-interface GameContext {
 
-}
 
 const numberOfPlayers = 2;
 
 export const GameLogic = {
 
-  setup: () => {
+  setup: (ctx: Ctx) => {
     // create contents of gamestate G
     let bag = createBag();
     let pog: PieceOnGrid[] = [];
@@ -36,8 +40,23 @@ export const GameLogic = {
     swap: () => {
 
     },
-    endTurn: () => {
-
+    endTurn: (G: GameState, ctx: Ctx) => {
+      console.log("End turn...")
+      let res = world.endTurn();
+      if (res === false) {
+        console.log("...invalid")
+        return INVALID_MOVE;
+      } 
+      let played = res as PieceMesh[];
+      // world.endTurn returns the pieces that have been played -> need to update hand
+      let player = G.players[parseInt(ctx.currentPlayer)];
+      player.hand = player.hand.filter((p1) => played.find((p2) => p1.id == p2.id ) === undefined);
+      fillHand(player, G.bag);
+      // update field
+      for (let p of played)
+        G.pog.push(p);
+      console.log("...ended")
+      ctx.events!.endTurn!();
     }
   }
 };

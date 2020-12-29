@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: logic.ts 3730 2020-12-29 11:01:25Z zwo $
+// $Id: logic.ts 3731 2020-12-29 13:43:23Z zwo $
 //
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
@@ -63,7 +63,7 @@ export function getGridSize(g: GridBound, margin: number): gridRect {
     return { tl: tl, br: br }
 }
 
-function isValidMove(g: GridGame, played: PieceMesh[]): boolean {
+export function isValidMove(g: GridGame, played: PieceMesh[]): boolean {
     // check if move valid
 
     // no piece played
@@ -160,33 +160,21 @@ function isValidMove(g: GridGame, played: PieceMesh[]): boolean {
     return true;
 }
 
-// function endTurn(g: GridBound, played: PieceMesh[]) {
-//     if (!isValidMove(g, played)) {
-//         console.warn("Should never happen 33324");
-//         return false;
-//     }
-//     // adds pieces from field_turn to field, updates field boundaries
-//     played.forEach((p) => {
-//         // p.mesh.isPickable = false; // TODO
-//         p.fix = true;
-//         updateGridSize(g, p.gridxy);
-//     });
-//     return true;
-// }
 
 
-function getFreeHandSlot(player: Player): number {
+
+export function getFreeHandSlot(hand: PieceMesh[]): number {
     // find empty slot on hand and return index
-    return 0; // TODO
-    // for (let i = 0; i < 6; ++i) {
-    //     for (var idx = 0; idx < player.hand.length; ++idx) {
-    //         if (player.hand[idx].home_x == i)
-    //             break;
-    //     }
-    //     if (idx == player.hand.length)
-    //         return i;
-    // }
-    // return -1;
+    for (let i = 0; i < 6; ++i) {
+        for (var idx = 0; idx < hand.length; ++idx) {
+            if (hand[idx].home_x == i)
+                break;
+        }
+        if (idx == hand.length)
+            return i;
+    }
+    console.log("getFreeHandSlot: couldn't find free slot??")
+    return -1;
 }
 
 export function fillHand(player: Player, bag: Bag) {

@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: PieceMesh.ts 3730 2020-12-29 11:01:25Z zwo $
+// $Id: PieceMesh.ts 3731 2020-12-29 13:43:23Z zwo $
 //
 
 import { Scene, Vector3 } from "@babylonjs/core";
@@ -18,9 +18,9 @@ import { Piece } from "./piece";
 
 export function identify(p: PieceMesh): string {
   if (p.isHand)
-    return `${colors[p.color]} ${Shape[p.shape]} on ${p.home_x}`;
+    return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on ${p.home_x}`;
   else
-    return `${colors[p.color]} ${Shape[p.shape]} on (${p.gridxy.x}, ${p.gridxy.y})`;
+    return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on (${p.gridxy.x}, ${p.gridxy.y})`;
 }
 
 
@@ -37,12 +37,12 @@ export class PieceMesh implements Piece {
     // graphics info
     scene: Scene,
     // position
-    public isHand: boolean = true,         // true = is on hand, false = is on field
+    public isHand: boolean = true,           // true = is on hand, false = is on field
     public gridxy: gridPos = { x: 0, y: 0 }, // position on field  / grid
-    public home_x: number = -1,           // index on hand
+    public home_x: number = -1,              // index on hand
     public homexy: gridPos = { x: 0, y: 0 }, // cache: home position computed from home_x, size of field and direction of player
-    public homerot: Vector3 = new Vector3,  // cache: rotation in home position
-    public fix: boolean = false,        // cannot be moved (= !isPickable)
+    public homerot: Vector3 = new Vector3,   // cache: rotation in home position
+    public fix: boolean = false,             // cannot be moved (= !isPickable)
     // flags
     public glows = false,
     private isSelected = false // is selected

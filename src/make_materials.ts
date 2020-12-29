@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: make_materials.ts 3724 2020-12-28 10:46:07Z zwo $
+// $Id: make_materials.ts 3731 2020-12-29 13:43:23Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
 
@@ -11,7 +11,7 @@ export var materials: StandardMaterial[][];
 
 export const colors = [
     "green",
-    "blue",
+    "#3040ff", // or RoyalBlue?
     "red",
     "yellow",
     "violet",
