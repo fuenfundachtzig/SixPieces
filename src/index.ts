@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: index.ts 3729 2020-12-28 22:12:00Z zwo $
+// $Id: index.ts 3730 2020-12-29 11:01:25Z zwo $
 
 
 import 'pepjs'
@@ -21,8 +21,8 @@ import { createWorld } from './world'
 const canvas: HTMLCanvasElement = document.getElementById('root') as HTMLCanvasElement
 const engine = createEngine(canvas)
 const scene = createScene()
-makeMaterials(scene);
-var world = createWorld(scene)
+makeMaterials(scene)
+const world = createWorld(scene)
 
 // main function that is async so we can call the scene manager with await
 const main = async () => {
@@ -41,11 +41,7 @@ gameClient.subscribe((state) => {
 }
 );
 gameClient.start();
-let x = gameClient.getState();
-if (x) {
-  // console.log("erfddfsdfsdf");
-  world.unpack(x.G);
-}
+
 
 // start the GUI
 main()

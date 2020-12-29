@@ -3,16 +3,17 @@
 //
 // (85)
 //
-// $Id: logic.ts 3729 2020-12-28 22:12:00Z zwo $
+// $Id: logic.ts 3730 2020-12-29 11:01:25Z zwo $
 //
 
-import { get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
-import { identify, Piece, PieceGame } from "./piece";
+import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
+import { Piece } from "./piece";
 import { Bag } from "./types/Bag";
 import { Player } from "./types/GameState";
+import { identify, PieceMesh } from "./PieceMesh";
 
 
-type GridGame = Grid<PieceGame>;
+type GridGame = Grid<PieceMesh>;
 
 export interface GridBound extends GridGame {
 
@@ -23,7 +24,19 @@ export interface GridBound extends GridGame {
 
 }
 
-export function placePiece(g: GridGame, p: PieceGame, xy: gridPos) {
+export function emptyGrid(): GridBound {
+    let grid: Grid<PieceMesh> = create();
+    return {
+        grid: grid.grid,
+        count: grid.count,
+        grid_maxx: 0,
+        grid_maxy: 0,
+        grid_minx: 0,
+        grid_miny: 0,
+    }
+}
+
+export function placePiece(g: GridGame, p: PieceMesh, xy: gridPos) {
     console.log("place " + identify(p) + " on " + xy.x + "," + xy.y)
     set(g, xy, p);
 }
@@ -44,13 +57,13 @@ export function updateGridSize(g: GridBound, xy: gridPos) {
     g.grid_maxy = Math.max(g.grid_maxy, xy.y);
 }
 
-function getGridSize(g: GridBound, margin: number): gridRect {
+export function getGridSize(g: GridBound, margin: number): gridRect {
     let tl = { x: g.grid_minx - margin, y: g.grid_miny - margin };
     let br = { x: g.grid_maxx + margin, y: g.grid_maxy + margin };
     return { tl: tl, br: br }
 }
 
-function isValidMove(g: GridGame, played: PieceGame[]): boolean {
+function isValidMove(g: GridGame, played: PieceMesh[]): boolean {
     // check if move valid
 
     // no piece played
@@ -147,7 +160,7 @@ function isValidMove(g: GridGame, played: PieceGame[]): boolean {
     return true;
 }
 
-// function endTurn(g: GridBound, played: PieceGame[]) {
+// function endTurn(g: GridBound, played: PieceMesh[]) {
 //     if (!isValidMove(g, played)) {
 //         console.warn("Should never happen 33324");
 //         return false;

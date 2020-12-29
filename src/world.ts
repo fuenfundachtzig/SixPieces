@@ -3,19 +3,17 @@
 // 
 // (85)
 //
-// $Id: world.ts 3729 2020-12-28 22:12:00Z zwo $
+// $Id: world.ts 3730 2020-12-29 11:01:25Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, shuffleArray, scene } from "./functions";
 import { create, Grid, gridCube, gridPos, gridRect, has, iterate, neighbors, set, translate } from "./types/Field";
-import { Piece, PieceGame } from "./piece";
-import { PieceMesh } from "./PieceMesh";
+import { Piece } from "./piece";
+import { identify, PieceMesh } from "./PieceMesh";
 import { gameClient } from "./client";
-import { GridBound, placePiece, unplace, updateGridSize } from "./logic";
+import { emptyGrid, getGridSize, GridBound, placePiece, unplace, updateGridSize } from "./logic";
 import { GameState } from "./types/GameState";
-import { State } from "boardgame.io";
-import { AdvancedDynamicTextureTreeItemComponent } from "@babylonjs/inspector/components/sceneExplorer/entities/gui/advancedDynamicTextureTreeItemComponent";
 
 // y positions of pieces
 const piece_y_lie = 0.31;
@@ -34,13 +32,13 @@ export function createWorld(scene: Scene) {
 }
 
 
-export class World {
+class World {
 
   private pieces = new Map<number, PieceMesh>();
   private sel_piece: Nullable<PieceMesh> = null;
   private shadowGenerator: ShadowGenerator;
-  // private grid: GridBound; 
-  private grid: Grid<PieceMesh>;
+  private grid: GridBound; 
+  // private grid: Grid<PieceMesh>;
   private hands: Array<Array<PieceMesh>>;
 
   constructor(scene: Scene) {
@@ -105,38 +103,34 @@ export class World {
     //   }
     // })
 
-    this.grid = {
-      grid: [], count: 0,
-      // grid_maxx: 0,
-      // grid_maxy: 0,
-      // grid_minx: 0,
-      // grid_miny: 0,
-    }
+    // init grid
+    this.grid = emptyGrid()
     this.hands = [];
 
   }
 
   recomputeHandPos() {
     // (re-)compute home position for meshes and show hand
-    // let fieldsize = Math.max( // TODO: use getFieldSize
-    //   this.grid.grid_maxx - this.grid.grid_minx,
-    //   this.grid.grid_maxy - this.grid.grid_miny
-    // )
-    let fieldsize = 0;
-    for (let curr_player = 0; curr_player < this.hands.length; ++curr_player) {
-      let angle1 = Math.PI / 4 + Math.PI / 2 * (curr_player - 2); // would include rotation of field for multiplayer
-      this.hands[curr_player].forEach(p => {
-        let angle2 = angle1 + Math.PI + Math.PI * (p.p.home_x - 2.5) / 10;
+    let fieldsize = Math.max( // TODO: use getFieldSize
+      this.grid.grid_maxx - this.grid.grid_minx,
+      this.grid.grid_maxy - this.grid.grid_miny
+    )
+    for (let player_idx = 0; player_idx < this.hands.length; ++player_idx) {
+      let angle1 = Math.PI / 4 + Math.PI / 2 * (player_idx - 2); // would include rotation of field for multiplayer
+      this.hands[player_idx].forEach(p => {
+        let angle2 = angle1 + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
         let angle3 = -angle2 + Math.PI / 2;
         let x = Math.cos(angle1) * (fieldsize + 28) + 10 * Math.cos(angle2);
         let y = Math.sin(angle1) * (fieldsize + 28) + 10 * Math.sin(angle2);
-        p.p.homexy = { x: x, y: y }
+        p.homexy = { x: x, y: y };
         p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
         p.moveHome();
         // make visible and clickable
-        p.mesh.isVisible = true;
-        p.mesh.isPickable = true;
-        console.log("vis: " + p.p.homexy);
+        let canmove = curr_player == player_idx;
+        p.fix = !canmove;
+        p.mesh.isVisible  = true;
+        p.mesh.isPickable = canmove;
+        console.log("vis: " + identify(p));
       });
     };
   }
@@ -146,19 +140,17 @@ export class World {
 
     let added = 0;
     for (let p of state.pog) {
-      if (!this.pieces.has(p.piece.id)) {
+      if (!this.pieces.has(p.id)) {
         // create new mesh
-        let pm = new PieceMesh(scene, {...p.piece, isHand: false, gridxy: p.pos, home_x: -1, fix: true, homexy: {x: 0, y: 0} });
+        let pm = new PieceMesh(p, scene); //, isHand: false, gridxy: p.pos, home_x: -1, fix: true, homexy: {x: 0, y: 0} );
         pm.mesh.isVisible = true;
-        set<PieceMesh>(this.grid, p.pos, pm)
-        this.pieces.set(p.piece.id, pm);
+        set(this.grid, p.pos, pm)
+        this.pieces.set(p.id, pm);
         ++added;
         // updateGridSize(this.grid, p.pos)
       } else {
-        set<PieceMesh>(this.grid, p.pos, this.pieces.get(p.piece.id));
+        set<PieceMesh>(this.grid, p.pos, this.pieces.get(p.id));
       }
-
-
     }
     console.log(`unpack: added ${added} new pieces in fields`);
     // this.grid.grid = {grid, grid_maxx, grid_maxy, grid_minx, grid_miny}
@@ -172,7 +164,7 @@ export class World {
         let p = player.hand[i];
         if (!this.pieces.has(p.id)) {
           // create new mesh
-          let pm = new PieceMesh(scene, {...p, isHand: true, gridxy: {x: 0, y: 0}, home_x: i, fix: false, homexy: {x: 0, y: 0} });
+          let pm = new PieceMesh(p, scene, true, undefined, i); //{...p, isHand: true, gridxy: {x: 0, y: 0}, home_x: i, fix: false, homexy: {x: 0, y: 0} });
           this.pieces.set(p.id, pm);
           ++added;
           this.hands[pidx].push(pm);
@@ -182,6 +174,11 @@ export class World {
     
     console.log(`updateWorld: added ${added} new pieces in hands`);
     this.recomputeHandPos();
+
+    // change perspective TODO
+    // const xSlide = new BABYLON.Animation("xSlide", "position.x", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+
   }
 
   click(p: PieceMesh) {
@@ -191,7 +188,7 @@ export class World {
       // handle unselect
       if (this.withinField(this.sel_piece.mesh.position)) {
         // check
-        // placePiece(this.state.grid, this.sel_piece.p, this.sel_piece.p.gridxy); TODO
+        placePiece(this.grid, this.sel_piece, this.sel_piece.gridxy); 
 
       } else {
         this.sel_piece.moveHome();
@@ -205,8 +202,8 @@ export class World {
     // select clicked piece
     this.sel_piece = p;
     p.select();
-    // if (!p.p.isHand) TODO
-      // unplace(this.state.grid, p.p.gridxy);
+    if (!p.isHand) 
+      unplace(this.grid, p.gridxy);
   }
 
   toGroundCoord(xy: gridPos): Vector3 {
@@ -216,11 +213,9 @@ export class World {
   getFieldSize(margin: number): gridCube {
     // if (!this.state) TODO
       // return { br: new Vector3, tl: new Vector3 };
-
-    return { br: new Vector3, tl: new Vector3 }; // TODO
-
-    // let r = this.state.G.grid.getGridSize(margin);
-    // return { tl: this.toGroundCoord(r.tl), br: this.toGroundCoord(r.br) };
+    // return { br: new Vector3, tl: new Vector3 }; // TODO
+    let r = getGridSize(this.grid, margin);
+    return { tl: this.toGroundCoord(r.tl), br: this.toGroundCoord(r.br) };
   }
 
   withinField(coord: Vector3, margin: number = 5): boolean {

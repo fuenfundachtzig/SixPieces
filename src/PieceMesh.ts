@@ -3,38 +3,58 @@
 //
 // (85)
 //
-// $Id: PieceMesh.ts 3728 2020-12-28 20:36:28Z zwo $
+// $Id: PieceMesh.ts 3730 2020-12-29 11:01:25Z zwo $
 //
 
 import { Scene, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { materials } from "./make_materials";
+import { colors, materials, Shape } from "./make_materials";
 import { createSuperEllipsoid } from './superello';
 import { piece_size, world, piece_y_stand } from "./world";
 import { gridPos } from "./types/Field";
-import { PieceGame } from "./piece";
+import { Piece } from "./piece";
 
 
-export class PieceMesh {
+
+export function identify(p: PieceMesh): string {
+  if (p.isHand)
+    return `${colors[p.color]} ${Shape[p.shape]} on ${p.home_x}`;
+  else
+    return `${colors[p.color]} ${Shape[p.shape]} on (${p.gridxy.x}, ${p.gridxy.y})`;
+}
+
+
+export class PieceMesh implements Piece {
   // a piece in the scene with an associated mesh
-  public mesh: Mesh;
+
+  public mesh : Mesh;
+  public id   : number;
+  public color: number;
+  public shape: number;
 
   constructor(
+    p: Piece,
+    // graphics info
     scene: Scene,
-    public p: PieceGame,
     // position
-    public homerot: Vector3 = new Vector3,
-
-
-    // public field_size: number = 0,            // cache field size
+    public isHand: boolean = true,         // true = is on hand, false = is on field
+    public gridxy: gridPos = { x: 0, y: 0 }, // position on field  / grid
+    public home_x: number = -1,           // index on hand
+    public homexy: gridPos = { x: 0, y: 0 }, // cache: home position computed from home_x, size of field and direction of player
+    public homerot: Vector3 = new Vector3,  // cache: rotation in home position
+    public fix: boolean = false,        // cannot be moved (= !isPickable)
     // flags
     public glows = false,
     private isSelected = false // is selected
   ) {
 
+    this.id    = p.id;
+    this.color = p.color;
+    this.shape = p.shape;
+
     // init mesh
     this.mesh = createSuperEllipsoid(8, 0.2, 0.2, piece_size / 2, 0.3, piece_size / 2, scene);
-    this.mesh.material = materials[this.p.shape][this.p.color];
+    this.mesh.material = materials[this.shape][this.color];
     this.mesh.ellipsoid = new Vector3(0.99, 100, 0.99);
     this.mesh.metadata = this;
     this.mesh.isPickable = false;
@@ -50,9 +70,9 @@ export class PieceMesh {
 
   moveHome() {
     // compute home position for meshes
-    this.mesh.position.set(this.p.homexy.x, piece_y_stand, this.p.homexy.y);
+    this.mesh.position.set(this.homexy.x, piece_y_stand, this.homexy.y);
     this.mesh.rotation = this.homerot;
-    this.p.isHand = true;
+    this.isHand = true;
   }
 
   click() {
@@ -83,12 +103,12 @@ export class PieceMesh {
       // is within field: check if can snap to empty field
       let xy = world.snap(newPosition); // TODO: use TransformNode?
       if (world.isEmpty(xy)) {
-        this.p.gridxy = xy;
+        this.gridxy = xy;
         this.mesh.position = world.toGroundCoord(xy);
         this.mesh.rotation = new Vector3();
         // console.log("set gridxy " + xy.x + ","+ xy.y)
       }
-      this.p.isHand = false;
+      this.isHand = false;
     } else if (world.withinField(newPosition, 8)) {
       this.mesh.rotation = new Vector3();
       this.mesh.position = newPosition;
