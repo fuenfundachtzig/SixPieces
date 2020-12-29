@@ -12,3 +12,9 @@ If the installation (first step) is succesful, the second step will open a web b
 Both take some time.
 
 Note that npm7 takes offense with some dependencies. npm6 doesn't.
+
+# Setting up a server (not yet working)
+```
+npm install --save esm
+npm run serve
+```

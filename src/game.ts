@@ -1,3 +1,11 @@
+//
+// Class to describe the game moves etc.
+//
+// (85)
+//
+// $Id: game.ts 3738 2020-12-29 22:09:00Z zwo $
+//
+
 import { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { shuffleArray } from './functions';
@@ -8,17 +16,14 @@ import { GameState, PieceOnGrid, Player } from './types/GameState';
 import { world } from './world';
 
 
-
-const numberOfPlayers = 4;
-
-export const GameLogic = {
+export const GameDefinition = {
 
   setup: (ctx: Ctx) => {
     // create contents of gamestate G
     let bag = createBag();
     let pog: PieceOnGrid[] = [];
     const players: Player[] = [];
-    for (let p = 0; p < numberOfPlayers; p++) {
+    for (let p = 0; p < ctx.numPlayers; p++) {
       let player = {
         id: p.toString(),
         name: "Player " + (p + 1),

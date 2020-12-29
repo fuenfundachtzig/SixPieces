@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: PieceMesh.ts 3732 2020-12-29 15:31:10Z zwo $
+// $Id: PieceMesh.ts 3738 2020-12-29 22:09:00Z zwo $
 //
 
 import { Scene, Vector3 } from "@babylonjs/core";
@@ -107,7 +107,7 @@ export class PieceMesh implements Piece {
     // move piece (mesh)
     if (!this.mesh)
       return;
-    if (world.withinField(newPosition, InnerRing)) { // TODO: use actual field size in all directions, TODO global offset that moves ground, lights and homes (but not pieces and camera)
+    if (world.withinField(newPosition, InnerRing)) { // TODO global offset that moves ground, lights and homes (but not pieces and camera)
       // is within field: check if can snap to empty field
       let xy = world.snap(newPosition); 
       if (world.isEmpty(xy)) {

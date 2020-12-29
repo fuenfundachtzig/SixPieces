@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3734 2020-12-29 18:34:05Z zwo $
+// $Id: world.ts 3738 2020-12-29 22:09:00Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SpotLight, SubMesh, Vector3, Animation, BoxBuilder } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -14,9 +14,9 @@ import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placeP
 import { GameState } from "./types/GameState";
 
 // y positions of pieces
-// const piece_y_lie = 0.31;
 export const piece_y_stand = 1;
 export const piece_size = 2.0;
+
 export let world: World;
 
 export function createWorld(scene: Scene) {
