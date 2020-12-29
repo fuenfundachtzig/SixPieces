@@ -116,7 +116,7 @@ export function makeMaterials(scene: Scene) {
     for (let shape of getAllEnumValues(Shape)) {
         const materials_colors: StandardMaterial[] = [];
         colors.forEach(color => {
-            var material = new StandardMaterial("mat_" + color, scene);
+            var material = new StandardMaterial("mat_" + color + "_" + shape, scene);
             var texture = new DynamicTexture("dyn_texture", { width: texture_w, height: texture_h }, scene, true);
             var ctx = texture.getContext();
             ctx.fillStyle = "#202020";

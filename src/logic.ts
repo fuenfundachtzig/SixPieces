@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: logic.ts 3732 2020-12-29 15:31:10Z zwo $
+// $Id: logic.ts 3733 2020-12-29 17:02:53Z zwo $
 //
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
@@ -11,11 +11,13 @@ import { Piece } from "./piece";
 import { Bag } from "./types/Bag";
 import { Player } from "./types/GameState";
 import { identify, PieceMesh } from "./PieceMesh";
+import { GridPropertyGridComponent } from "@babylonjs/inspector/components/actionTabs/tabs/propertyGrids/gui/gridPropertyGridComponent";
 
 
 type GridGame = Grid<PieceMesh>;
 
 export interface GridBound extends GridGame {
+  inited: boolean; // whether sizes are valid
   grid_minx: number; // size of fixed pieces
   grid_miny: number;
   grid_maxx: number;
@@ -25,12 +27,13 @@ export interface GridBound extends GridGame {
 export function emptyGrid(): GridBound {
   let grid: Grid<PieceMesh> = create();
   return {
+    inited: false,
     grid: grid.grid,
     count: grid.count,
-    grid_maxx: 0,
-    grid_maxy: 0,
     grid_minx: 0,
     grid_miny: 0,
+    grid_maxx: 0,
+    grid_maxy: 0,
   }
 }
 
@@ -49,10 +52,29 @@ function isEmpty(g: GridGame, xy: gridPos): boolean {
 }
 
 export function updateGridSize(g: GridBound, xy: gridPos) {
-  g.grid_minx = Math.min(g.grid_minx, xy.x);
-  g.grid_maxx = Math.max(g.grid_maxx, xy.x);
-  g.grid_miny = Math.min(g.grid_miny, xy.y);
-  g.grid_maxy = Math.max(g.grid_maxy, xy.y);
+  console.log("updateGridSize " + g.inited + " "+ g.count  + " " + xy.x + ","+xy.y)
+  if (!g.inited) {
+    for (let x = 0; x < g.grid.length; ++x) {
+      for (let y = 0; y < g.grid.length; ++y) {
+        if (has(g, { x, y })) {
+          if (g.inited)
+            updateGridSize(g, { x, y })
+          else {
+            g.grid_minx = x;
+            g.grid_maxx = x;
+            g.grid_miny = y;
+            g.grid_maxy = y;
+            g.inited = true;
+          }
+        }
+      }
+    }
+  } else {
+    g.grid_minx = Math.min(g.grid_minx, xy.x);
+    g.grid_maxx = Math.max(g.grid_maxx, xy.x);
+    g.grid_miny = Math.min(g.grid_miny, xy.y);
+    g.grid_maxy = Math.max(g.grid_maxy, xy.y);
+  }
 }
 
 export function getGridSize(g: GridBound, margin: number): gridRect {

@@ -3,9 +3,9 @@
 // 
 // (85)
 //
-// $Id: world.ts 3732 2020-12-29 15:31:10Z zwo $
+// $Id: world.ts 3733 2020-12-29 17:02:53Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SpotLight, SubMesh, Vector3, Animation } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SpotLight, SubMesh, Vector3, Animation, BoxBuilder } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, scene, floatingPiece } from "./functions";
 import { gridCube, gridPos, has, set } from "./types/Field";
@@ -25,6 +25,22 @@ export function createWorld(scene: Scene) {
 }
 
 
+function fieldBox(from = Vector3.Zero(), to = Vector3.One()) {
+  // return a box from to
+  let size = to.subtract(from);
+  console.log("size" + size.x +" " +  size.y + " " + size.z)
+  let box = MeshBuilder.CreateBox("fieldMesh", { width: size.x, height: size.y, depth: size.z });
+  let center = from.add(size.scale(0.5));
+  center.y = 0.5;
+  box.position = center;
+  // style
+  box.showBoundingBox = true;
+  box.isPickable = false;
+  box.visibility = 0.01;
+  return box;
+}
+
+
 class World {
 
   private pieces = new Map<number, PieceMesh>(); // pieces for which meshes have been created in scene
@@ -35,6 +51,9 @@ class World {
   private curr_player = 0; // cache of current player
   private light_player: SpotLight; // spotlight showing hand of current player
   private score = 0; // score of current move
+
+  // debug meshes
+  private fieldMesh: Mesh;
 
   constructor(scene: Scene) {
 
@@ -57,6 +76,9 @@ class World {
     // add shadow
     this.shadowGenerator = new ShadowGenerator(1024, light_dir1);
     this.shadowGenerator.useExponentialShadowMap = true;
+
+    // add debug meshes
+    this.fieldMesh = fieldBox();
 
     // add glow (not used (much))
     var glow_layer = new GlowLayer("glow", scene);
@@ -190,6 +212,16 @@ class World {
         set<PieceMesh>(this.grid, p.gridxy, this.pieces.get(p.id));
       }
     }
+
+    // draw field box
+    scene.removeMesh(this.fieldMesh);
+    this.fieldMesh = fieldBox(
+      // this.toGroundCoord({ x: this.grid.grid_minx-0.5, y: this.grid.grid_miny-0.5}),
+      // this.toGroundCoord({ x: this.grid.grid_maxx+0.5, y: this.grid.grid_maxy+0.5})
+      this.toGroundCoord({ x: this.grid.grid_minx-5.5, y: this.grid.grid_miny-5.5}),
+      this.toGroundCoord({ x: this.grid.grid_maxx+5.5, y: this.grid.grid_maxy+5.5})
+      );
+
     console.log(`unpack: added ${added} new pieces in field, grid size = ${this.grid.grid_minx}-${this.grid.grid_maxx}, ${this.grid.grid_miny}-${this.grid.grid_maxy}`);
 
     // update hands
@@ -240,7 +272,7 @@ class World {
     if (!p.isHand)
       unplace(this.grid, p.gridxy);
     // unset glow effect for all pieces
-    this.hands[this.curr_player].forEach(p => {p.glows = false});
+    this.hands[this.curr_player].forEach(p => { p.glows = false });
   }
 
   toGroundCoord(xy: gridPos): Vector3 {
