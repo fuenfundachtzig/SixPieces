@@ -118,13 +118,19 @@ export function createScene() {
         scene.debugLayer.show()
       }
     }
-    if ((kbinfo.type === KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyT')) {
+    if ((kbinfo.type === KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyE')) {
       // end turn
       if (floatingPiece != null)
         // TODO: notify player that piece needs to be set
         return;
-      // if (gameClient.moves.endTurn)
-        gameClient.moves.endTurn();
+      gameClient.moves.endTurn();
+    }
+    if ((kbinfo.type === KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyS')) {
+      // end turn
+      if (floatingPiece != null)
+        // TODO: notify player that piece needs to be set
+        return;
+      gameClient.moves.swap();
     }
   })
 
@@ -174,7 +180,7 @@ export const createArcRotateCamera = () => {
   camera.attachControl(canvas, false)
 
   // Set some basic camera settings
-  camera.minZ = 1 // clip at 1 meter
+  camera.minZ = 1
 
   camera.panningAxis = new Vector3(1, 0, 1) // pan along ground
   camera.panningSensibility = 100 // how fast do you pan, set to 0 if you don't want to allow panning (smaller value = faster)

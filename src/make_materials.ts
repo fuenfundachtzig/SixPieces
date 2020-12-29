@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: make_materials.ts 3731 2020-12-29 13:43:23Z zwo $
+// $Id: make_materials.ts 3732 2020-12-29 15:31:10Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
 
@@ -31,7 +31,7 @@ export enum Shape {
     Circle,
     Star,
     Cross,
-    Diamond,
+    Rhombus,
     Clover
 }
 
@@ -80,7 +80,7 @@ function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
             // 4-fold star
             drawStar(ctx, texture_w * 0.45, 4, 0.38, Math.PI / 4);
             break;
-        case Shape.Diamond:
+        case Shape.Rhombus:
             // rotated square
             ctx.beginPath();
             ctx.translate(texture_w / 2, texture_h / 2);

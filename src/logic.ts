@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: logic.ts 3731 2020-12-29 13:43:23Z zwo $
+// $Id: logic.ts 3732 2020-12-29 15:31:10Z zwo $
 //
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
@@ -16,12 +16,10 @@ import { identify, PieceMesh } from "./PieceMesh";
 type GridGame = Grid<PieceMesh>;
 
 export interface GridBound extends GridGame {
-
     grid_minx: number; // size of fixed pieces
     grid_miny: number;
     grid_maxx: number;
     grid_maxy: number;
-
 }
 
 export function emptyGrid(): GridBound {
@@ -156,9 +154,6 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean {
     return true;
 }
 
-
-
-
 export function getFreeHandSlot(hand: PieceMesh[]): number {
     // find empty slot on hand and return index
     for (let i = 0; i < 6; ++i) {
@@ -176,14 +171,9 @@ export function getFreeHandSlot(hand: PieceMesh[]): number {
 export function fillHand(player: Player, bag: Bag) {
     // fill hand
     while (player.hand.length < 6) {
-        // TODO:  let p = new PieceMesh(scene, this.bag.draw() as Piece);
-        //   if (!p)
-        // break;
-        //   this.shadowGenerator.addShadowCaster(p.mesh); // therefore, we need to be in World...
         let p = bag.pop();
         if (!p)
             break;
-        // p.home_x = getFreeHandSlot(player); // TODO
         player.hand.push(p);
     }
 }

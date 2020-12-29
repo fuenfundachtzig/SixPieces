@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: PieceMesh.ts 3731 2020-12-29 13:43:23Z zwo $
+// $Id: PieceMesh.ts 3732 2020-12-29 15:31:10Z zwo $
 //
 
 import { Scene, Vector3 } from "@babylonjs/core";
@@ -14,7 +14,9 @@ import { piece_size, world, piece_y_stand } from "./world";
 import { gridPos } from "./types/Field";
 import { Piece } from "./piece";
 
-
+// areas where piece cannot be dropped / will return to home
+const InnerRing = 5;
+const OuterRing = 6;
 
 export function identify(p: PieceMesh): string {
   if (p.isHand)
@@ -99,19 +101,20 @@ export class PieceMesh implements Piece {
     // move piece (mesh)
     if (!this.mesh)
       return;
-    if (world.withinField(newPosition, 5)) {
+    if (world.withinField(newPosition, InnerRing)) { // TODO: use actual field size in all directions, TODO global offset that moves ground, lights and homes (but not pieces and camera)
       // is within field: check if can snap to empty field
-      let xy = world.snap(newPosition); // TODO: use TransformNode?
+      let xy = world.snap(newPosition); 
       if (world.isEmpty(xy)) {
         this.gridxy = xy;
         this.mesh.position = world.toGroundCoord(xy);
-        this.mesh.rotation = new Vector3();
+        this.mesh.rotation = Vector3.Zero();
         // console.log("set gridxy " + xy.x + ","+ xy.y)
+        this.isHand = false;
       }
-      this.isHand = false;
-    } else if (world.withinField(newPosition, 8)) {
-      this.mesh.rotation = new Vector3();
+    } else if (world.withinField(newPosition, OuterRing)) {
+      this.mesh.rotation = Vector3.Zero();
       this.mesh.position = newPosition;
+      this.isHand = true;
     } else {
       this.moveHome();
     }

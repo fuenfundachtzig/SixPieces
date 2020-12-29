@@ -3,9 +3,9 @@
 // 
 // (85)
 //
-// $Id: world.ts 3731 2020-12-29 13:43:23Z zwo $
+// $Id: world.ts 3732 2020-12-29 15:31:10Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3 } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SpotLight, SubMesh, Vector3, Animation } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, scene, floatingPiece } from "./functions";
 import { gridCube, gridPos, has, set } from "./types/Field";
@@ -51,7 +51,7 @@ class World {
     light_dir1.intensity = 0.4;
 
     // this.light_player = new DirectionalLight("light_player", new Vector3(50, 2, 50), scene);
-    this.light_player = new SpotLight("light_player", Vector3.Zero(), Vector3.Zero(), Math.PI/4, 20, scene);
+    this.light_player = new SpotLight("light_player", Vector3.Zero(), Vector3.Zero(), Math.PI / 4, 20, scene);
     this.light_player.intensity = 0.5;
 
     // add shadow
@@ -113,54 +113,50 @@ class World {
     console.log("Active player now is " + p);
     this.curr_player = parseInt(p);
     // // move spotlight...
-    // const frameRate = 10;
+    const newpos = new Vector3(Math.cos(this.playerToAngle(this.curr_player)) * 50, 5, Math.sin(this.playerToAngle(this.curr_player)) * 50);
+    const newdir = newpos.scale(-1);
+    const frameRate = 10;
+    const posSlide = new Animation("posSlide", "position", 10, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    const dirSlide = new Animation("dirSlide", "direction", 10, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    posSlide.setKeys([{ frame: 0, value: this.light_player.position }, { frame: frameRate, value: newpos }]);
+    dirSlide.setKeys([{ frame: 0, value: this.light_player.direction }, { frame: frameRate, value: newdir }]);
+    scene.beginDirectAnimation(this.light_player, [posSlide, dirSlide], 0, frameRate, false);
 
-    // const xSlide = new BABYLON.Animation("xSlide", "position.x", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
-    // const keyFrames = []; 
-
-    // keyFrames.push({
-    //     frame: 0,
-    //     value: 2
-    // });
-
-    // keyFrames.push({
-    //     frame: frameRate,
-    //     value: -2
-    // });
-
-    // keyFrames.push({
-    //     frame: 2 * frameRate,
-    //     value: 2
-    // });
-
-    // xSlide.setKeys(keyFrames);
-
-    // box.animations.push(xSlide);
-
-    // scene.beginAnimation(box, 0, 2 * frameRate, true);
-    this.light_player.position = new Vector3(
-      Math.cos(this.playerToAngle(this.curr_player)) * 50,
-      5,
-      Math.sin(this.playerToAngle(this.curr_player)) * 50
-      )
-    this.light_player.direction = this.light_player.position.scale(-1);
+    // this.light_player.position = new Vector3(
+    //   Math.cos(this.playerToAngle(this.curr_player)) * 50,
+    //   5,
+    //   Math.sin(this.playerToAngle(this.curr_player)) * 50
+    //   )
+    // this.light_player.direction = this.light_player.position.scale(-1);
   }
 
   recomputeHandPos() {
     // (re-)compute home position for meshes and show hand
-    let fieldsize = Math.max( // TODO: use getFieldSize
-      this.grid.grid_maxx - this.grid.grid_minx,
-      this.grid.grid_maxy - this.grid.grid_miny
-    )
     for (let player_idx = 0; player_idx < this.hands.length; ++player_idx) {
       let angle1 = this.playerToAngle(player_idx)
+      var fieldsizes: number[] = [];
+      switch (player_idx) {
+        case 0:
+          fieldsizes = [this.grid.grid_maxx, this.grid.grid_maxy];
+          break;
+        case 1:
+          fieldsizes = [this.grid.grid_minx, this.grid.grid_maxy];
+          break;
+        case 2:
+          fieldsizes = [this.grid.grid_minx, this.grid.grid_miny];
+          break;
+        case 3:
+          fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
+          break;
+      }
+      console.log("fieldsize = max(abs(" + fieldsizes[0] + ","+ fieldsizes[1]+"))")
       this.hands[player_idx].forEach(p => {
         console.log(`hand ${player_idx} has ${identify(p)}`)
         let angle2 = angle1 + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
         let angle3 = -angle2 + Math.PI / 2;
-        let x = Math.cos(angle1) * (fieldsize + 28) + 10 * Math.cos(angle2);
-        let y = Math.sin(angle1) * (fieldsize + 28) + 10 * Math.sin(angle2);
+        let x = Math.cos(angle1) * 30 + fieldsizes[0] + 10 * Math.cos(angle2);
+        let y = Math.sin(angle1) * 30 + fieldsizes[1] + 10 * Math.sin(angle2);
         p.homexy = { x: x, y: y };
         if (p.isHand) {
           p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
@@ -216,10 +212,6 @@ class World {
     this.recomputeHandPos();
     console.log(`updateWorld: added ${added} new pieces in hands`);
 
-    // change perspective TODO
-    // const xSlide = new BABYLON.Animation("xSlide", "position.x", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-
-
   }
 
   click(p: PieceMesh) {
@@ -227,7 +219,8 @@ class World {
     if (this.sel_piece) {
       this.sel_piece.unselect();
       // handle unselect
-      if (this.withinField(this.sel_piece.mesh.position)) {
+      // if (this.withinField(this.sel_piece.mesh.position, InnerRing)) {
+      if (!this.sel_piece.isHand) {
         // check
         placePiece(this.grid, this.sel_piece, this.sel_piece.gridxy);
 
@@ -296,6 +289,30 @@ class World {
     return played;
   }
 
+  swap(): PieceMesh[] | false {
+    // returns false if not possible or the collection of pieces to be swapped
+    if (floatingPiece)
+      return false;
+    // which pieces to swap
+    let toreturn = this.hands[this.curr_player].filter(p => p.isHand);
+    // remove meshes for pieces in hand
+    toreturn.forEach(p => {
+      console.log("remove mesh for " + identify(p));
+      scene.removeMesh(p.mesh);
+      this.pieces.delete(p.id);
+    });
+    // disable pieces on field and move to hand
+    let infield = this.hands[this.curr_player].filter(p => !p.isHand);
+    infield.forEach((p) => {
+      console.log("return to hand " + identify(p));
+      p.mesh.isPickable = false;
+      p.isHand = true;
+      p.fix = false;
+      unplace(this.grid, p.gridxy);
+      p.moveHome();
+    });    
+    return toreturn;
+  }
 
 
 }
