@@ -150,7 +150,7 @@ class World {
           fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
           break;
       }
-      console.log("fieldsize = max(abs(" + fieldsizes[0] + ","+ fieldsizes[1]+"))")
+      console.log("fieldsize = max(abs(" + fieldsizes[0] + "," + fieldsizes[1] + "))")
       this.hands[player_idx].forEach(p => {
         console.log(`hand ${player_idx} has ${identify(p)}`)
         let angle2 = angle1 + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
@@ -295,6 +295,9 @@ class World {
       return false;
     // which pieces to swap
     let toreturn = this.hands[this.curr_player].filter(p => p.isHand);
+    if (toreturn.length == 6)
+      // cannot skip move
+      return false;
     // remove meshes for pieces in hand
     toreturn.forEach(p => {
       console.log("remove mesh for " + identify(p));
@@ -310,7 +313,7 @@ class World {
       p.fix = false;
       unplace(this.grid, p.gridxy);
       p.moveHome();
-    });    
+    });
     return toreturn;
   }
 

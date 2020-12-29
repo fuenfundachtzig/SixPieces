@@ -54,12 +54,14 @@ export const GameLogic = {
         player.hand.splice(idx, 1);
         for (let px of player.hand)
           console.log("nacjhher " + px.id)
-      }      
+      }
       shuffleArray(G.bag);
       fillHand(player, G.bag);
       ctx.events!.endTurn!();
     },
+
     endTurn: (G: GameState, ctx: Ctx) => {
+      // check if valid
       console.log("End turn...")
       let res = world.endTurn();
       if (res === false) {
@@ -67,23 +69,50 @@ export const GameLogic = {
         return INVALID_MOVE;
       }
       let played = res as PieceMesh[];
+
       // world.endTurn returns the pieces that have been played -> need to update hand
       let player = G.players[parseInt(ctx.currentPlayer)];
       player.hand = player.hand.filter((p1) => played.find((p2) => p1.id === p2.id ) === undefined);
       fillHand(player, G.bag);
+      if (player.hand.length == 0) {
+        console.log(`6 points for player ${player.id} for ending the game`);
+        player.score += 6;
+      }
+
       // update field
       for (let p of played)
         G.pog.push(p);
       console.log("...ended")
       ctx.events!.endTurn!();
 
-      while (G.bag.length > 15)
+      while (G.bag.length > 1)
         G.bag.pop();
+    }
+  },
+
+  endIf: (G: GameState, ctx: Ctx) => {
+    // check if game is over
+    let ended = false;
+    if (G.bag.length == 0) {
+      for (let p of G.players) {
+        if (p.hand.length == 0) {
+          ended = true;
+          // cannot add score here :/
+          break;
+        }
+      }
+    }
+    if (ended) {
+      // find max. points
+      const maxscore = G.players.reduce((max, player) => (player.score > max ? player.score : max), 0);
+      const winners = G.players.filter((p) => p.score == maxscore);
+      return { winners };
     }
   },
 
   events: {
     endTurn: false
   }
+  
 };
 
