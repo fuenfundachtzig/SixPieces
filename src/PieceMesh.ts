@@ -45,12 +45,12 @@ export class PieceMesh implements Piece {
     // graphics info
     scene: Scene,
     // position
-    public isHand: boolean = true,           // true = is on hand, false = is on field
-    public gridxy: gridPos = { x: 0, y: 0 }, // position on field  / grid
-    public home_x: number = -1,              // index on hand
-    public homexy: gridPos = { x: 0, y: 0 }, // cache: home position computed from home_x, size of field and direction of player
-    public homerot: Vector3 = new Vector3(), // cache: rotation in home position
-    public fix: boolean = false,             // cannot be moved (= !isPickable)
+    public isHand: boolean = true,            // true = is on hand, false = is on field
+    public gridxy: gridPos = { x: 0, y: 0 },  // position on field  / grid
+    public home_x: number = -1,               // index on hand
+    public homexy: gridPos = { x: 0, y: 0 },  // cache: home position computed from home_x, size of field and direction of player
+    public homerot: Vector3 = Vector3.Zero(), // cache: rotation in home position
+    public fix: boolean = false,              // cannot be moved (= !isPickable)
     // flags
     public glows = false,
     private isSelected = false // is selected

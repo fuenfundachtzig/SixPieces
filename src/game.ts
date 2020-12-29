@@ -48,7 +48,7 @@ export const GameLogic = {
       let player = G.players[parseInt(ctx.currentPlayer)];
       for (let p1 of toreturn) {
         G.bag.push(p1);
-        let idx = player.hand.findIndex((p2) => p1.id == p2.id);
+        let idx = player.hand.findIndex((p2) => p1.id === p2.id);
         for (let px of player.hand)
           console.log("vorher " + px.id)
         player.hand.splice(idx, 1);
@@ -72,12 +72,12 @@ export const GameLogic = {
 
       // world.endTurn returns the pieces that have been played -> need to update hand
       let player = G.players[parseInt(ctx.currentPlayer)];
-      player.hand = player.hand.filter((p1) => played.find((p2) => p1.id === p2.id ) === undefined);
+      player.hand = player.hand.filter((p1) => played.find((p2) => p1.id === p2.id) === undefined);
       fillHand(player, G.bag);
 
       // scoring
       player.score += world.getScore();
-      if (player.hand.length == 0) {
+      if (player.hand.length === 0) {
         console.log(`6 points for player ${player.id} for ending the game`);
         player.score += 6;
       }
@@ -96,9 +96,9 @@ export const GameLogic = {
   endIf: (G: GameState, ctx: Ctx) => {
     // check if game is over
     let ended = false;
-    if (G.bag.length == 0) {
+    if (G.bag.length === 0) {
       for (let p of G.players) {
-        if (p.hand.length == 0) {
+        if (p.hand.length === 0) {
           ended = true;
           // cannot add score here :/
           break;
@@ -108,7 +108,7 @@ export const GameLogic = {
     if (ended) {
       // find max. points
       const maxscore = G.players.reduce((max, player) => (player.score > max ? player.score : max), 0);
-      const winners = G.players.filter((p) => p.score == maxscore);
+      const winners = G.players.filter((p) => p.score === maxscore);
       return { winners };
     }
   },

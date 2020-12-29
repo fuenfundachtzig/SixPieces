@@ -5,7 +5,7 @@
 //
 // $Id: world.ts 3734 2020-12-29 18:34:05Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SpotLight, SubMesh, Vector3, Animation, BoxBuilder } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SpotLight, SubMesh, Vector3, Animation, BoxBuilder } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, scene, floatingPiece } from "./functions";
 import { gridCube, gridPos, has, set } from "./types/Field";
@@ -28,7 +28,7 @@ export function createWorld(scene: Scene) {
 function fieldBox(from = Vector3.Zero(), to = Vector3.One()) {
   // return a box from to
   let size = to.subtract(from);
-  console.log("size" + size.x +" " +  size.y + " " + size.z)
+  // console.log("fieldBox: size " + size.x +" " +  size.y + " " + size.z)
   let box = MeshBuilder.CreateBox("fieldMesh", { width: size.x, height: size.y, depth: size.z });
   let center = from.add(size.scale(0.5));
   center.y = 0.5;
@@ -141,29 +141,33 @@ class World {
   recomputeHandPos() {
     // (re-)compute home position for meshes and show hand
     for (let player_idx = 0; player_idx < this.hands.length; ++player_idx) {
-      let angle1 = this.playerToAngle(player_idx)
-      var fieldsizes: number[] = [];
+      let angle1 = this.playerToAngle(player_idx);
+      let fieldsize = this.getFieldSize(5);
+      var refpoint: gridPos;
       switch (player_idx) {
         case 0:
-          fieldsizes = [this.grid.grid_maxx, this.grid.grid_maxy];
+          // fieldsizes = [this.grid.grid_maxx, this.grid.grid_maxy];
+          refpoint = {x: fieldsize.br.x, y: fieldsize.br.z};
           break;
         case 1:
-          fieldsizes = [this.grid.grid_minx, this.grid.grid_maxy];
+          // fieldsizes = [this.grid.grid_minx, this.grid.grid_maxy];
+          refpoint = {x: fieldsize.tl.x, y: fieldsize.br.z};
           break;
         case 2:
-          fieldsizes = [this.grid.grid_minx, this.grid.grid_miny];
+          // fieldsizes = [this.grid.grid_minx, this.grid.grid_miny];
+          refpoint = {x: fieldsize.tl.x, y: fieldsize.tl.z};
           break;
         case 3:
-          fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
+          // fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
+          refpoint = {x: fieldsize.br.x, y: fieldsize.tl.z};
           break;
       }
-      console.log("fieldsize = max(abs(" + fieldsizes[0] + "," + fieldsizes[1] + "))")
       this.hands[player_idx].forEach(p => {
         console.log(`hand ${player_idx} has ${identify(p)}`)
         let angle2 = angle1 + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
         let angle3 = -angle2 + Math.PI / 2;
-        let x = fieldsizes[0] + Math.cos(angle1) * 30 + 10 * Math.cos(angle2);
-        let y = fieldsizes[1] + Math.sin(angle1) * 30 + 10 * Math.sin(angle2);
+        let x = refpoint.x + Math.cos(angle1) * 14 + 10 * Math.cos(angle2);
+        let y = refpoint.y + Math.sin(angle1) * 14 + 10 * Math.sin(angle2);
         p.homexy = { x: x, y: y };
         if (p.isHand) {
           p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
@@ -199,8 +203,6 @@ class World {
     // draw field box
     scene.removeMesh(this.fieldMesh);
     this.fieldMesh = fieldBox(
-      // this.toGroundCoord({ x: this.grid.grid_minx-0.5, y: this.grid.grid_miny-0.5}),
-      // this.toGroundCoord({ x: this.grid.grid_maxx+0.5, y: this.grid.grid_maxy+0.5})
       this.toGroundCoord({ x: this.grid.grid_minx-5.5, y: this.grid.grid_miny-5.5}),
       this.toGroundCoord({ x: this.grid.grid_maxx+5.5, y: this.grid.grid_maxy+5.5})
       );
@@ -319,7 +321,7 @@ class World {
       return false;
     // which pieces to swap
     let toreturn = this.hands[this.curr_player].filter(p => p.isHand);
-    if (toreturn.length == 6)
+    if (toreturn.length == 0)
       // cannot skip move
       return false;
     // remove meshes for pieces in hand

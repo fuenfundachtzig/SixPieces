@@ -34,6 +34,9 @@ function getGroundPosition() {
 }
 
 /*
+let startingPoint: any
+let currentMesh: any
+
 function pointerDown(mesh: any) {
   currentMesh = mesh
   startingPoint = getGroundPosition()
