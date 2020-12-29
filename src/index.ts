@@ -7,11 +7,12 @@
 
 
 import 'pepjs'
-import { gameClient } from './client'
 
 import { createEngine, createScene } from './functions'
 import { makeMaterials } from './make_materials'
 import { createWorld } from './world'
+import { Client } from 'boardgame.io/client';
+import { GameLogic } from './game';
 
 
 // Import stylesheets
@@ -33,7 +34,8 @@ const main = async () => {
 
 }
 
-// start game client
+// construct and start game client and overlay debug panel
+export const gameClient = Client({ game: GameLogic });
 gameClient.subscribe((state) => {
   if (state) {
     world.setCurrPlayer(state.ctx.currentPlayer);

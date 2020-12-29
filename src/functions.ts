@@ -1,7 +1,7 @@
 import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4, Nullable, KeyboardEventTypes } from '@babylonjs/core'
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import '@babylonjs/inspector'
-import { gameClient } from './client'
+import { gameClient } from '.'
 import { PieceMesh } from "./PieceMesh"
 
 export let canvas: HTMLCanvasElement

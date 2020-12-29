@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3733 2020-12-29 17:02:53Z zwo $
+// $Id: world.ts 3734 2020-12-29 18:34:05Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SpotLight, SubMesh, Vector3, Animation, BoxBuilder } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -112,16 +112,6 @@ class World {
     groundMesh.freezeWorldMatrix() // since we are not going to be moving the ground, we freeze it for better performance
     groundMesh.receiveShadows = true;
 
-    // scene.onKeyboardObservable.add((kbinfo) => {
-    //   if ((kbinfo.type == KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyM')) {
-    //     this.hands[curr_player].forEach(p => {
-    //       // if (p.mesh) 
-    //       // p.mesh.visibility = 0.5;
-    //       p.glows = !p.glows;
-    //     });
-    //   }
-    // })
-
     // init grid
     this.grid = emptyGrid()
     this.hands = [];
@@ -134,6 +124,7 @@ class World {
   }
 
   setCurrPlayer(p: string) {
+    // receive update on current player
     console.log("Active player now is " + p);
     this.curr_player = parseInt(p);
     // // move spotlight...
@@ -145,14 +136,6 @@ class World {
     posSlide.setKeys([{ frame: 0, value: this.light_player.position }, { frame: frameRate, value: newpos }]);
     dirSlide.setKeys([{ frame: 0, value: this.light_player.direction }, { frame: frameRate, value: newdir }]);
     scene.beginDirectAnimation(this.light_player, [posSlide, dirSlide], 0, frameRate, false);
-
-
-    // this.light_player.position = new Vector3(
-    //   Math.cos(this.playerToAngle(this.curr_player)) * 50,
-    //   5,
-    //   Math.sin(this.playerToAngle(this.curr_player)) * 50
-    //   )
-    // this.light_player.direction = this.light_player.position.scale(-1);
   }
 
   recomputeHandPos() {
@@ -179,8 +162,8 @@ class World {
         console.log(`hand ${player_idx} has ${identify(p)}`)
         let angle2 = angle1 + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
         let angle3 = -angle2 + Math.PI / 2;
-        let x = Math.cos(angle1) * 30 + fieldsizes[0] + 10 * Math.cos(angle2);
-        let y = Math.sin(angle1) * 30 + fieldsizes[1] + 10 * Math.sin(angle2);
+        let x = fieldsizes[0] + Math.cos(angle1) * 30 + 10 * Math.cos(angle2);
+        let y = fieldsizes[1] + Math.sin(angle1) * 30 + 10 * Math.sin(angle2);
         p.homexy = { x: x, y: y };
         if (p.isHand) {
           p.homerot = new Vector3(-Math.PI / 2, angle3, 0);

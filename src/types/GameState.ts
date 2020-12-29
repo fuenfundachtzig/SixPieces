@@ -8,8 +8,8 @@
 // $Id: GameState.ts 3731 2020-12-29 13:43:23Z zwo $
 
 import { gridPos } from "./Field";
-import { Piece } from "../piece";
 import { Bag } from "./Bag";
+import { Piece } from "../PieceMesh";
 
 export interface Player {
     id: string;

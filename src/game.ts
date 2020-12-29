@@ -9,7 +9,7 @@ import { world } from './world';
 
 
 
-const numberOfPlayers = 2;
+const numberOfPlayers = 4;
 
 export const GameLogic = {
 

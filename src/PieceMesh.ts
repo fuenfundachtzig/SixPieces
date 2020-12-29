@@ -1,5 +1,5 @@
 //
-// Class to describe a piece in the scene with an associated mesh.
+// Class to describe a piece in the game.
 //
 // (85)
 //
@@ -12,7 +12,6 @@ import { colors, materials, Shape } from "./make_materials";
 import { createSuperEllipsoid } from './superello';
 import { piece_size, world, piece_y_stand } from "./world";
 import { gridPos } from "./types/Field";
-import { Piece } from "./piece";
 
 // areas where piece cannot be dropped / will return to home
 const InnerRing = 5;
@@ -25,6 +24,13 @@ export function identify(p: PieceMesh): string {
     return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on (${p.gridxy.x}, ${p.gridxy.y})`;
 }
 
+export interface Piece {
+  // a basic piece that can be serialized
+  id: number; // unique ID
+  // type
+  color: number;
+  shape: number;
+}
 
 export class PieceMesh implements Piece {
   // a piece in the scene with an associated mesh

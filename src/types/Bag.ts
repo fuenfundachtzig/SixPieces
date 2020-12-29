@@ -7,7 +7,7 @@
 //
 
 import { shuffleArray } from "../functions";
-import { Piece } from "../piece";
+import { Piece } from "../PieceMesh";
 
 export type Bag = Array<Piece>;
 

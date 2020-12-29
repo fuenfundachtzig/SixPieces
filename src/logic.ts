@@ -3,16 +3,13 @@
 //
 // (85)
 //
-// $Id: logic.ts 3733 2020-12-29 17:02:53Z zwo $
+// $Id: logic.ts 3734 2020-12-29 18:34:05Z zwo $
 //
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
-import { Piece } from "./piece";
 import { Bag } from "./types/Bag";
 import { Player } from "./types/GameState";
-import { identify, PieceMesh } from "./PieceMesh";
-import { GridPropertyGridComponent } from "@babylonjs/inspector/components/actionTabs/tabs/propertyGrids/gui/gridPropertyGridComponent";
-
+import { identify, Piece, PieceMesh } from "./PieceMesh";
 
 type GridGame = Grid<PieceMesh>;
 
@@ -52,6 +49,7 @@ function isEmpty(g: GridGame, xy: gridPos): boolean {
 }
 
 export function updateGridSize(g: GridBound, xy: gridPos) {
+  // updates the cached grid size with a xy position (note: there is no way to undo this)
   console.log("updateGridSize " + g.inited + " "+ g.count  + " " + xy.x + ","+xy.y)
   if (!g.inited) {
     for (let x = 0; x < g.grid.length; ++x) {
