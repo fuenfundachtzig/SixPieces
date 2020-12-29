@@ -25,11 +25,11 @@ export function createBag() {
                     id: ++count_id,
                     color: i,
                     shape: j,
-                    isHand: true,
-                    gridxy: { x: 0, y: 0 },
-                    home_x: -1,
-                    homexy: { x: 0, y: 0 },
-                    fix   : false,
+                    // isHand: true,
+                    // gridxy: { x: 0, y: 0 },
+                    // home_x: -1,
+                    // homexy: { x: 0, y: 0 },
+                    // fix   : false,
                 };
                 bag.push(p);
             }

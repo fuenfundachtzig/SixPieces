@@ -74,6 +74,9 @@ export const GameLogic = {
       let player = G.players[parseInt(ctx.currentPlayer)];
       player.hand = player.hand.filter((p1) => played.find((p2) => p1.id === p2.id ) === undefined);
       fillHand(player, G.bag);
+
+      // scoring
+      player.score += world.getScore();
       if (player.hand.length == 0) {
         console.log(`6 points for player ${player.id} for ending the game`);
         player.score += 6;

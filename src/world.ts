@@ -27,14 +27,14 @@ export function createWorld(scene: Scene) {
 
 class World {
 
-  private pieces = new Map<number, PieceMesh>();
-  private sel_piece: Nullable<PieceMesh> = null;
+  private pieces = new Map<number, PieceMesh>(); // pieces for which meshes have been created in scene
+  private sel_piece: Nullable<PieceMesh> = null; // currently selected piece (by player, for moving)
   private shadowGenerator: ShadowGenerator;
-  private grid: GridBound;
-  // private grid: Grid<PieceMesh>;
-  private hands: Array<Array<PieceMesh>>;
-  private curr_player = 0;
-  private light_player: SpotLight;
+  private grid: GridBound; // cache of grid
+  private hands: Array<Array<PieceMesh>>; // cache of hands
+  private curr_player = 0; // cache of current player
+  private light_player: SpotLight; // spotlight showing hand of current player
+  private score = 0; // score of current move
 
   constructor(scene: Scene) {
 
@@ -61,12 +61,14 @@ class World {
     // add glow (not used (much))
     var glow_layer = new GlowLayer("glow", scene);
     glow_layer.customEmissiveColorSelector = (function () {
-      var x = 0;
+      var x = 20;
+      var dx = 1;
       return function (mesh: Mesh, _subMesh: SubMesh, _material: Material, result: Color4) {
         if (mesh.metadata && mesh.metadata.glows) {
-          if (++x === 100)
-            x = 0;
-          result.set(0.2, 0.5, 0.2, x / 100);
+          x += dx;
+          if ((x === 20) || (x === 80))
+            dx = -dx;
+          result.set(0.5, 0.2, 0.2, x / 100);
         } else {
           result.set(0, 0, 0, 0);
         }
@@ -223,7 +225,6 @@ class World {
       if (!this.sel_piece.isHand) {
         // check
         placePiece(this.grid, this.sel_piece, this.sel_piece.gridxy);
-
       } else {
         this.sel_piece.moveHome();
       }
@@ -238,6 +239,8 @@ class World {
     p.select();
     if (!p.isHand)
       unplace(this.grid, p.gridxy);
+    // unset glow effect for all pieces
+    this.hands[this.curr_player].forEach(p => {p.glows = false});
   }
 
   toGroundCoord(xy: gridPos): Vector3 {
@@ -272,8 +275,10 @@ class World {
     if (floatingPiece)
       return false;
     let played = this.hands[this.curr_player].filter(p => !p.isHand);
-    if (!isValidMove(this.grid, played))
+    let score = isValidMove(this.grid, played);
+    if (score === false)
       return false;
+    this.score = score as number;
     // move is valid => move pieces from hands array to field
     played.forEach((p) => {
       p.isHand = false;
@@ -287,6 +292,10 @@ class World {
       p.mesh.isPickable = false;
     });
     return played;
+  }
+
+  getScore(): number {
+    return this.score;
   }
 
   swap(): PieceMesh[] | false {
