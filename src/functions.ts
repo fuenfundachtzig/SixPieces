@@ -1,7 +1,8 @@
 import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4, Nullable, KeyboardEventTypes } from '@babylonjs/core'
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import '@babylonjs/inspector'
-import { PieceMesh } from "./piece"
+import { gameClient } from './client'
+import { PieceMesh } from "./PieceMesh"
 import { world } from './world'
 
 export let canvas: HTMLCanvasElement
@@ -126,7 +127,8 @@ export function createScene() {
       if (currentPiece != null)
         // TODO: notify player that piece needs to be set
         return;
-      world.endTurn();
+      if (gameClient.events.endGame)
+        gameClient.events.endGame();
     }
   })
 
@@ -167,8 +169,8 @@ export function createScene() {
 }
 
 export const createArcRotateCamera = () => {
-  const startAlpha  = 225 / 180 * Math.PI
-  const startBeta   = 60 / 180 * Math.PI
+  const startAlpha = 225 / 180 * Math.PI
+  const startBeta = 60 / 180 * Math.PI
   const startRadius = 20
   const startPosition = new Vector3(-20, 8, -20)
 
