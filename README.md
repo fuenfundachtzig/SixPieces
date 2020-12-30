@@ -18,3 +18,11 @@ Note that npm7 takes offense with some dependencies. npm6 doesn't.
 npm install --save esm
 npm run serve
 ```
+
+# Useful links
+* https://github.com/TypeStrong/ts-loader
+* https://webpack.js.org/guides/getting-started/
+* https://webpack.js.org/guides/typescript/
+* https://github.com/RaananW/babylonjs-webpack-es6/
+* https://boardgame.io/documentation/#/multiplayer
+* https://doc.babylonjs.com/guidedLearning/createAGame/gettingSetUp
