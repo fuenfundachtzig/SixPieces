@@ -29,7 +29,7 @@ export function translate(xy: gridPos, dx: number = 0, dy: number = 0): gridPos 
   return { x: xy.x + dx, y: xy.y + dy };
 }
 
-const maxsize = 100;
+const maxsize = 128;
 
 export const neighbors = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 

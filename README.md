@@ -1,6 +1,6 @@
 # SixPieces
 
-SixPieces is based on [`babylon.js`](https://www.babylonjs.com/) and uses [this starter package](https://github.com/leon/starter-babylonjs) for the basic config.
+SixPieces is based on [`babylon.js`](https://www.babylonjs.com/) and is intended to at some point use [`boardgame.io`](https://boardgame.io/) for multiplayer mode.
 
 # Getting started
 Installation requires `npm`, the Node.js package manager. To run do

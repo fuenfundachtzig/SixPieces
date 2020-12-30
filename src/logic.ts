@@ -52,6 +52,12 @@ export function updateGridSize(g: GridBound, xy: gridPos) {
   // updates the cached grid size with a xy position (note: there is no way to undo this)
   console.log("updateGridSize " + g.inited + " "+ g.count  + " " + xy.x + ","+xy.y)
   if (!g.inited) {
+    /*
+    // we could try to iterate over all pieces in grid as done below 
+    // but the coordinates in the 2-D array are mapped to positive values whereas the grid size we want actually is defined also for negative values 
+    // as we actually need the negative values instead of the wrapped values for the graphics, 
+    //   we'll just rely on updateGridSize to be called for all pieces (as is done: in endTurn for our player's pieces and in unpack for other players' pieces)
+    // which makes it simpler here
     for (let x = 0; x < g.grid.length; ++x) {
       for (let y = 0; y < g.grid.length; ++y) {
         if (has(g, { x, y })) {
@@ -67,7 +73,12 @@ export function updateGridSize(g: GridBound, xy: gridPos) {
         }
       }
     }
-  } else {
+    */
+   g.grid_minx = xy.x;
+   g.grid_maxx = xy.x;
+   g.grid_miny = xy.y;
+   g.grid_maxy = xy.y;
+} else {
     g.grid_minx = Math.min(g.grid_minx, xy.x);
     g.grid_maxx = Math.max(g.grid_maxx, xy.x);
     g.grid_miny = Math.min(g.grid_miny, xy.y);

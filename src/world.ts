@@ -27,7 +27,7 @@ export function createWorld(scene: Scene) {
 
 
 function fieldBox(from = Vector3.Zero(), to = Vector3.One()) {
-  // return a box from to
+  // return a box from to (instead of center and scale / size as babalon.js uses)
   let size = to.subtract(from);
   // console.log("fieldBox: size " + size.x +" " +  size.y + " " + size.z)
   let box = MeshBuilder.CreateBox("fieldMesh", { width: size.x, height: size.y, depth: size.z });
