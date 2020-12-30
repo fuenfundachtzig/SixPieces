@@ -57,11 +57,11 @@ export const GameDefinition = {
       for (let p1 of toreturn) {
         G.bag.push(p1);
         let idx = player.hand.findIndex((p2) => p1.id === p2.id);
-        for (let px of player.hand)
-          console.log("vorher " + px.id)
+        // for (let px of player.hand)
+        //   console.log("before remove " + px.id)
         player.hand.splice(idx, 1);
-        for (let px of player.hand)
-          console.log("nacjhher " + px.id)
+        // for (let px of player.hand)
+        //   console.log("after remove " + px.id)
       }
       shuffleArray(G.bag);
       fillHand(player, G.bag);

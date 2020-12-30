@@ -1,5 +1,5 @@
 //
-// Implement logic for moves on grid.
+// Implement logic for (valid) moves on grid.
 //
 // (85)
 //
@@ -85,8 +85,10 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean | number 
   // check if move valid
 
   // no piece played
-  if (played.length === 0)
+  if (played.length === 0) {
+    console.log("Illegal move: have to play at least one piece (by placing it correctly in the field).")
     return false;
+  }
 
   // check all new pieces are in one row or column... ergo need to get x, y arrays back
   let xyarray: gridPos[] = played.map(p => p.gridxy);

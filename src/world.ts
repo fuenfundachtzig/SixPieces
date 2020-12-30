@@ -207,7 +207,7 @@ class World {
       this.toGroundCoord({ x: this.grid.grid_maxx+5.5, y: this.grid.grid_maxy+5.5})
       );
 
-    console.log(`unpack: added ${added} new pieces in field, grid size = ${this.grid.grid_minx}-${this.grid.grid_maxx}, ${this.grid.grid_miny}-${this.grid.grid_maxy}`);
+    console.log(`unpack: added meshes for ${added} new pieces in field, grid size = ${this.grid.grid_minx}-${this.grid.grid_maxx}, ${this.grid.grid_miny}-${this.grid.grid_maxy}`);
 
     // update hands
     added = 0;
@@ -229,7 +229,7 @@ class World {
       }
     }
     this.recomputeHandPos();
-    console.log(`updateWorld: added ${added} new pieces in hands`);
+    console.log(`updateWorld: added meshes for ${added} new pieces in hands`);
 
   }
 
@@ -320,25 +320,23 @@ class World {
     if (floatingPiece)
       return false;
     // which pieces to swap
-    let toreturn = this.hands[this.curr_player].filter(p => p.isHand);
-    if (toreturn.length == 0)
+    let toreturn = this.hands[this.curr_player].filter(p => !p.isHand);
+    if (toreturn.length == 0) {
       // cannot skip move
+      console.log("Illegal move: have to swap at least one piece (by placing it anywhere in the field).")
       return false;
-    // remove meshes for pieces in hand
+    }
+    // remove meshes for pieces on field (i.e. to be returned to bag)
     toreturn.forEach(p => {
       console.log("remove mesh for " + identify(p));
       scene.removeMesh(p.mesh);
       this.pieces.delete(p.id);
-    });
-    // disable pieces on field and move to hand
-    let infield = this.hands[this.curr_player].filter(p => !p.isHand);
-    infield.forEach((p) => {
-      console.log("return to hand " + identify(p));
-      p.mesh.isPickable = false;
-      p.isHand = true;
-      p.fix = false;
       unplace(this.grid, p.gridxy);
-      p.moveHome();
+    });
+    // disable pieces on hand
+    let onhand = this.hands[this.curr_player].filter(p => p.isHand);
+    onhand.forEach((p) => {
+      p.mesh.isPickable = false;
     });
     return toreturn;
   }
