@@ -3,15 +3,16 @@
 //
 // (85)
 //
-// $Id: PieceMesh.ts 3738 2020-12-29 22:09:00Z zwo $
+// $Id: PieceMesh.ts 3742 2020-12-30 11:56:18Z zwo $
 //
 
-import { Scene, Vector3 } from "@babylonjs/core";
+import { Scene, StandardMaterial, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { colors, materials, Shape } from "./make_materials";
 import { createSuperEllipsoid } from './superello';
 import { piece_size, world, piece_y_stand } from "./world";
 import { gridPos } from "./types/Field";
+import { Color3LineComponent } from "@babylonjs/inspector/components/actionTabs/lines/color3LineComponent";
 
 // areas where piece cannot be dropped / will return to home
 const InnerRing = 5;
@@ -35,10 +36,11 @@ export interface Piece {
 export class PieceMesh implements Piece {
   // a piece in the scene with an associated mesh
 
-  public mesh : Mesh;
-  public id   : number;
+  public mesh: Mesh;
+  public id: number;
   public color: number;
   public shape: number;
+  private unveil: boolean = false; // show shape and color
 
   constructor(
     p: Piece,
@@ -56,17 +58,17 @@ export class PieceMesh implements Piece {
     private isSelected = false // is selected
   ) {
 
-    this.id    = p.id;
+    this.id = p.id;
     this.color = p.color;
     this.shape = p.shape;
 
     // init mesh
     this.mesh = createSuperEllipsoid(8, 0.2, 0.2, piece_size / 2, 0.3, piece_size / 2, scene);
-    this.mesh.material = materials[this.shape][this.color];
     this.mesh.ellipsoid = new Vector3(0.99, 100, 0.99);
     this.mesh.metadata = this;
     this.mesh.isPickable = false;
     this.mesh.isVisible = false;
+    this.setUnveil(false);
     // this.mesh.checkCollisions = true; -- manual now
   }
 
@@ -109,7 +111,7 @@ export class PieceMesh implements Piece {
       return;
     if (world.withinField(newPosition, InnerRing)) { // TODO global offset that moves ground, lights and homes (but not pieces and camera)
       // is within field: check if can snap to empty field
-      let xy = world.snap(newPosition); 
+      let xy = world.snap(newPosition);
       if (world.isEmpty(xy)) {
         this.gridxy = xy;
         this.mesh.position = world.toGroundCoord(xy);
@@ -124,6 +126,14 @@ export class PieceMesh implements Piece {
     } else {
       this.moveHome();
     }
+  }
+
+  setUnveil(unveil: boolean) {
+    if (unveil)
+      this.mesh.material = materials[this.shape][this.color];
+    else
+      this.mesh.material = materials[Shape.Hidden][0];
+    this.unveil = unveil;
   }
 
 }

@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3738 2020-12-29 22:09:00Z zwo $
+// $Id: index.ts 3742 2020-12-30 11:56:18Z zwo $
 
 // import 'pepjs'
 
@@ -21,6 +21,7 @@ import { GameDefinition } from './game';
 // configuration
 const numberOfPlayers = 4;
 export const debug = true; // NOTE: press ctrl+shift+X for debugging webGL objects
+export const hideopp = true; // hide other players' pieces on hand (not for debugging)
 export const limitBag = 18; // less pieces in bag (for debugging)
 export const ngeneration = 3; // how often each piece exists, normally 3
 

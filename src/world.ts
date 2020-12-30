@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3741 2020-12-30 10:17:07Z zwo $
+// $Id: world.ts 3742 2020-12-30 11:56:18Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -12,6 +12,7 @@ import { gridCube, gridPos, has, set } from "./types/Field";
 import { identify, PieceMesh } from "./PieceMesh";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
 import { GameState } from "./types/GameState";
+import { hideopp } from ".";
 
 // y positions of pieces
 export const piece_y_stand = 1;
@@ -138,7 +139,7 @@ class World {
     scene.beginDirectAnimation(this.light_player, [posSlide, dirSlide], 0, frameRate, false);
   }
 
-  recomputeHandPos() {
+  updateHandMeshes() {
     // (re-)compute home position for meshes and show hand
     for (let player_idx = 0; player_idx < this.hands.length; ++player_idx) {
       let angle1 = this.playerToAngle(player_idx);
@@ -147,23 +148,27 @@ class World {
       switch (player_idx) {
         case 0:
           // fieldsizes = [this.grid.grid_maxx, this.grid.grid_maxy];
-          refpoint = {x: fieldsize.br.x, y: fieldsize.br.z};
+          refpoint = { x: fieldsize.br.x, y: fieldsize.br.z };
           break;
         case 1:
           // fieldsizes = [this.grid.grid_minx, this.grid.grid_maxy];
-          refpoint = {x: fieldsize.tl.x, y: fieldsize.br.z};
+          refpoint = { x: fieldsize.tl.x, y: fieldsize.br.z };
           break;
         case 2:
           // fieldsizes = [this.grid.grid_minx, this.grid.grid_miny];
-          refpoint = {x: fieldsize.tl.x, y: fieldsize.tl.z};
+          refpoint = { x: fieldsize.tl.x, y: fieldsize.tl.z };
           break;
         case 3:
           // fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
-          refpoint = {x: fieldsize.br.x, y: fieldsize.tl.z};
+          refpoint = { x: fieldsize.br.x, y: fieldsize.tl.z };
           break;
       }
       this.hands[player_idx].forEach(p => {
-        console.log(`hand ${player_idx} has ${identify(p)}`)
+        let isMine = this.curr_player === player_idx;
+        if (isMine || !hideopp)
+          console.log(`hand ${player_idx} has ${identify(p)}`)
+        else
+          console.log(`hand ${player_idx} has a piece on ${p.home_x}`)
         let angle2 = angle1 + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
         let angle3 = -angle2 + Math.PI / 2;
         let x = refpoint.x + Math.cos(angle1) * 14 + 10 * Math.cos(angle2);
@@ -174,10 +179,10 @@ class World {
           p.moveHome();
         }
         // make visible and clickable
-        let canmove = this.curr_player === player_idx;
-        p.fix = !canmove;
+        p.setUnveil(isMine || !hideopp);
+        p.fix = !isMine;
         p.mesh.isVisible = true;
-        p.mesh.isPickable = canmove;
+        p.mesh.isPickable = isMine;
       });
     };
   }
@@ -203,9 +208,9 @@ class World {
     // draw field box
     scene.removeMesh(this.fieldMesh);
     this.fieldMesh = fieldBox(
-      this.toGroundCoord({ x: this.grid.grid_minx-5.5, y: this.grid.grid_miny-5.5}),
-      this.toGroundCoord({ x: this.grid.grid_maxx+5.5, y: this.grid.grid_maxy+5.5})
-      );
+      this.toGroundCoord({ x: this.grid.grid_minx - 5.5, y: this.grid.grid_miny - 5.5 }),
+      this.toGroundCoord({ x: this.grid.grid_maxx + 5.5, y: this.grid.grid_maxy + 5.5 })
+    );
 
     console.log(`unpack: added meshes for ${added} new pieces in field, grid size = ${this.grid.grid_minx}-${this.grid.grid_maxx}, ${this.grid.grid_miny}-${this.grid.grid_maxy}`);
 
@@ -228,7 +233,7 @@ class World {
         }
       }
     }
-    this.recomputeHandPos();
+    this.updateHandMeshes();
     console.log(`updateWorld: added meshes for ${added} new pieces in hands`);
 
   }

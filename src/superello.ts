@@ -8,7 +8,7 @@
 //
 // (85)
 // 
-// $Id: superello.ts 3724 2020-12-28 10:46:07Z zwo $
+// $Id: superello.ts 3741 2020-12-30 10:17:07Z zwo $
 
 import { Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";

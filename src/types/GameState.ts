@@ -5,7 +5,7 @@
 //
 // (85)
 // 
-// $Id: GameState.ts 3731 2020-12-29 13:43:23Z zwo $
+// $Id: GameState.ts 3742 2020-12-30 11:56:18Z zwo $
 
 import { gridPos } from "./Field";
 import { Bag } from "./Bag";
@@ -23,10 +23,8 @@ export interface PieceOnGrid extends Piece {
 }
 
 export interface GameState {
-
     players: Player[];
     bag: Bag;
     pog: PieceOnGrid[];
-
 }
 

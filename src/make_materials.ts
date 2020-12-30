@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: make_materials.ts 3734 2020-12-29 18:34:05Z zwo $
+// $Id: make_materials.ts 3742 2020-12-30 11:56:18Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
 
@@ -32,7 +32,8 @@ export enum Shape {
     Star,
     Cross,
     Rhombus,
-    Clover
+    Clover,
+    Hidden
 }
 
 // https://github.com/tranvansang/enum-for
@@ -102,6 +103,9 @@ function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
                 ctx.arc(-texture_w / 4.8, 0, texture_w * 0.14, Math.PI * open, Math.PI * (2 - open))
             }
             ctx.closePath();
+            break;
+        case Shape.Hidden:
+            // for pieces that player should not see
             break;
     }
     ctx.fill();

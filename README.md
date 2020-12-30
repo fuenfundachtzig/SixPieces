@@ -21,6 +21,7 @@ npm run serve
 ```
 
 # TODO
+* add "?" on pieces on hand of opponents (instead of leaving blank)
 * add display for scores
 * add remote server for multiplayer
   * disentangle dependencies so that server.ts compiles
@@ -29,3 +30,4 @@ npm run serve
   * add lobby
 * remove / replace react
 * add levitating arrow pointing at current player
+* add effect for 6-in-a-row bonus
