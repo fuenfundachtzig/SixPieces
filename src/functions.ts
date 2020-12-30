@@ -157,11 +157,18 @@ export function createScene() {
     switch (pointerInfo.type) {
       case PointerEventTypes.POINTERPICK:
         if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh && pointerInfo.pickInfo.pickedMesh.metadata) {
+          // click on piece to select (or place)
           let p = pointerInfo.pickInfo.pickedMesh.metadata as PieceMesh;
           if (p.click())
             floatingPiece = p;
           else
             floatingPiece = null;
+        } else {
+          // when clicking on empty space, drop piece
+          if (floatingPiece) {
+            if (!floatingPiece.click()) // do this by virtually clicking on piece so that world can handle it
+              floatingPiece = null;
+          }
         }
         break
       case PointerEventTypes.POINTERMOVE:
