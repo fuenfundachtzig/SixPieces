@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: logic.ts 3734 2020-12-29 18:34:05Z zwo $
+// $Id: logic.ts 3735 2020-12-29 19:46:20Z zwo $
 //
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
@@ -44,9 +44,9 @@ export function unplace(g: GridGame, xy: gridPos) {
   remove(g, xy);
 }
 
-function isEmpty(g: GridGame, xy: gridPos): boolean {
-  return !has(g, xy);
-}
+// function isEmpty(g: GridGame, xy: gridPos): boolean {
+//   return !has(g, xy);
+// }
 
 export function updateGridSize(g: GridBound, xy: gridPos) {
   // updates the cached grid size with a xy position (note: there is no way to undo this)

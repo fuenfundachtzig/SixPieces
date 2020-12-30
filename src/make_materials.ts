@@ -38,6 +38,7 @@ export enum Shape {
 // https://github.com/tranvansang/enum-for
 var getAllEnumKeys = (enumType: any) => Object.keys(enumType).filter(key => isNaN(Number(key)));
 var getAllEnumValues = (enumType: any) => getAllEnumKeys(enumType).map(key => enumType[key]);
+// var getAllEnumEntries = (enumType: any) => getAllEnumKeys(enumType).map(key => [key, enumType[key]]);
 
 const texture_w = 256;
 const texture_h = 256;

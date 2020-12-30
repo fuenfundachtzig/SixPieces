@@ -9,14 +9,12 @@
 import 'pepjs'
 
 import { Client } from 'boardgame.io/client';
-import { Local } from 'boardgame.io/multiplayer'
+// import { Local } from 'boardgame.io/multiplayer'
 
 import { createEngine, createScene } from './functions'
 import { makeMaterials } from './make_materials'
 import { createWorld } from './world'
 import { GameDefinition } from './game';
-
-
 
 // Import stylesheets
 // import './index.css';
@@ -44,7 +42,7 @@ const main = async () => {
 export const gameClient = Client({ 
   game: GameDefinition,
   numPlayers: numberOfPlayers,
-  multiplayer: Local(),
+  // multiplayer: Local(),
   debug
 });
 gameClient.subscribe((state) => {

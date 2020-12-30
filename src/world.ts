@@ -3,9 +3,9 @@
 // 
 // (85)
 //
-// $Id: world.ts 3738 2020-12-29 22:09:00Z zwo $
+// $Id: world.ts 3741 2020-12-30 10:17:07Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SpotLight, SubMesh, Vector3, Animation, BoxBuilder } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, scene, floatingPiece } from "./functions";
 import { gridCube, gridPos, has, set } from "./types/Field";
