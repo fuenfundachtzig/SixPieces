@@ -13,8 +13,19 @@ Both take some time.
 
 Note that npm7 takes offense with some dependencies. npm6 doesn't.
 
-# Setting up a server (not yet working)
+# Setting up a server 
+(not yet implemented)
 ```
 npm install --save esm
 npm run serve
 ```
+
+# TODO
+* add display for scores
+* add remote server for multiplayer
+  * disentangle dependencies so that server.ts compiles
+  * allow using standalone server without gui
+  * add option to rename players
+  * add lobby
+* remove / replace react
+* add levitating arrow pointing at current player
