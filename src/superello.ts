@@ -118,13 +118,13 @@ export function createSuperEllipsoid(samples: number, exp1: any, exp2: any, scal
             let phi  = Math.PI/ni*i - Math.PI / 2;  // i runs from "bottom" to "top" (polar coordinate)
             let beta = 2*Math.PI*j/nj;              // j runs "around" (azimuthal coordinate) 
             vertices.push(sampleSuperEllipsoid(phi, beta, exp1, exp2, scalex, scaley, scalez))
-            normals .push(calculateNormal     (phi, beta, exp1, exp2, scalex, scaley, scalez));
+            normals.push (calculateNormal     (phi, beta, exp1, exp2, scalex, scaley, scalez));
         }
     }
     vertices.push(sampleSuperEllipsoid(-Math.PI/2, 0, exp1, exp2, scalex, scaley, scalez)); // bottom vertex: (ni-1)*nj
     vertices.push(sampleSuperEllipsoid( Math.PI/2, 0, exp1, exp2, scalex, scaley, scalez)); // top vertex:    (ni-1)*nj+1
-    normals .push(calculateNormal     (-Math.PI/2, 0, exp1, exp2, scalex, scaley, scalez));
-    normals .push(calculateNormal     ( Math.PI/2, 0, exp1, exp2, scalex, scaley, scalez));
+    normals.push (calculateNormal     (-Math.PI/2, 0, exp1, exp2, scalex, scaley, scalez));
+    normals.push (calculateNormal     ( Math.PI/2, 0, exp1, exp2, scalex, scaley, scalez));
 
     function getV(i: number, j: number) {
         // look up index in array of vertices

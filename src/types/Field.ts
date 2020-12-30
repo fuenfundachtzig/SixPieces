@@ -91,7 +91,7 @@ export function has<T>(g: Grid<T>, xy: gridPos): boolean {
 }
 
 export function empty<T>(g: Grid<T>): boolean {
-  return (g.count == 0);
+  return g.count === 0;
 }
 
 export function getN<T>(g: Grid<T>): number {

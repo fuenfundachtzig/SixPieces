@@ -5,25 +5,19 @@
 //
 // $Id: world.ts 3731 2020-12-29 13:43:23Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, KeyboardEventTypes, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, ShapeBuilder, SpotLight, SubMesh, Vector3 } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { createPBRSkybox, createArcRotateCamera, shuffleArray, scene, floatingPiece } from "./functions";
-import { create, Grid, gridCube, gridPos, gridRect, has, iterate, neighbors, set, translate } from "./types/Field";
-import { Piece } from "./piece";
+import { createPBRSkybox, createArcRotateCamera, scene, floatingPiece } from "./functions";
+import { gridCube, gridPos, has, set } from "./types/Field";
 import { identify, PieceMesh } from "./PieceMesh";
-import { gameClient } from "./client";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
 import { GameState } from "./types/GameState";
-import { pid } from "process";
 
 // y positions of pieces
-const piece_y_lie = 0.31;
+// const piece_y_lie = 0.31;
 export const piece_y_stand = 1;
 export const piece_size = 2.0;
 export let world: World;
-
-// temporary test
-const n_players = 4;
 
 export function createWorld(scene: Scene) {
   world = new World(scene);
@@ -70,7 +64,7 @@ class World {
       var x = 0;
       return function (mesh: Mesh, _subMesh: SubMesh, _material: Material, result: Color4) {
         if (mesh.metadata && mesh.metadata.glows) {
-          if (++x == 100)
+          if (++x === 100)
             x = 0;
           result.set(0.2, 0.5, 0.2, x / 100);
         } else {
@@ -173,7 +167,7 @@ class World {
           p.moveHome();
         }
         // make visible and clickable
-        let canmove = this.curr_player == player_idx;
+        let canmove = this.curr_player === player_idx;
         p.fix = !canmove;
         p.mesh.isVisible = true;
         p.mesh.isPickable = canmove;
@@ -240,7 +234,7 @@ class World {
       } else {
         this.sel_piece.moveHome();
       }
-      if (this.sel_piece == p) {
+      if (this.sel_piece === p) {
         // clicked on selected piece -> don't select again
         this.sel_piece = null;
         return;

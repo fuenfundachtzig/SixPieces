@@ -3,7 +3,6 @@ import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import '@babylonjs/inspector'
 import { gameClient } from './client'
 import { PieceMesh } from "./PieceMesh"
-import { world } from './world'
 
 export let canvas: HTMLCanvasElement
 export let engine: Engine
@@ -22,8 +21,6 @@ export const createEngine = (hostCanvas: HTMLCanvasElement) => {
 }
 
 
-let startingPoint: any
-let currentMesh: any
 export let floatingPiece: Nullable<PieceMesh> = null
 
 // functions for picking and moving objects: https://playground.babylonjs.com/#7CBW04

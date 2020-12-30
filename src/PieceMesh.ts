@@ -41,7 +41,7 @@ export class PieceMesh implements Piece {
     public gridxy: gridPos = { x: 0, y: 0 }, // position on field  / grid
     public home_x: number = -1,              // index on hand
     public homexy: gridPos = { x: 0, y: 0 }, // cache: home position computed from home_x, size of field and direction of player
-    public homerot: Vector3 = new Vector3,   // cache: rotation in home position
+    public homerot: Vector3 = new Vector3(), // cache: rotation in home position
     public fix: boolean = false,             // cannot be moved (= !isPickable)
     // flags
     public glows = false,

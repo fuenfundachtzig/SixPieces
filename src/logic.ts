@@ -46,10 +46,6 @@ export function unplace(g: GridGame, xy: gridPos) {
     remove(g, xy);
 }
 
-function isEmpty(g: GridGame, xy: gridPos): boolean {
-    return !has(g, xy);
-}
-
 export function updateGridSize(g: GridBound, xy: gridPos) {
     g.grid_minx = Math.min(g.grid_minx, xy.x);
     g.grid_maxx = Math.max(g.grid_maxx, xy.x);
@@ -67,7 +63,7 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean {
     // check if move valid
 
     // no piece played
-    if (played.length == 0)
+    if (played.length === 0)
         return false;
 
     // check all new pieces are in one row or column... ergo need to get x, y arrays back
@@ -78,7 +74,7 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean {
     let maxx = Math.max(...xarray);
     let miny = Math.min(...yarray);
     let maxy = Math.max(...yarray);
-    if ((minx != maxx) && (miny != maxy)) {
+    if ((minx !== maxx) && (miny !== maxy)) {
         console.log(`diagonal ${minx} ${maxx} ${miny} ${maxy}`);
         return false;
     }
@@ -119,7 +115,7 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean {
     function mismatch(p1: Piece | undefined, p2: Piece | undefined) {
         if ((p1 === undefined) || (p2 === undefined))
             return false;
-        return (p1.shape != p2.shape) == (p1.color != p2.color);
+        return (p1.shape !== p2.shape) === (p1.color !== p2.color);
     }
     for (var p of played) {
         for (var disp of neighbors) {
@@ -167,10 +163,10 @@ export function getFreeHandSlot(hand: PieceMesh[]): number {
     // find empty slot on hand and return index
     for (let i = 0; i < 6; ++i) {
         for (var idx = 0; idx < hand.length; ++idx) {
-            if (hand[idx].home_x == i)
+            if (hand[idx].home_x === i)
                 break;
         }
-        if (idx == hand.length)
+        if (idx === hand.length)
             return i;
     }
     console.log("getFreeHandSlot: couldn't find free slot??")
