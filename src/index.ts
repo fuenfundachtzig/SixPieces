@@ -1,12 +1,11 @@
 // 
-// Main
-// 
-// (85)
+// Main entry point.
+//
+ // (85)
 //
 // $Id: index.ts 3738 2020-12-29 22:09:00Z zwo $
 
-
-import 'pepjs'
+// import 'pepjs'
 
 import { Client } from 'boardgame.io/client';
 // import { Local } from 'boardgame.io/multiplayer'
@@ -19,9 +18,13 @@ import { GameDefinition } from './game';
 // Import stylesheets
 // import './index.css';
 
+// configuration
 const numberOfPlayers = 4;
-const debug = true;
+export const debug = true; // NOTE: press ctrl+shift+X for debugging webGL objects
+export const limitBag = 18; // less pieces in bag (for debugging)
+export const ngeneration = 3; // how often each piece exists, normally 3
 
+// setup objects
 const canvas: HTMLCanvasElement = document.getElementById('root') as HTMLCanvasElement
 const engine = createEngine(canvas)
 const scene = createScene()

@@ -3,15 +3,15 @@
 //
 // (85)
 //
-// $Id: Bag.ts 3733 2020-12-29 17:02:53Z zwo $
+// $Id: Bag.ts 3735 2020-12-29 19:46:20Z zwo $
 //
 
+import { ngeneration } from "..";
 import { shuffleArray } from "../functions";
 import { Piece } from "../PieceMesh";
 
 export type Bag = Array<Piece>;
 
-const ngeneration = 1; // how often each piece exists, normally 3
 let count_id = 0;      // ID counter for creating pieces
 
 export function createBag() {

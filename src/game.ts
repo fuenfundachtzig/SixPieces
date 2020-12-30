@@ -8,6 +8,7 @@
 
 import { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
+import { limitBag } from '.';
 import { shuffleArray } from './functions';
 import { fillHand } from './logic';
 import { PieceMesh } from './PieceMesh';
@@ -33,6 +34,8 @@ export const GameDefinition = {
       fillHand(player, bag);
       players.push(player);
     }
+    while (bag.length > limitBag)
+      bag.pop();
     return {
       players,
       bag,
@@ -93,8 +96,6 @@ export const GameDefinition = {
       console.log("...ended")
       ctx.events!.endTurn!();
 
-      while (G.bag.length > 1)
-        G.bag.pop();
     }
   },
 

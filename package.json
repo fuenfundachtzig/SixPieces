@@ -6,15 +6,13 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "tsc-do-not-use": "tsc src/server.ts"
+    "test": "react-scripts test"
   },
   "dependencies": {
     "@babylonjs/core": "^4.1.0",
     "@babylonjs/inspector": "^4.1.0",
     "@babylonjs/loaders": "^4.1.0",
     "boardgame.io": "^0.42.2",
-    "esm": "^3.2.25",
     "pepjs": "^0.5.2"
   },
   "devDependencies": {
