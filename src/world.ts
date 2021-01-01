@@ -9,10 +9,10 @@ import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, scene, floatingPiece } from "./functions";
 import { gridCube, gridPos, has, set } from "./types/Field";
-import { identify, PieceMesh } from "./PieceMesh";
+import { PieceMesh } from "./PieceMesh";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
-import { GameState } from "./types/GameState";
-import { hideopp } from ".";
+import { GameState, identify2, PieceInGame } from "./types/GameState";
+import { gameClient, hideopp } from ".";
 
 // y positions of pieces
 export const piece_y_stand = 1;
@@ -51,10 +51,7 @@ class World {
   private hands: Array<Array<PieceMesh>>; // cache of hands
   private curr_player = 0; // cache of current player
   private light_player: SpotLight; // spotlight showing hand of current player
-  private score = 0; // score of current move
-
-  // debug meshes
-  private fieldMesh: Mesh;
+  private fieldMesh: Mesh; // used to indicate field size
 
   constructor(scene: Scene) {
 
@@ -87,7 +84,7 @@ class World {
       var x = 20;
       var dx = 1;
       return function (mesh: Mesh, _subMesh: SubMesh, _material: Material, result: Color4) {
-        if (mesh.metadata && mesh.metadata.glows) {
+        if (mesh.metadata && (mesh.metadata as PieceInGame).invalid) {
           x += dx;
           if ((x === 20) || (x === 80))
             dx = -dx;
@@ -166,7 +163,7 @@ class World {
       this.hands[player_idx].forEach(p => {
         let isMine = this.curr_player === player_idx;
         if (isMine || !hideopp)
-          console.log(`hand ${player_idx} has ${identify(p)}`)
+          console.log(`hand ${player_idx} has ${identify2(p)}`)
         else
           console.log(`hand ${player_idx} has a piece on ${p.home_x}`)
         let angle2 = angle1 + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
@@ -180,7 +177,6 @@ class World {
         }
         // make visible and clickable
         p.setUnveil(isMine || !hideopp);
-        p.fix = !isMine;
         p.mesh.isVisible = true;
         p.mesh.isPickable = isMine;
       });
@@ -201,7 +197,7 @@ class World {
         ++added;
         updateGridSize(this.grid, p.gridxy)
       } else {
-        set<PieceMesh>(this.grid, p.gridxy, this.pieces.get(p.id));
+        set(this.grid, p.gridxy, this.pieces.get(p.id));
       }
     }
 
@@ -262,7 +258,7 @@ class World {
     if (!p.isHand)
       unplace(this.grid, p.gridxy);
     // unset glow effect for all pieces
-    this.hands[this.curr_player].forEach(p => { p.glows = false });
+    this.hands[this.curr_player].forEach(p => { p.invalid = false });
   }
 
   toGroundCoord(xy: gridPos): Vector3 {
@@ -292,35 +288,31 @@ class World {
     return !has(this.grid, xy);
   }
 
-  endTurn(): PieceMesh[] | false {
+  placeCommand() {
     // check if move is valid
     if (floatingPiece)
-      return false;
+      return;
     let played = this.hands[this.curr_player].filter(p => !p.isHand);
     let score = isValidMove(this.grid, played);
     if (score === false)
       return false;
-    this.score = score as number;
-    // move is valid => move pieces from hands array to field
-    played.forEach((p) => {
-      p.isHand = false;
-      p.mesh.isPickable = false;
-      p.fix = true;
-      updateGridSize(this.grid, p.gridxy);
-    });
-    this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
-    // disable hand
+
+    // move is valid => disable pieces on hand
     this.hands[this.curr_player].forEach(p => {
       p.mesh.isPickable = false;
     });
-    return played;
+    // move meshes from hands array to field and update field size
+    played.forEach((p) => {
+      p.isHand = false;
+      p.mesh.isPickable = false;
+      updateGridSize(this.grid, p.gridxy);
+    });
+    this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
+    // end turn
+    gameClient.moves.place(played);
   }
 
-  getScore(): number {
-    return this.score;
-  }
-
-  swap(): PieceMesh[] | false {
+  swapCommand() {
     // returns false if not possible or the collection of pieces to be swapped
     if (floatingPiece)
       return false;
@@ -328,22 +320,24 @@ class World {
     let toreturn = this.hands[this.curr_player].filter(p => !p.isHand);
     if (toreturn.length == 0) {
       // cannot skip move
-      console.log("Illegal move: have to swap at least one piece (by placing it anywhere in the field).")
+      console.log("Illegal move in world.swap: have to swap at least one piece (by placing it anywhere in the field).")
       return false;
     }
+    
+    // move is valid => disable pieces on hand
+    this.hands[this.curr_player].forEach(p => {
+      p.mesh.isPickable = false;
+    });
     // remove meshes for pieces on field (i.e. to be returned to bag)
     toreturn.forEach(p => {
-      console.log("remove mesh for " + identify(p));
+      console.log("remove mesh for " + identify2(p));
       scene.removeMesh(p.mesh);
       this.pieces.delete(p.id);
       unplace(this.grid, p.gridxy);
     });
-    // disable pieces on hand
-    let onhand = this.hands[this.curr_player].filter(p => p.isHand);
-    onhand.forEach((p) => {
-      p.mesh.isPickable = false;
-    });
-    return toreturn;
+    this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
+    // end turn
+    gameClient.moves.swap(toreturn);
   }
 
 

@@ -8,10 +8,9 @@
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
 import { Bag } from "./types/Bag";
-import { Player } from "./types/GameState";
-import { identify, Piece, PieceMesh } from "./PieceMesh";
+import { identify1, identify2, Piece, PieceInGame, Player } from "./types/GameState";
 
-type GridGame = Grid<PieceMesh>;
+type GridGame = Grid<PieceInGame>;
 
 export interface GridBound extends GridGame {
   inited: boolean; // whether sizes are valid
@@ -22,7 +21,7 @@ export interface GridBound extends GridGame {
 }
 
 export function emptyGrid(): GridBound {
-  let grid: Grid<PieceMesh> = create();
+  let grid: Grid<PieceInGame> = create();
   return {
     inited: false,
     grid: grid.grid,
@@ -34,8 +33,8 @@ export function emptyGrid(): GridBound {
   }
 }
 
-export function placePiece(g: GridGame, p: PieceMesh, xy: gridPos) {
-  console.log("place " + identify(p) + " on " + xy.x + "," + xy.y)
+export function placePiece(g: GridGame, p: Piece, xy: gridPos) {
+  console.log("place " + identify1(p) + " on " + xy.x + "," + xy.y)
   set(g, xy, p);
 }
 
@@ -74,6 +73,7 @@ export function updateGridSize(g: GridBound, xy: gridPos) {
       }
     }
     */
+   g.inited = true;
    g.grid_minx = xy.x;
    g.grid_maxx = xy.x;
    g.grid_miny = xy.y;
@@ -92,7 +92,7 @@ export function getGridSize(g: GridBound, margin: number): gridRect {
   return { tl: tl, br: br }
 }
 
-export function isValidMove(g: GridGame, played: PieceMesh[]): boolean | number {
+export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | number {
   // check if move valid
 
   // no piece played
@@ -111,7 +111,7 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean | number 
   let maxy = Math.max(...yarray);
   if ((minx != maxx) && (miny != maxy)) {
     console.log(`diagonal ${minx} ${maxx} ${miny} ${maxy}`);
-    played.forEach(p => { p.glows = true });
+    played.forEach(p => { p.invalid = true });
     return false;
   }
 
@@ -120,8 +120,8 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean | number 
     let old = false;
     for (let p of played) {
       if (!neighbors.some(disp => has(g, translate(p.gridxy, ...disp)))) {
-        console.log("disconnected " + identify(p));
-        p.glows = true;
+        console.log("disconnected " + identify2(p));
+        p.invalid = true;
         return false;
       }
       for (let disp of neighbors) {
@@ -134,7 +134,7 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean | number 
     }
     if ((getN(g) > played.length) && !old) {
       console.log("disconnected from prev.");
-      played.forEach(p => { p.glows = true });
+      played.forEach(p => { p.invalid = true });
       return false;
     }
   }
@@ -148,8 +148,8 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean | number 
   for (var p of played) {
     for (var disp of neighbors) {
       if (mismatch(p, get(g, translate(p.gridxy, ...disp)))) {
-        console.log("does not match " + identify(p) + " " + identify(get(g, translate(p.gridxy, ...disp))!));
-        p.glows = true;
+        console.log("does not match " + identify2(p) + " " + identify1(get(g, translate(p.gridxy, ...disp))!));
+        p.invalid = true;
         return false;
       }
     }
@@ -178,10 +178,10 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean | number 
       let ucolors = new Set(colors); // same rule here
       if (((ushapes.size < shapes.length) && (ushapes.size > 1)) ||
         ((ucolors.size < colors.length) && (ucolors.size > 1))) {
-        console.log(`invalid ${isrow ? "row" : "column"} for ${identify(piece)}`);
+        console.log(`invalid ${isrow ? "row" : "column"} for ${identify2(piece)}`);
         console.log("shapes " + shapes);
         console.log("colors " + colors);
-        piece.glows = true;
+        piece.invalid = true;
         return false;
       }
       // piece is in valid row / column => get points!
@@ -210,7 +210,7 @@ export function isValidMove(g: GridGame, played: PieceMesh[]): boolean | number 
   return score;
 }
 
-export function getFreeHandSlot(hand: PieceMesh[]): number {
+export function getFreeHandSlot(hand: PieceInGame[]): number {
   // find empty slot on hand and return index
   for (let i = 0; i < 6; ++i) {
     for (var idx = 0; idx < hand.length; ++idx) {

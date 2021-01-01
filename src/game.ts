@@ -10,10 +10,11 @@ import { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { limitBag } from '.';
 import { shuffleArray } from './functions';
-import { fillHand } from './logic';
+import { emptyGrid, fillHand, isValidMove } from './logic';
 import { PieceMesh } from './PieceMesh';
 import { createBag } from './types/Bag';
-import { GameState, PieceOnGrid, Player } from './types/GameState';
+import { set } from './types/Field';
+import { GameState, PieceInGame, Player } from './types/GameState';
 import { world } from './world';
 
 
@@ -22,7 +23,7 @@ export const GameDefinition = {
   setup: (ctx: Ctx) => {
     // create contents of gamestate G
     let bag = createBag();
-    let pog: PieceOnGrid[] = [];
+    let pog: PieceInGame[] = [];
     const players: Player[] = [];
     for (let p = 0; p < ctx.numPlayers; p++) {
       let player = {
@@ -44,15 +45,21 @@ export const GameDefinition = {
   },
 
   moves: {
-    swap: (G: GameState, ctx: Ctx) => {
-      // first best idea I came up with to select pieces to swap: place everything not to swap on field
-      console.log("Swap...")
-      let res = world.swap();
-      if (res === false) {
-        console.log("...invalid")
+    swap: (G: GameState, ctx: Ctx, toreturn: PieceMesh[]) => {
+      // to select pieces to swap: place everything to swap on field
+
+      console.log("moves.swap...")
+      if (!toreturn) {
+        console.log("...illegal: got an empty toreturn array :/")
         return INVALID_MOVE;
       }
-      let toreturn = res as PieceMesh[];
+
+      if (toreturn.length == 0) {
+        // cannot skip move
+        console.log("...illegal: have to swap at least one piece (by placing it anywhere in the field).")
+        return INVALID_MOVE;
+      }
+      
       let player = G.players[parseInt(ctx.currentPlayer)];
       for (let p1 of toreturn) {
         G.bag.push(p1);
@@ -68,31 +75,48 @@ export const GameDefinition = {
       ctx.events!.endTurn!();
     },
 
-    endTurn: (G: GameState, ctx: Ctx) => {
+    place: (G: GameState, ctx: Ctx, played: PieceInGame[]) => {
+
+      console.log("moves.place...")
+      if (!played) {
+        console.log("...illegal: got an empty played array :/")
+        return INVALID_MOVE;
+      }
+
+      // reproduce grid for checking -- TODO: could also keep grid as part of G (in addition to pog)
+      let grid = emptyGrid();
+      for (let p of G.pog) {
+        set(grid, p.gridxy, p);
+      }
+      for (let p of played) {
+        set(grid, p.gridxy, p);
+      }
+
       // check if valid
-      console.log("End turn...")
-      let res = world.endTurn();
-      if (res === false) {
+      let score = isValidMove(grid, played);
+      if (score === false) {
         console.log("...invalid")
         return INVALID_MOVE;
       }
-      let played = res as PieceMesh[];
 
       // world.endTurn returns the pieces that have been played -> need to update hand
       let player = G.players[parseInt(ctx.currentPlayer)];
       player.hand = player.hand.filter((p1) => played.find((p2) => p1.id === p2.id) === undefined);
       fillHand(player, G.bag);
+      console.log(`filled hand: ${JSON.stringify(G.players[parseInt(ctx.currentPlayer)].hand)})`);
 
       // scoring
-      player.score += world.getScore();
+      player.score += score as number;
       if (player.hand.length === 0) {
         console.log(`6 points for player ${player.id} for ending the game`);
         player.score += 6;
       }
 
       // update field
-      for (let p of played)
+      for (let p of played) {
+        p.fix = true;
         G.pog.push(p);
+      }
       console.log("...ended")
       ctx.events!.endTurn!();
 
@@ -122,6 +146,6 @@ export const GameDefinition = {
   events: {
     endTurn: false
   }
-  
+
 };
 

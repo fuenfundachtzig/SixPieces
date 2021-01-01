@@ -3,6 +3,7 @@ import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import '@babylonjs/inspector'
 import { gameClient } from '.'
 import { PieceMesh } from "./PieceMesh"
+import { world } from './world'
 
 export let canvas: HTMLCanvasElement
 export let engine: Engine
@@ -126,14 +127,14 @@ export function createScene() {
       if (floatingPiece != null)
         // TODO: notify player that piece needs to be set
         return;
-      gameClient.moves.endTurn();
+      world.placeCommand();
     }
     if ((kbinfo.type === KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyS')) {
       // end turn
       if (floatingPiece != null)
         // TODO: notify player that piece needs to be set
         return;
-      gameClient.moves.swap();
+      world.swapCommand();
     }
   })
 

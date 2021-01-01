@@ -8,7 +8,7 @@
 
 import { ngeneration } from "..";
 import { shuffleArray } from "../functions";
-import { Piece } from "../PieceMesh";
+import { Piece } from "./GameState";
 
 export type Bag = Array<Piece>;
 

@@ -9,6 +9,11 @@
 
 import { Client } from 'boardgame.io/client';
 // import { Local } from 'boardgame.io/multiplayer'
+// import { SocketIO } from 'boardgame.io/multiplayer'
+
+// for headless mode:
+// var engine = new BABYLON.NullEngine();
+// var scene = new BABYLON.Scene(engine);
 
 import { createEngine, createScene } from './functions'
 import { makeMaterials } from './make_materials'
@@ -19,9 +24,9 @@ import { GameDefinition } from './game';
 // import './index.css';
 
 // configuration
-const numberOfPlayers = 4;
+const numberOfPlayers = 2;
 export const debug = true; // NOTE: press ctrl+shift+X for debugging webGL objects
-export const hideopp = true; // hide other players' pieces on hand (not for debugging)
+export const hideopp = !true; // hide other players' pieces on hand (not for debugging)
 export const limitBag = 18; // less pieces in bag (for debugging)
 export const ngeneration = 3; // how often each piece exists, normally 3
 
@@ -47,6 +52,8 @@ export const gameClient = Client({
   game: GameDefinition,
   numPlayers: numberOfPlayers,
   // multiplayer: Local(),
+  // multiplayer: SocketIO({ server: 'localhost:8000'}),
+  // playerID: "0",
   debug
 });
 gameClient.subscribe((state) => {

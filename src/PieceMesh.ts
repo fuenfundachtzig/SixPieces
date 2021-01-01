@@ -6,34 +6,20 @@
 // $Id: PieceMesh.ts 3742 2020-12-30 11:56:18Z zwo $
 //
 
-import { Scene, StandardMaterial, Vector3 } from "@babylonjs/core";
+import { Scene, Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { colors, materials, Shape } from "./make_materials";
+import { materials, Shape } from "./make_materials";
 import { createSuperEllipsoid } from './superello';
 import { piece_size, world, piece_y_stand } from "./world";
 import { gridPos } from "./types/Field";
-import { Color3LineComponent } from "@babylonjs/inspector/components/actionTabs/lines/color3LineComponent";
+import { Piece, PieceInGame } from "./types/GameState";
 
 // areas where piece cannot be dropped / will return to home
 const InnerRing = 5;
 const OuterRing = 6;
 
-export function identify(p: PieceMesh): string {
-  if (p.isHand)
-    return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on ${p.home_x}`;
-  else
-    return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on (${p.gridxy.x}, ${p.gridxy.y})`;
-}
 
-export interface Piece {
-  // a basic piece that can be serialized
-  id: number; // unique ID
-  // type
-  color: number;
-  shape: number;
-}
-
-export class PieceMesh implements Piece {
+export class PieceMesh implements PieceInGame {
   // a piece in the scene with an associated mesh
 
   public mesh: Mesh;
@@ -41,20 +27,21 @@ export class PieceMesh implements Piece {
   public color: number;
   public shape: number;
   private unveil: boolean = false; // show shape and color
+  public invalid: boolean = false;
 
   constructor(
     p: Piece,
     // graphics info
     scene: Scene,
     // position
-    public isHand: boolean = true,            // true = is on hand, false = is on field
-    public gridxy: gridPos = { x: 0, y: 0 },  // position on field  / grid
-    public home_x: number = -1,               // index on hand
+    public isHand: boolean = true,
+    public gridxy: gridPos = { x: 0, y: 0 },
+    public home_x: number = -1,
+    public fix: boolean = false,
+    // graphics-related stuff
     public homexy: gridPos = { x: 0, y: 0 },  // cache: home position computed from home_x, size of field and direction of player
     public homerot: Vector3 = Vector3.Zero(), // cache: rotation in home position
-    public fix: boolean = false,              // cannot be moved (= !isPickable)
     // flags
-    public glows = false,
     private isSelected = false // is selected
   ) {
 

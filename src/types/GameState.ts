@@ -9,7 +9,8 @@
 
 import { gridPos } from "./Field";
 import { Bag } from "./Bag";
-import { Piece } from "../PieceMesh";
+import { GridBound } from "../logic";
+import { colors, Shape } from "../make_materials";
 
 export interface Player {
     id: string;
@@ -18,13 +19,45 @@ export interface Player {
     hand: Piece[];
 }
 
-export interface PieceOnGrid extends Piece {
-    gridxy: gridPos;
+export interface Piece {
+    // a basic piece that can be serialized
+    id: number; // unique ID
+    // type
+    color: number;
+    shape: number;
+}
+
+export interface PieceInGame extends Piece {
+    gridxy: gridPos;    // position on field  / grid
+    isHand: boolean;    // true = is on hand, false = is on field
+    home_x: number;     // slot on hand         
+    invalid: boolean;   // if placement invalid (evaluated by isValid)
+    fix: boolean;       // cannot be moved (= !isPickable)
+}
+
+
+// well, overloading apparently does not work in TypeScript
+// export function identify(p: Piece): string;
+// export function identify(p: PieceInGame): string;
+// export function identify(p: Piece | PieceInGame): string {
+// if (typeof p == "Piece") {
+// return "";
+// } else {
+// }
+export function identify1(p: Piece): string {
+    return `${p.id} (${colors[p.color]} ${Shape[p.shape]})`;
+}
+
+export function identify2(p: PieceInGame): string {
+    if (p.isHand)
+        return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on ${p.home_x}`;
+    else
+        return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on (${p.gridxy.x}, ${p.gridxy.y})`;
 }
 
 export interface GameState {
     players: Player[];
     bag: Bag;
-    pog: PieceOnGrid[];
+    pog: PieceInGame[];
 }
 

@@ -31,3 +31,7 @@ npm run serve
 * remove / replace react
 * add levitating arrow pointing at current player
 * add effect for 6-in-a-row bonus
+
+# Notes
+* 2-D grid needed for isValidMove and isEmpty
+* 1-D list of pieces needed for updating meshes
