@@ -15,13 +15,10 @@ Note that npm7 takes offense with some dependencies. npm6 doesn't.
 
 # Setting up a server 
 (not yet implemented)
-```
-npm install --save esm
-npm run serve
-```
 
 # TODO
 * add "?" on pieces on hand of opponents (instead of leaving blank)
+* select pieces from hand by pressing 1..6
 * add display for scores
 * add remote server for multiplayer
   * disentangle dependencies so that server.ts compiles

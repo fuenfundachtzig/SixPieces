@@ -12,7 +12,7 @@ import { gridCube, gridPos, has, set } from "./types/Field";
 import { PieceMesh } from "./PieceMesh";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
 import { GameState, identify2, PieceInGame } from "./types/GameState";
-import { gameClient, hideopp } from ".";
+import { debug, gameClient, hideopp } from ".";
 
 // y positions of pieces
 export const piece_y_stand = 1;

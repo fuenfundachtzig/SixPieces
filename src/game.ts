@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: game.ts 3744 2021-01-01 18:01:23Z zwo $
+// $Id: game.ts 3746 2021-01-01 20:01:29Z zwo $
 //
 
 import { Ctx } from 'boardgame.io';
@@ -127,6 +127,7 @@ export const GameDefinition = {
     if (G.bag.length === 0) {
       for (let p of G.players) {
         if (p.hand.length === 0) {
+          console.log("Game ended!");
           ended = true;
           // cannot add score here :/
           break;
