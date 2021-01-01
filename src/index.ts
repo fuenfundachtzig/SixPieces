@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3746 2021-01-01 20:01:29Z zwo $
+// $Id: index.ts 3748 2021-01-01 21:27:23Z zwo $
 
 // import 'pepjs'
 
@@ -19,19 +19,16 @@ import { createEngine, createScene } from './functions'
 import { makeMaterials } from './make_materials'
 import { createWorld } from './world'
 import { GameDefinition } from './game';
-import { PieceInGame } from './types/GameState';
 import { _ClientImpl } from 'boardgame.io/dist/types/src/client/client';
-import { Game } from 'boardgame.io';
 
 // Import stylesheets
 // import './index.css';
 
-// configuration
-const numberOfPlayers = 2;
+const numberOfPlayers = 4;
 export const debug = false; // NOTE: press ctrl+shift+X for debugging webGL objects
 export var playerID: string; // this player's ID
+export var matchID: string = "default"; // match ID on server
 export const hideopp = true; // hide other players' pieces on hand (not for debugging)
-export const limitBag = 18; // less pieces in bag (for debugging)
 export const ngeneration = 3; // how often each piece exists, normally 3
 
 // setup objects
@@ -50,7 +47,7 @@ function SetupScreen(div: HTMLDivElement) {
       div.append(button);
     };
     div.innerHTML = `<p>Play as</p>`;
-    const playerIDs = ['0', '1'];
+    const playerIDs = ['0', '1', "2", "3"];
     playerIDs.forEach(createButton);
   });
 }
@@ -70,14 +67,17 @@ class GameClient {
   private client: _ClientImpl;
   public moves: any;
 
-  constructor(public playerID: string
+  constructor(
+    public playerID: string,
+    public server_url: string,
   ) {
     this.client = Client({
       game: GameDefinition,
       numPlayers: numberOfPlayers,
       // multiplayer: Local(),
-      multiplayer: SocketIO({ server: 'localhost:8000' }),
+      multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
       playerID,
+      matchID,
       debug
     });
 
@@ -111,7 +111,8 @@ SetupScreen(divElement).then((playerID: any) => {
   console.log("Playing as " + playerID);
 
   // construct and start game client and overlay debug panel
-  gameClient = new GameClient(playerID);
+  let server_url = document.getElementById("server_url")!.getAttribute("content") as string;
+  gameClient = new GameClient(playerID, server_url);
 
   // start the GUI
   main();

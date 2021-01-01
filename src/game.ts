@@ -3,12 +3,11 @@
 //
 // (85)
 //
-// $Id: game.ts 3746 2021-01-01 20:01:29Z zwo $
+// $Id: game.ts 3748 2021-01-01 21:27:23Z zwo $
 //
 
 import { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { limitBag } from '.';
 import { shuffleArray } from './functions';
 import { emptyGrid, fillHand, isValidMove } from './logic';
 import { createBag } from './types/Bag';
@@ -33,8 +32,6 @@ export const GameDefinition = {
       fillHand(player, bag);
       players.push(player);
     }
-    while (bag.length > limitBag)
-      bag.pop();
     return {
       players,
       bag,

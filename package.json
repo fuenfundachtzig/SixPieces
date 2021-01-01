@@ -1,8 +1,9 @@
 {
   "name": "SixPieces",
-  "version": "0.2.0",
-  "main": "src/server.ts",
+  "version": "0.3.0",
+  "main": "src/index.ts",
   "private": true,
+  "homepage": "/SixPieces",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

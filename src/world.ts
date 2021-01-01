@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3746 2021-01-01 20:01:29Z zwo $
+// $Id: world.ts 3748 2021-01-01 21:27:23Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
