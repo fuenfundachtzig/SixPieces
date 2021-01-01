@@ -1,7 +1,6 @@
 import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4, Nullable, KeyboardEventTypes } from '@babylonjs/core'
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
-import '@babylonjs/inspector'
-import { gameClient } from '.'
+import '@babylonjs/inspector' // for ctrl+alt+X
 import { PieceMesh } from "./PieceMesh"
 import { world } from './world'
 

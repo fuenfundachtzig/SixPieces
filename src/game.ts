@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: game.ts 3742 2020-12-30 11:56:18Z zwo $
+// $Id: game.ts 3744 2021-01-01 18:01:23Z zwo $
 //
 
 import { Ctx } from 'boardgame.io';
@@ -11,11 +11,9 @@ import { INVALID_MOVE } from 'boardgame.io/core';
 import { limitBag } from '.';
 import { shuffleArray } from './functions';
 import { emptyGrid, fillHand, isValidMove } from './logic';
-import { PieceMesh } from './PieceMesh';
 import { createBag } from './types/Bag';
 import { set } from './types/Field';
 import { GameState, PieceInGame, Player } from './types/GameState';
-import { world } from './world';
 
 
 export const GameDefinition = {
@@ -45,12 +43,12 @@ export const GameDefinition = {
   },
 
   moves: {
-    swap: (G: GameState, ctx: Ctx, toreturn: PieceMesh[]) => {
+    swap: (G: GameState, ctx: Ctx, toreturn: PieceInGame[]) => {
       // to select pieces to swap: place everything to swap on field
 
       console.log("moves.swap...")
       if (!toreturn) {
-        console.log("...illegal: got an empty toreturn array :/")
+        console.log("...illegal: got no toreturn array :/")
         return INVALID_MOVE;
       }
 
@@ -79,7 +77,7 @@ export const GameDefinition = {
 
       console.log("moves.place...")
       if (!played) {
-        console.log("...illegal: got an empty played array :/")
+        console.log("...illegal: got no  played array :/")
         return INVALID_MOVE;
       }
 
@@ -117,8 +115,8 @@ export const GameDefinition = {
         p.fix = true;
         G.pog.push(p);
       }
-      console.log("...ended")
-      ctx.events!.endTurn!();
+     console.log("...ended")
+     ctx.events!.endTurn!();
 
     }
   },

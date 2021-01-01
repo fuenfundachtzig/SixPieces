@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3742 2020-12-30 11:56:18Z zwo $
+// $Id: world.ts 3744 2021-01-01 18:01:23Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -25,6 +25,17 @@ export function createWorld(scene: Scene) {
   return world;
 }
 
+function downgrade(arr: PieceMesh[]): PieceInGame[] {
+  // don't know why
+  let res: PieceInGame[] = [];
+  for (let p of arr) {
+    // NOTE: this will blow up -- need to make a copy to avoid "uncaught error undefined too much recursion"
+    // let x: PieceInGame = {...p}; 
+    // arr.push(x);
+    res.push({gridxy: p.gridxy, isHand: p.isHand, home_x: p.home_x, invalid: p.invalid, fix: p.fix, id: p.id, color: p.color, shape: p.shape});
+  }
+  return res;
+}
 
 function fieldBox(from = Vector3.Zero(), to = Vector3.One()) {
   // return a box from to (instead of center and scale / size as babalon.js uses)
@@ -191,7 +202,11 @@ class World {
       if (!this.pieces.has(p.id)) {
         // create new mesh
         let pm = new PieceMesh(p, scene); //, isHand: false, gridxy: p.pos, home_x: -1, fix: true, homexy: {x: 0, y: 0} );
+        Object.assign(pm, p);
+        pm.setUnveil(true);
         pm.mesh.isVisible = true;
+        pm.setGrid(pm.gridxy);
+        // console.log("add mesh for " + identify2(pm));
         set(this.grid, p.gridxy, pm)
         this.pieces.set(p.id, pm);
         ++added;
@@ -221,6 +236,7 @@ class World {
           // create new mesh
           let home_x = getFreeHandSlot(this.hands[pidx])
           let pm = new PieceMesh(p, scene, true, undefined, home_x); //{...p, isHand: true, gridxy: {x: 0, y: 0}, home_x: i, fix: false, homexy: {x: 0, y: 0} });
+          Object.assign(pm, p);
           this.pieces.set(p.id, pm);
           ++added;
           this.hands[pidx].push(pm);
@@ -303,13 +319,16 @@ class World {
     });
     // move meshes from hands array to field and update field size
     played.forEach((p) => {
+      p.fix = true;
       p.isHand = false;
       p.mesh.isPickable = false;
       updateGridSize(this.grid, p.gridxy);
     });
     this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
     // end turn
-    gameClient.moves.place(played);
+    gameClient.moves.place(downgrade(played));
+
+    console.log("placeCommand ended")
   }
 
   swapCommand() {
@@ -323,7 +342,7 @@ class World {
       console.log("Illegal move in world.swap: have to swap at least one piece (by placing it anywhere in the field).")
       return false;
     }
-    
+
     // move is valid => disable pieces on hand
     this.hands[this.curr_player].forEach(p => {
       p.mesh.isPickable = false;
@@ -337,7 +356,7 @@ class World {
     });
     this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
     // end turn
-    gameClient.moves.swap(toreturn);
+    gameClient.moves.swap(downgrade(toreturn));
   }
 
 
