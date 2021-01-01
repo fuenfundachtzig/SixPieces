@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: logic.ts 3742 2020-12-30 11:56:18Z zwo $
+// $Id: logic.ts 3746 2021-01-01 20:01:29Z zwo $
 //
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
@@ -192,7 +192,7 @@ export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | numbe
             score += shapes.length;
             if (shapes.length == 6)
               score += 6;
-            console.log(shapes.length);
+            // console.log(shapes.length);
           }
         } else {
           if (!cols_counted.includes(piece.gridxy.x)) {
@@ -200,7 +200,7 @@ export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | numbe
             score += shapes.length;
             if (shapes.length == 6)
               score += 6;
-            console.log(shapes.length);
+            // console.log(shapes.length);
           }
         }
     }

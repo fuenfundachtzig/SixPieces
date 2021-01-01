@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3744 2021-01-01 18:01:23Z zwo $
+// $Id: world.ts 3746 2021-01-01 20:01:29Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -32,7 +32,7 @@ function downgrade(arr: PieceMesh[]): PieceInGame[] {
     // NOTE: this will blow up -- need to make a copy to avoid "uncaught error undefined too much recursion"
     // let x: PieceInGame = {...p}; 
     // arr.push(x);
-    res.push({gridxy: p.gridxy, isHand: p.isHand, home_x: p.home_x, invalid: p.invalid, fix: p.fix, id: p.id, color: p.color, shape: p.shape});
+    res.push({ gridxy: p.gridxy, isHand: p.isHand, home_x: p.home_x, invalid: p.invalid, fix: p.fix, id: p.id, color: p.color, shape: p.shape });
   }
   return res;
 }
@@ -172,7 +172,8 @@ class World {
           break;
       }
       this.hands[player_idx].forEach(p => {
-        let isMine = this.curr_player === player_idx;
+        let isMine: boolean = player_idx === parseInt(gameClient.playerID);
+        let isCurr: boolean = player_idx === this.curr_player;
         if (isMine || !hideopp)
           console.log(`hand ${player_idx} has ${identify2(p)}`)
         else
@@ -189,7 +190,7 @@ class World {
         // make visible and clickable
         p.setUnveil(isMine || !hideopp);
         p.mesh.isVisible = true;
-        p.mesh.isPickable = isMine;
+        p.mesh.isPickable = p.isHand && isCurr && (isMine || debug);
       });
     };
   }
@@ -199,21 +200,23 @@ class World {
 
     let added = 0;
     for (let p of state.pog) {
+      let pm: PieceMesh;
       if (!this.pieces.has(p.id)) {
         // create new mesh
-        let pm = new PieceMesh(p, scene); //, isHand: false, gridxy: p.pos, home_x: -1, fix: true, homexy: {x: 0, y: 0} );
+        pm = new PieceMesh(p, scene); //, isHand: false, gridxy: p.pos, home_x: -1, fix: true, homexy: {x: 0, y: 0} );
         Object.assign(pm, p);
-        pm.setUnveil(true);
-        pm.mesh.isVisible = true;
-        pm.setGrid(pm.gridxy);
         // console.log("add mesh for " + identify2(pm));
-        set(this.grid, p.gridxy, pm)
         this.pieces.set(p.id, pm);
         ++added;
-        updateGridSize(this.grid, p.gridxy)
       } else {
-        set(this.grid, p.gridxy, this.pieces.get(p.id));
+        pm = this.pieces.get(p.id) as PieceMesh;
+        pm.gridxy = p.gridxy;
       }
+      set(this.grid, pm.gridxy, pm);
+      pm.setUnveil(true);
+      pm.mesh.isVisible = true;
+      pm.setGrid(pm.gridxy);
+      updateGridSize(this.grid, p.gridxy);
     }
 
     // draw field box
@@ -321,8 +324,8 @@ class World {
     played.forEach((p) => {
       p.fix = true;
       p.isHand = false;
-      p.mesh.isPickable = false;
-      updateGridSize(this.grid, p.gridxy);
+      // p.mesh.isPickable = false; // would be overwritten later
+      // updateGridSize(this.grid, p.gridxy); NOTE: should not do this here because move could still be rejected (only if it's not our turn?)
     });
     this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
     // end turn
