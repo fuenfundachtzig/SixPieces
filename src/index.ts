@@ -5,7 +5,7 @@
 //
 // $Id: index.ts 3752 2021-01-02 10:14:55Z zwo $
 
-// import 'pepjs'
+// import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
 import { Client } from 'boardgame.io/client';
 // import { Local } from 'boardgame.io/multiplayer'
@@ -44,7 +44,7 @@ function SetupScreen(div: HTMLDivElement) {
       div.append(button);
     };
     div.innerHTML = `<p>Play as</p>`;
-    const playerIDs = ['0', '1', "2", "3"];
+    const playerIDs = ["0", "1", "2", "3"];
     playerIDs.forEach(createButton);
   });
 }
@@ -72,7 +72,8 @@ class GameClient {
       game: GameDefinition,
       numPlayers: numberOfPlayers,
       // multiplayer: Local(),
-      multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
+      // multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
+      multiplayer: SocketIO({ server: server_url }), // TODO: better way to set path
       playerID,
       matchID,
       debug

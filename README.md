@@ -28,11 +28,11 @@ npm build
 For debugging:
 * `[ctrl]+[shift]+x`: open babylon inspector to debug GUI
 
-### Play in local mode
+### Playing in local mode
 Not tested much. `multiplayer: Local()` does not yet work. Running without `multiplayer` works for debugging.
 
-### Play in server/client mode
-This requires a server to be setup with [`SixPiecesServer`](https://github.com/fuenfundachtzig/SixPiecesServer/) that can be accessed from the web.
+### Playing in server/client mode
+This requires a server to be setup with [`SixPiecesServer`](https://github.com/fuenfundachtzig/SixPiecesServer/) that can be accessed from the web. Alternatively, server and clients can also be run on the same machine for testing. The server address is currently configured in `public/index.html`.  
 
 ## TODO
 * setup screen, add more options:
@@ -60,6 +60,7 @@ This requires a server to be setup with [`SixPiecesServer`](https://github.com/f
   * increase max. number of players
   * cleanup structure of code
   * make linter happy
+  * add favicon
 
 ### Technical remarks
 * 2-D grid needed for isValidMove and isEmpty
