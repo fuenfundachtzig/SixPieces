@@ -17,6 +17,14 @@ import { GameState, PieceInGame, Player } from './types/GameState';
 
 export const GameDefinition = {
 
+  name: "SixPieces",
+  minPlayers: 1,
+  maxPlayers: 4,
+  disableUndo: true,
+  events: {
+    endTurn: false
+  },
+
   setup: (ctx: Ctx) => {
     // create contents of gamestate G
     let bag = createBag();
@@ -138,10 +146,6 @@ export const GameDefinition = {
       return { winners };
     }
   },
-
-  events: {
-    endTurn: false
-  }
 
 };
 

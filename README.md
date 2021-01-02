@@ -38,7 +38,6 @@ This requires a server to be setup with [`SixPiecesServer`](https://github.com/f
 * setup screen, add more options:
   * configure server address
   * choose number of players (numberOfPlayers)
-  * choose matchID
   * rename players (Player.name -- keep playerID numeric strings from 0..3)
   * (choose size of bag)
   * add lobby
@@ -61,6 +60,7 @@ This requires a server to be setup with [`SixPiecesServer`](https://github.com/f
   * cleanup structure of code
   * make linter happy
   * add favicon
+  * use [lobby API](https://github.com/boardgameio/boardgame.io/blob/master/docs/documentation/api/Lobby.md) for match making
 
 ### Technical remarks
 * 2-D grid needed for isValidMove and isEmpty
