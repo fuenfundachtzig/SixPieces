@@ -82,7 +82,7 @@ class World {
 
     // this.light_player = new DirectionalLight("light_player", new Vector3(50, 2, 50), scene);
     this.light_player = new SpotLight("light_player", Vector3.Zero(), Vector3.Zero(), Math.PI / 4, 20, scene);
-    this.light_player.intensity = 0.5;
+    this.light_player.intensity = 0.8;
 
     // add shadow
     this.shadowGenerator = new ShadowGenerator(1024, light_dir1);
@@ -163,18 +163,21 @@ class World {
     console.log("Active player now is " + p);
     this.curr_player = parseInt(p);
     // // move spotlight...
-    let homepos = this.computeHomeCenter(this.curr_player);
-    const newpos = new Vector3(
-      homepos.x + Math.cos(this.playerToAngle(this.curr_player)) * 30,
-      5,
-      homepos.y + Math.sin(this.playerToAngle(this.curr_player)) * 30
+    let homeposxy = this.computeHomeCenter(this.curr_player);
+    let homepos3 = new Vector3(
+      homeposxy.x + 40*Math.cos(this.playerToAngle(this.curr_player)), 
+      3, 
+      homeposxy.y + 40*Math.sin(this.playerToAngle(this.curr_player)));
+    let dirpos3 = new Vector3(
+      -Math.cos(this.playerToAngle(this.curr_player)),
+      0,
+      -Math.sin(this.playerToAngle(this.curr_player))
     );
-    const newdir = newpos.scale(-1);
     const frameRate = 10;
     const posSlide = new Animation("posSlide", "position", 10, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
     const dirSlide = new Animation("dirSlide", "direction", 10, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
-    posSlide.setKeys([{ frame: 0, value: this.light_player.position }, { frame: frameRate, value: newpos }]);
-    dirSlide.setKeys([{ frame: 0, value: this.light_player.direction }, { frame: frameRate, value: newdir }]);
+    posSlide.setKeys([{ frame: 0, value: this.light_player.position }, { frame: frameRate, value: homepos3 }]);
+    dirSlide.setKeys([{ frame: 0, value: this.light_player.direction }, { frame: frameRate, value: dirpos3 }]);
     scene.beginDirectAnimation(this.light_player, [posSlide, dirSlide], 0, frameRate, false);
   }
 

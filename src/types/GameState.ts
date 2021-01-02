@@ -49,9 +49,9 @@ export function identify1(p: Piece): string {
 
 export function identify2(p: PieceInGame): string {
     if (p.isHand)
-        return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on ${p.home_x}`;
+        return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on ${p.home_x}${p.fix ? ", fix" : ""}`;
     else
-        return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on (${p.gridxy.x}, ${p.gridxy.y})`;
+        return `${p.id} (${colors[p.color]} ${Shape[p.shape]}) on (${p.gridxy.x}, ${p.gridxy.y}${p.fix ? ", fix" : ""})`;
 }
 
 export interface GameState {
