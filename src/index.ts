@@ -3,17 +3,13 @@
 //
 // (85)
 //
-// $Id: index.ts 3751 2021-01-02 01:21:16Z zwo $
+// $Id: index.ts 3752 2021-01-02 10:14:55Z zwo $
 
 // import 'pepjs'
 
 import { Client } from 'boardgame.io/client';
 // import { Local } from 'boardgame.io/multiplayer'
 import { SocketIO } from 'boardgame.io/multiplayer'
-
-// for headless mode:
-// var engine = new BABYLON.NullEngine();
-// var scene = new BABYLON.Scene(engine);
 
 import { createEngine, createScene } from './functions'
 import { makeMaterials } from './make_materials'
@@ -37,6 +33,7 @@ const engine = createEngine(canvas)
 const scene = createScene()
 makeMaterials(scene)
 const world = createWorld(scene)
+export var gameClient: GameClient;
 
 function SetupScreen(div: HTMLDivElement) {
   return new Promise(resolve => {
@@ -68,7 +65,7 @@ class GameClient {
   public moves: any;
 
   constructor(
-    public playerID: string,
+    public playerID: string = "0",
     public server_url: string,
   ) {
     this.client = Client({
@@ -98,10 +95,10 @@ class GameClient {
 
     this.moves = this.client.moves;
     this.client.start();
+
+    console.log("GameCient created and started.");
   }
 }
-
-export var gameClient: GameClient;
 
 const divElement = document.getElementById('setup') as HTMLDivElement;
 SetupScreen(divElement).then((playerID: any) => {

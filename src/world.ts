@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3751 2021-01-02 01:21:16Z zwo $
+// $Id: world.ts 3752 2021-01-02 10:14:55Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -129,27 +129,32 @@ class World {
 
   }
 
+  getPlayerID(): number {
+    if (gameClient)
+      return parseInt(gameClient.playerID);
+    return 0;
+  }
+
   viewHomeCenter(player_idx: number = -1) {
     // rotate camera to show pieces of player (note: only for start of game)
     if (player_idx < 0) {
-      if (gameClient)
-        player_idx = parseInt(gameClient.playerID);
+      player_idx = this.getPlayerID();
     }
     this.camera.target = this.fieldMesh.position.clone(); // fs.tl.add(fs.br.subtract(fs.tl).scale(0.5));
     this.camera.alpha = this.playerToAngle(player_idx);
-    let fs = this.getFieldSize(5); 
+    let fs = this.getFieldSize(5);
     let distance = fs.br.subtract(fs.tl).length();
-    this.camera.radius = distance+5;
+    this.camera.radius = distance + 5;
     this.camera.beta = 1.3;
   }
 
   viewCameraCenter() {
-    let fs = this.getFieldSize(5); 
+    let fs = this.getFieldSize(5);
     let distance = fs.br.subtract(fs.tl).length();
     this.camera.target = this.fieldMesh.position.clone(); // fs.tl.add(fs.br.subtract(fs.tl).scale(0.5));
-    this.camera.alpha = Math.PI/2;
+    this.camera.alpha = Math.PI / 2;
     this.camera.beta = this.camera.lowerBetaLimit;
-    this.camera.target.z += distance*Math.sin(this.camera.beta) / 10;
+    this.camera.target.z += distance * Math.sin(this.camera.beta) / 10;
     this.camera.radius = distance;
   }
 
@@ -211,7 +216,7 @@ class World {
     // (re-)compute home position for meshes and show hand
     for (let player_idx = 0; player_idx < this.hands.length; ++player_idx) {
       this.hands[player_idx].forEach(p => {
-        let isMine: boolean = player_idx === parseInt(gameClient.playerID);
+        let isMine: boolean = player_idx === this.getPlayerID();
         let isCurr: boolean = player_idx === this.curr_player;
         if (isMine || !hideopp)
           console.log(`hand ${player_idx} has ${identify2(p)}`)

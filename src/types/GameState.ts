@@ -5,11 +5,10 @@
 //
 // (85)
 // 
-// $Id: GameState.ts 3742 2020-12-30 11:56:18Z zwo $
+// $Id: GameState.ts 3752 2021-01-02 10:14:55Z zwo $
 
 import { gridPos } from "./Field";
 import { Bag } from "./Bag";
-import { GridBound } from "../logic";
 import { colors, Shape } from "../make_materials";
 
 export interface Player {
