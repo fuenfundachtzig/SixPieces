@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3748 2021-01-01 21:27:23Z zwo $
+// $Id: world.ts 3749 2021-01-02 00:09:37Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -15,6 +15,7 @@ import { GameState, identify2, PieceInGame } from "./types/GameState";
 import { debug, gameClient, hideopp } from ".";
 
 // y positions of pieces
+export const piece_y_lie = 0.31;
 export const piece_y_stand = 1;
 export const piece_size = 2.0;
 
@@ -182,15 +183,17 @@ class World {
         let angle3 = -angle2 + Math.PI / 2;
         let x = refpoint.x + Math.cos(angle1) * 14 + 10 * Math.cos(angle2);
         let y = refpoint.y + Math.sin(angle1) * 14 + 10 * Math.sin(angle2);
-        p.homexy = { x: x, y: y };
         if (p.isHand) {
-          p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
-          p.moveHome();
+          if (p.homexy.x == 0) {
+            p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
+            p.homexy = { x: x, y: y };
+            p.moveHome(true);
+          }
         }
         // make visible and clickable
         p.setUnveil(isMine || !hideopp);
         p.mesh.isVisible = true;
-        p.mesh.isPickable = p.isHand && isCurr && (isMine || debug);
+        p.mesh.isPickable = !p.fix && isCurr && (isMine || debug);
       });
     };
   }
@@ -215,7 +218,7 @@ class World {
       set(this.grid, pm.gridxy, pm);
       pm.setUnveil(true);
       pm.mesh.isVisible = true;
-      pm.setGrid(pm.gridxy);
+      pm.setGrid(pm.gridxy, true);
       updateGridSize(this.grid, p.gridxy);
     }
 
@@ -281,7 +284,7 @@ class World {
   }
 
   toGroundCoord(xy: gridPos): Vector3 {
-    return new Vector3(xy.x * piece_size, 0, xy.y * piece_size);
+    return new Vector3(xy.x * piece_size, piece_y_lie, xy.y * piece_size);
   }
 
   getFieldSize(margin: number): gridCube {
