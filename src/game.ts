@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: game.ts 3748 2021-01-01 21:27:23Z zwo $
+// $Id: game.ts 3754 2021-01-02 12:16:38Z zwo $
 //
 
 import { Ctx } from 'boardgame.io';
@@ -12,7 +12,7 @@ import { shuffleArray } from './functions';
 import { emptyGrid, fillHand, isValidMove } from './logic';
 import { createBag } from './types/Bag';
 import { set } from './types/Field';
-import { GameState, PieceInGame, Player } from './types/GameState';
+import { GameState, Piece, PieceInGame, Player } from './types/GameState';
 
 
 export const GameDefinition = {
@@ -40,10 +40,12 @@ export const GameDefinition = {
       fillHand(player, bag);
       players.push(player);
     }
+    let removed: Piece[] = [];
     return {
       players,
       bag,
-      pog
+      pog,
+      removed
     };
   },
 
@@ -114,7 +116,7 @@ export const GameDefinition = {
         console.log(`6 points for player ${player.id} for ending the game`);
         player.score += 6;
       }
-
+      // console.log(`...ended, hand of current player: ${JSON.stringify(G.players[parseInt(ctx.currentPlayer)])}`)
       // update field
       for (let p of played) {
         p.fix = true;

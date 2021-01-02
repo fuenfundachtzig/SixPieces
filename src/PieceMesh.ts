@@ -40,7 +40,7 @@ export class PieceMesh implements PieceInGame {
   public invalid: boolean = false;
 
   constructor(
-    p: Piece,
+    p: PieceInGame,
     // graphics info
     scene: Scene,
     // position

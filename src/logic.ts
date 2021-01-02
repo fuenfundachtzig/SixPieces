@@ -49,7 +49,7 @@ export function unplace(g: GridGame, xy: gridPos) {
 
 export function updateGridSize(g: GridBound, xy: gridPos) {
   // updates the cached grid size with a xy position (note: there is no way to undo this)
-  console.log("updateGridSize " + g.inited + " "+ g.count  + " " + xy.x + ","+xy.y)
+  console.log("updateGridSize " + g.inited + " " + g.count + " " + xy.x + "," + xy.y)
   if (!g.inited) {
     /*
     // we could try to iterate over all pieces in grid as done below 
@@ -73,12 +73,12 @@ export function updateGridSize(g: GridBound, xy: gridPos) {
       }
     }
     */
-   g.inited = true;
-   g.grid_minx = xy.x;
-   g.grid_maxx = xy.x;
-   g.grid_miny = xy.y;
-   g.grid_maxy = xy.y;
-} else {
+    g.inited = true;
+    g.grid_minx = xy.x;
+    g.grid_maxx = xy.x;
+    g.grid_miny = xy.y;
+    g.grid_maxy = xy.y;
+  } else {
     g.grid_minx = Math.min(g.grid_minx, xy.x);
     g.grid_maxx = Math.max(g.grid_maxx, xy.x);
     g.grid_miny = Math.min(g.grid_miny, xy.y);
@@ -227,10 +227,10 @@ export function getFreeHandSlot(hand: PieceInGame[]): number {
 export function fillHand(player: Player, bag: Bag) {
   // fill hand
   while (player.hand.length < 6) {
-    let p = bag.pop();
+    let p: Piece | undefined = bag.pop();
     if (!p)
       break;
-    player.hand.push(p);
+    player.hand.push({ ...p, gridxy: { x: 0, y: 0 }, isHand: true, home_x: -1, invalid: false, fix: false });
   }
 }
 

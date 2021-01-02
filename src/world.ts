@@ -165,9 +165,9 @@ class World {
     // // move spotlight...
     let homeposxy = this.computeHomeCenter(this.curr_player);
     let homepos3 = new Vector3(
-      homeposxy.x + 40*Math.cos(this.playerToAngle(this.curr_player)), 
-      3, 
-      homeposxy.y + 40*Math.sin(this.playerToAngle(this.curr_player)));
+      homeposxy.x + 40 * Math.cos(this.playerToAngle(this.curr_player)),
+      3,
+      homeposxy.y + 40 * Math.sin(this.playerToAngle(this.curr_player)));
     let dirpos3 = new Vector3(
       -Math.cos(this.playerToAngle(this.curr_player)),
       0,
@@ -252,15 +252,26 @@ class World {
   unpack(state: GameState) {
     // unpack game state to useful data
 
+    for (let p of state.removed) {
+      if (this.pieces.has(p.id)) {
+        let pm = this.pieces.get(p.id) as PieceMesh;
+        console.log("remove mesh for " + identify2(pm));
+        scene.removeMesh(pm.mesh);
+        this.pieces.delete(pm.id);
+        unplace(this.grid, pm.gridxy);  
+      }
+    }
+
+
     let added = 0;
     for (let p of state.pog) {
       let pm: PieceMesh;
       if (!this.pieces.has(p.id)) {
         // create new mesh
         pm = new PieceMesh(p, scene); //, isHand: false, gridxy: p.pos, home_x: -1, fix: true, homexy: {x: 0, y: 0} );
-        // console.log("add mesh for " + identify2(pm));
         this.pieces.set(p.id, pm);
         ++added;
+        console.log("add field mesh for " + identify2(pm));
       } else {
         pm = this.pieces.get(p.id) as PieceMesh;
       }
@@ -291,12 +302,13 @@ class World {
         let p = player.hand[i];
         if (!this.pieces.has(p.id)) {
           // create new mesh
-          let home_x = getFreeHandSlot(this.hands[pidx])
-          let pm = new PieceMesh(p, scene, true, undefined, home_x); //{...p, isHand: true, gridxy: {x: 0, y: 0}, home_x: i, fix: false, homexy: {x: 0, y: 0} });
+          let pm = new PieceMesh(p, scene); //, true, undefined, home_x); //{...p, isHand: true, gridxy: {x: 0, y: 0}, home_x: i, fix: false, homexy: {x: 0, y: 0} });
           Object.assign(pm, p);
+          pm.home_x = getFreeHandSlot(this.hands[pidx]);
           this.pieces.set(p.id, pm);
           ++added;
           this.hands[pidx].push(pm);
+          console.log("add hand mesh for " + identify2(pm));
         } else {
           this.hands[pidx].push(this.pieces.get(p.id) as PieceMesh);
         }
@@ -404,13 +416,15 @@ class World {
     this.hands[this.curr_player].forEach(p => {
       p.mesh.isPickable = false;
     });
-    // remove meshes for pieces on field (i.e. to be returned to bag)
+    // remove meshes for pieces on field (i.e. to be returned to bag) -- boardgame.io will immediately give us an outdated update where we would restore the mesh, so better leave it for now and introduce a mechanism to remove meshes in unpack
+    /*
     toreturn.forEach(p => {
       console.log("remove mesh for " + identify2(p));
       scene.removeMesh(p.mesh);
       this.pieces.delete(p.id);
       unplace(this.grid, p.gridxy);
     });
+    */
     this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
     // end turn
     gameClient.moves.swap(downgrade(toreturn));

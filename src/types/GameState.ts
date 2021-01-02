@@ -15,7 +15,7 @@ export interface Player {
     id: string;
     name: string;
     score: number;
-    hand: Piece[];
+    hand: PieceInGame[];
 }
 
 export interface Piece {
@@ -58,5 +58,6 @@ export interface GameState {
     players: Player[];
     bag: Bag;
     pog: PieceInGame[];
+    removed: Piece[]; // pieces that were returned from field to bag -- for deleting meshes
 }
 
