@@ -8,12 +8,13 @@
 
 import { Scene, Vector3, Animation, CubicEase, EasingFunction, IAnimationKey, WeightedSound } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { materials, Shape } from "./make_materials";
+import { Shape } from "./types/Materials";
 import { createSuperEllipsoid } from './superello';
 import { piece_size, world, piece_y_stand } from "./world";
 import { gridPos } from "./types/Field";
 import { Piece, PieceInGame } from "./types/GameState";
 import { scene } from "./functions";
+import { materials } from "./make_materials";
 
 // areas where piece cannot be dropped / will return to home
 const InnerRing = 5;

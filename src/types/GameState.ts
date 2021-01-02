@@ -9,7 +9,7 @@
 
 import { gridPos } from "./Field";
 import { Bag } from "./Bag";
-import { colors, Shape } from "../make_materials";
+import { colors, Shape } from "./Materials";
 
 export interface Player {
     id: string;

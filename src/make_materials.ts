@@ -6,35 +6,9 @@
 // $Id: make_materials.ts 3742 2020-12-30 11:56:18Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
+import { colors, Shape } from "./types/Materials";
 
 export var materials: StandardMaterial[][];
-
-export const colors = [
-    "green",
-    "#3040ff", // or RoyalBlue?
-    "red",
-    "yellow",
-    "violet",
-    "orange"
-];
-// enum PieceColor {
-//     Green,
-//     Blue,
-//     Red,
-//     Yellow,
-//     Violet,
-//     Orange
-// }
-// TODO: type shape = "square" | "circle" | ...
-export enum Shape {
-    Square,
-    Circle,
-    Star,
-    Cross,
-    Rhombus,
-    Clover,
-    Hidden
-}
 
 // https://github.com/tranvansang/enum-for
 var getAllEnumKeys = (enumType: any) => Object.keys(enumType).filter(key => isNaN(Number(key)));
