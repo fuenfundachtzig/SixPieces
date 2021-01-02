@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3750 2021-01-02 00:34:01Z zwo $
+// $Id: world.ts 3751 2021-01-02 01:21:16Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -129,9 +129,28 @@ class World {
 
   }
 
-  rotateCamera(player_idx: number) {
+  viewHomeCenter(player_idx: number = -1) {
     // rotate camera to show pieces of player (note: only for start of game)
+    if (player_idx < 0) {
+      if (gameClient)
+        player_idx = parseInt(gameClient.playerID);
+    }
+    this.camera.target = this.fieldMesh.position.clone(); // fs.tl.add(fs.br.subtract(fs.tl).scale(0.5));
     this.camera.alpha = this.playerToAngle(player_idx);
+    let fs = this.getFieldSize(5); 
+    let distance = fs.br.subtract(fs.tl).length();
+    this.camera.radius = distance+5;
+    this.camera.beta = 1.3;
+  }
+
+  viewCameraCenter() {
+    let fs = this.getFieldSize(5); 
+    let distance = fs.br.subtract(fs.tl).length();
+    this.camera.target = this.fieldMesh.position.clone(); // fs.tl.add(fs.br.subtract(fs.tl).scale(0.5));
+    this.camera.alpha = Math.PI/2;
+    this.camera.beta = this.camera.lowerBetaLimit;
+    this.camera.target.z += distance*Math.sin(this.camera.beta) / 10;
+    this.camera.radius = distance;
   }
 
   setCurrPlayer(p: string) {

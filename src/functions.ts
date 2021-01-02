@@ -121,21 +121,33 @@ export function createScene() {
         scene.debugLayer.show()
       }
     }
-    if ((kbinfo.type === KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyE')) {
-      // end turn
-      if (floatingPiece != null)
-        // TODO: notify player that piece needs to be set
-        return;
-      world.placeCommand();
+    if (kbinfo.type === KeyboardEventTypes.KEYDOWN) {
+      switch (kbinfo.event.code) {
+        case 'KeyE':
+          // end turn
+          if (floatingPiece != null)
+            // TODO: notify player that piece needs to be set
+            return;
+          world.placeCommand();
+          break;
+        case 'KeyS':
+          // end turn
+          if (floatingPiece != null)
+            // TODO: notify player that piece needs to be set
+            return;
+          world.swapCommand();
+          break;
+        case 'Space':
+          world.viewCameraCenter();
+          break;
+        case 'Enter':
+          world.viewHomeCenter();
+          break;
+        default:
+      }
     }
-    if ((kbinfo.type === KeyboardEventTypes.KEYDOWN) && (kbinfo.event.code === 'KeyS')) {
-      // end turn
-      if (floatingPiece != null)
-        // TODO: notify player that piece needs to be set
-        return;
-      world.swapCommand();
-    }
-  })
+  }
+  );
 
   scene.onPointerObservable.add((pointerInfo) => {
     /*   		
@@ -200,7 +212,7 @@ export const createArcRotateCamera = () => {
   camera.allowUpsideDown = false // don't allow zooming inverted
   camera.lowerRadiusLimit = 2 // how close can you zoom
   camera.upperRadiusLimit = 100 // how far out can you zoom
-  camera.lowerBetaLimit = 0.5 // how high can you move the camera
+  camera.lowerBetaLimit = 0.3 // how high can you move the camera
   camera.upperBetaLimit = 1.4 // how low down can you move the camera
 
   camera.checkCollisions = true // make the camera collide with meshes
