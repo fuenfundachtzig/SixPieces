@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: logic.ts 3746 2021-01-01 20:01:29Z zwo $
+// $Id: logic.ts 3755 2021-01-02 14:36:51Z zwo $
 //
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
@@ -49,7 +49,7 @@ export function unplace(g: GridGame, xy: gridPos) {
 
 export function updateGridSize(g: GridBound, xy: gridPos) {
   // updates the cached grid size with a xy position (note: there is no way to undo this)
-  console.log("updateGridSize " + g.inited + " " + g.count + " " + xy.x + "," + xy.y)
+  // console.log("updateGridSize " + g.inited + " " + g.count + " " + xy.x + "," + xy.y)
   if (!g.inited) {
     /*
     // we could try to iterate over all pieces in grid as done below 
@@ -205,7 +205,6 @@ export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | numbe
         }
     }
   }
-  console.log("Scored " + score + " points");
 
   return score;
 }
@@ -232,5 +231,6 @@ export function fillHand(player: Player, bag: Bag) {
       break;
     player.hand.push({ ...p, gridxy: { x: 0, y: 0 }, isHand: true, home_x: -1, invalid: false, fix: false });
   }
+  console.log(bag.length + " pieces left in bag");
 }
 

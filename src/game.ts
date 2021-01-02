@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: game.ts 3754 2021-01-02 12:16:38Z zwo $
+// $Id: game.ts 3755 2021-01-02 14:36:51Z zwo $
 //
 
 import { Ctx } from 'boardgame.io';
@@ -27,6 +27,7 @@ export const GameDefinition = {
 
   setup: (ctx: Ctx) => {
     // create contents of gamestate G
+    console.log("Init")
     let bag = createBag();
     let pog: PieceInGame[] = [];
     const players: Player[] = [];
@@ -66,11 +67,13 @@ export const GameDefinition = {
       }
       
       let player = G.players[parseInt(ctx.currentPlayer)];
+      G.removed = [];
       for (let p1 of toreturn) {
         G.bag.push(p1);
         let idx = player.hand.findIndex((p2) => p1.id === p2.id);
         // for (let px of player.hand)
         //   console.log("before remove " + px.id)
+        G.removed.push(player.hand[idx]);
         player.hand.splice(idx, 1);
         // for (let px of player.hand)
         //   console.log("after remove " + px.id)
@@ -104,6 +107,9 @@ export const GameDefinition = {
         return INVALID_MOVE;
       }
 
+      // move accepted
+      G.removed = [];
+
       // world.endTurn returns the pieces that have been played -> need to update hand
       let player = G.players[parseInt(ctx.currentPlayer)];
       player.hand = player.hand.filter((p1) => played.find((p2) => p1.id === p2.id) === undefined);
@@ -112,6 +118,7 @@ export const GameDefinition = {
 
       // scoring
       player.score += score as number;
+      console.log(`Player ${ctx.currentPlayer} scored ${score} points`);
       if (player.hand.length === 0) {
         console.log(`6 points for player ${player.id} for ending the game`);
         player.score += 6;
