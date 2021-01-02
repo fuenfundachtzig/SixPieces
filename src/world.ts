@@ -258,14 +258,14 @@ class World {
       if (!this.pieces.has(p.id)) {
         // create new mesh
         pm = new PieceMesh(p, scene); //, isHand: false, gridxy: p.pos, home_x: -1, fix: true, homexy: {x: 0, y: 0} );
-        Object.assign(pm, p);
         // console.log("add mesh for " + identify2(pm));
         this.pieces.set(p.id, pm);
         ++added;
       } else {
         pm = this.pieces.get(p.id) as PieceMesh;
-        pm.gridxy = p.gridxy;
       }
+      Object.assign(pm, p);
+      console.log(`...add to grid: ${identify2(pm)} at ${JSON.stringify(pm.gridxy)}`);
       set(this.grid, pm.gridxy, pm);
       pm.setUnveil(true);
       pm.mesh.isVisible = true;
