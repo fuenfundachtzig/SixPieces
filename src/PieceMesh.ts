@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: PieceMesh.ts 3749 2021-01-02 00:09:37Z zwo $
+// $Id: PieceMesh.ts 3750 2021-01-02 00:34:01Z zwo $
 //
 
 import { Scene, Vector3, Animation, CubicEase, EasingFunction, IAnimationKey, WeightedSound } from "@babylonjs/core";
@@ -111,7 +111,7 @@ export class PieceMesh implements PieceInGame {
     }
   }
 
-  moveHome(animate: boolean = false) {
+  moveHome(animate: boolean = false, animate_drop: boolean = false) {
     // compute home position for meshes
     let homepos = new Vector3(this.homexy.x, piece_y_stand, this.homexy.y);
     if (!animate) {
@@ -119,16 +119,20 @@ export class PieceMesh implements PieceInGame {
       this.mesh.rotation = this.homerot;
     } else {
       // animation only used for new pieces that "drop from heaven"
+      const easingFunction = new CubicEase();
       this.mesh.rotation = this.homerot;
-      let homeposup = homepos.clone();
-      homeposup.y = 100;
-      this.mesh.position = homeposup;
+      let homepos_start = this.mesh.position;
+      if (animate_drop) {
+        homepos_start = homepos.clone();
+        homepos_start.y = 100;
+        this.mesh.position = homepos_start;
+        easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEOUT);
+      } else
+        easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
       const frameRate = 60;
       const frames = 60;
       const posSlide = new Animation(`posSlide${this.id}`, "position", frameRate, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
-      posSlide.setKeys([{ frame: 0, value: homeposup }, { frame: frames, value: homepos }]);
-      const easingFunction = new CubicEase();
-      easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEOUT);
+      posSlide.setKeys([{ frame: 0, value: homepos_start }, { frame: frames, value: homepos }]);
       posSlide.setEasingFunction(easingFunction);
       scene.beginDirectAnimation(this.mesh, [posSlide], 0, frames, false);
     }

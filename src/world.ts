@@ -3,9 +3,9 @@
 // 
 // (85)
 //
-// $Id: world.ts 3749 2021-01-02 00:09:37Z zwo $
+// $Id: world.ts 3750 2021-01-02 00:34:01Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, scene, floatingPiece } from "./functions";
 import { gridCube, gridPos, has, set } from "./types/Field";
@@ -64,12 +64,13 @@ class World {
   private curr_player = 0; // cache of current player
   private light_player: SpotLight; // spotlight showing hand of current player
   private fieldMesh: Mesh; // used to indicate field size
+  private camera: ArcRotateCamera;
 
   constructor(scene: Scene) {
 
     // add camera and sky
-    createPBRSkybox()
-    createArcRotateCamera()
+    createPBRSkybox();
+    this.camera = createArcRotateCamera();
 
     // add lights
     const light = new HemisphericLight('light', Vector3.Zero(), scene);
@@ -128,9 +129,9 @@ class World {
 
   }
 
-  playerToAngle(player_idx: number) {
-    // returns angle on field pointing to player
-    return Math.PI / 4 + Math.PI / 2 * player_idx;
+  rotateCamera(player_idx: number) {
+    // rotate camera to show pieces of player (note: only for start of game)
+    this.camera.alpha = this.playerToAngle(player_idx);
   }
 
   setCurrPlayer(p: string) {
@@ -138,7 +139,12 @@ class World {
     console.log("Active player now is " + p);
     this.curr_player = parseInt(p);
     // // move spotlight...
-    const newpos = new Vector3(Math.cos(this.playerToAngle(this.curr_player)) * 50, 5, Math.sin(this.playerToAngle(this.curr_player)) * 50);
+    let homepos = this.computeHomeCenter(this.curr_player);
+    const newpos = new Vector3(
+      homepos.x + Math.cos(this.playerToAngle(this.curr_player)) * 30,
+      5,
+      homepos.y + Math.sin(this.playerToAngle(this.curr_player)) * 30
+    );
     const newdir = newpos.scale(-1);
     const frameRate = 10;
     const posSlide = new Animation("posSlide", "position", 10, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
@@ -148,30 +154,43 @@ class World {
     scene.beginDirectAnimation(this.light_player, [posSlide, dirSlide], 0, frameRate, false);
   }
 
+  playerToAngle(player_idx: number) {
+    // returns angle on field pointing to player
+    return Math.PI / 4 + Math.PI / 2 * player_idx;
+  }
+
+  computeHomeCenter(player_idx: number): gridPos {
+    // compute center of home position for player
+    let angle1 = this.playerToAngle(player_idx);
+    let fieldsize = this.getFieldSize(5);
+    var refpoint: gridPos;
+    switch (player_idx) {
+      default:
+      case 0:
+        // fieldsizes = [this.grid.grid_maxx, this.grid.grid_maxy];
+        refpoint = { x: fieldsize.br.x, y: fieldsize.br.z };
+        break;
+      case 1:
+        // fieldsizes = [this.grid.grid_minx, this.grid.grid_maxy];
+        refpoint = { x: fieldsize.tl.x, y: fieldsize.br.z };
+        break;
+      case 2:
+        // fieldsizes = [this.grid.grid_minx, this.grid.grid_miny];
+        refpoint = { x: fieldsize.tl.x, y: fieldsize.tl.z };
+        break;
+      case 3:
+        // fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
+        refpoint = { x: fieldsize.br.x, y: fieldsize.tl.z };
+        break;
+    }
+    let x = refpoint.x + Math.cos(angle1) * 14;
+    let y = refpoint.y + Math.sin(angle1) * 14;
+    return { x, y };
+  }
+
   updateHandMeshes() {
     // (re-)compute home position for meshes and show hand
     for (let player_idx = 0; player_idx < this.hands.length; ++player_idx) {
-      let angle1 = this.playerToAngle(player_idx);
-      let fieldsize = this.getFieldSize(5);
-      var refpoint: gridPos;
-      switch (player_idx) {
-        case 0:
-          // fieldsizes = [this.grid.grid_maxx, this.grid.grid_maxy];
-          refpoint = { x: fieldsize.br.x, y: fieldsize.br.z };
-          break;
-        case 1:
-          // fieldsizes = [this.grid.grid_minx, this.grid.grid_maxy];
-          refpoint = { x: fieldsize.tl.x, y: fieldsize.br.z };
-          break;
-        case 2:
-          // fieldsizes = [this.grid.grid_minx, this.grid.grid_miny];
-          refpoint = { x: fieldsize.tl.x, y: fieldsize.tl.z };
-          break;
-        case 3:
-          // fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
-          refpoint = { x: fieldsize.br.x, y: fieldsize.tl.z };
-          break;
-      }
       this.hands[player_idx].forEach(p => {
         let isMine: boolean = player_idx === parseInt(gameClient.playerID);
         let isCurr: boolean = player_idx === this.curr_player;
@@ -179,15 +198,20 @@ class World {
           console.log(`hand ${player_idx} has ${identify2(p)}`)
         else
           console.log(`hand ${player_idx} has a piece on ${p.home_x}`)
-        let angle2 = angle1 + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
+        let angle2 = this.playerToAngle(player_idx) + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
         let angle3 = -angle2 + Math.PI / 2;
-        let x = refpoint.x + Math.cos(angle1) * 14 + 10 * Math.cos(angle2);
-        let y = refpoint.y + Math.sin(angle1) * 14 + 10 * Math.sin(angle2);
+        let refpoint = this.computeHomeCenter(player_idx);
+        let x = refpoint.x + 10 * Math.cos(angle2);
+        let y = refpoint.y + 10 * Math.sin(angle2);
         if (p.isHand) {
+          p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
           if (p.homexy.x == 0) {
-            p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
             p.homexy = { x: x, y: y };
-            p.moveHome(true);
+            p.moveHome(true, true);
+          } else {
+            // move without drop (e.g. when home center was adjusted because field got larger)
+            p.homexy = { x: x, y: y };
+            p.moveHome(true, false);
           }
         }
         // make visible and clickable

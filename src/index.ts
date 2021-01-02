@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3748 2021-01-01 21:27:23Z zwo $
+// $Id: index.ts 3750 2021-01-02 00:34:01Z zwo $
 
 // import 'pepjs'
 
@@ -115,5 +115,6 @@ SetupScreen(divElement).then((playerID: any) => {
   gameClient = new GameClient(playerID, server_url);
 
   // start the GUI
+  world.rotateCamera(parseInt(playerID));
   main();
 })
