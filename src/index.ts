@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3752 2021-01-02 10:14:55Z zwo $
+// $Id: index.ts 3754 2021-01-02 12:16:38Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -99,7 +99,7 @@ class GameClient {
     this.moves = this.client.moves;
     this.client.start();
 
-    console.log("GameCient created and started.");
+    console.log(`GameCient for ${numPlayers} created and started.`);
   }
 }
 
@@ -109,7 +109,7 @@ SetupScreen(divElement).then((playerID: any) => {
   divElement.hidden = true;
   playerID = playerID;
   let matchID = (document.getElementById('matchID') as HTMLInputElement).value;
-  let numberOfPlayers = parseInt((document.getElementById('matchID') as HTMLInputElement).value);
+  let numberOfPlayers = parseInt((document.getElementById('numberOfPlayers') as HTMLInputElement).value);
   console.log(`Playing as ${playerID} in ${matchID}.`);
 
   // construct and start game client and overlay debug panel if debug is set
