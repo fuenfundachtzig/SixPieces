@@ -70,15 +70,15 @@ Alternatively, server and clients can also be run on the same machine for testin
 * keyboard shortcuts:
   * select pieces from hand by pressing 1..6
 * GUI:
-  * display scores while playing
+  * improve display of scores and number of pieces left in bag
   * display player names
-  * display / show number of pieces left in bag
+  * add simpler shapes that are better visible (e.g. circle with hole or triangle to replace star)
   * improve camera positions (viewHomeCenter, viewCameraCenter)
   * add "?" on pieces on hand of opponents (instead of leaving blank) (drawShape for Shape.Hidden)
-  * add levitating arrow pointing at current player (could replace current sphere)
+  * improve animation for sphere or add levitating arrow pointing at current player (could replace current sphere)
   * add effect for 6-in-a-row bonus
   * add sound
-  * improve animations (new Animation in several places)
+  * improve animations (cf. Animation in several places)
 * features
   * remove / replace react
   * add license information

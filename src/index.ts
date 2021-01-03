@@ -88,7 +88,7 @@ class GameClient {
           for (let player of state.G.players as Player[]) {
             s.push(player.score);
           }
-          document.title = `Scores: ${JSON.stringify(s)}`;
+          document.title = `Scores: ${JSON.stringify(s)} -- Bag: ${state.G.bag.length} pieces`;
         }
         if (state.ctx.gameover) {
           divElement.hidden = false;
