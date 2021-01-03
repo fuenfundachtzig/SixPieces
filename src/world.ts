@@ -12,7 +12,7 @@ import { gridCube, gridPos, has, set } from "./types/Field";
 import { PieceMesh } from "./PieceMesh";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
 import { GameState, identify2, PieceInGame } from "./types/GameState";
-import { debug, gameClient, hideopp } from ".";
+import { debug, flatfield, gameClient, hideopp } from ".";
 
 // y positions of pieces
 export const piece_y_lie = 0.31;
@@ -217,13 +217,19 @@ class World {
   }
 
   viewCameraCenter() {
+    // same view for everybody
     let fs = this.getFieldSize(5);
     let distance = fs.br.subtract(fs.tl).length();
     this.camera.target = this.fieldMesh.position.clone(); // fs.tl.add(fs.br.subtract(fs.tl).scale(0.5));
     this.camera.alpha = Math.PI / 2;
     this.camera.beta = this.camera.lowerBetaLimit;
     this.camera.target.z += distance * Math.sin(this.camera.beta) / 10;
-    this.camera.radius = distance;
+    if (flatfield) {
+      // zoom a bit further out to include homes
+      this.camera.target.z = this.camera.target.z + 4;
+      this.camera.radius = distance * 1.25;
+    } else
+      this.camera.radius = distance * 0.9;
   }
 
   setCurrPlayer(p: string) {
@@ -289,7 +295,10 @@ class World {
         let x = refpoint.x + 10 * Math.cos(angle2);
         let y = refpoint.y + 10 * Math.sin(angle2);
         if (p.isHand) {
-          p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
+          if (!flatfield)
+            p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
+          else
+            p.homerot = Vector3.Zero();
           if (p.homexy.x == 0) {
             p.homexy = { x: x, y: y };
             p.moveHome(true, true);
@@ -314,6 +323,7 @@ class World {
       if (this.pieces.has(p.id)) {
         let pm = this.pieces.get(p.id) as PieceMesh;
         console.log("remove mesh for " + identify2(pm));
+        pm.mesh.visibility = 0; // we might otherwise be leaving shadows behind??
         scene.removeMesh(pm.mesh);
         this.pieces.delete(pm.id);
         unplace(this.grid, pm.gridxy);

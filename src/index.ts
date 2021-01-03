@@ -21,10 +21,12 @@ import { Player } from './types/GameState';
 // Import stylesheets
 // import './index.css';
 
+// configuration
 export const debug = false; // NOTE: press ctrl+shift+X for debugging webGL objects
 export var playerID: string; // this player's ID
 export const hideopp = true; // hide other players' pieces on hand (not for debugging)
 export const ngeneration = 3; // how often each piece exists, normally 3
+export const flatfield = true; // lie all pieces flat (including the ones in home)
 
 // setup objects
 const canvas: HTMLCanvasElement = document.getElementById('game_canvas') as HTMLCanvasElement
