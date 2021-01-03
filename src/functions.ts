@@ -1,4 +1,4 @@
-import { Engine, Scene, ArcRotateCamera, Vector3, CubeTexture, Color4, Nullable, KeyboardEventTypes } from '@babylonjs/core'
+import { Engine, Scene, CubeTexture, Color4, Nullable, KeyboardEventTypes } from '@babylonjs/core'
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import '@babylonjs/inspector' // for ctrl+alt+X
 import { PieceMesh } from "./PieceMesh"
@@ -7,7 +7,6 @@ import { world } from './world'
 export let canvas: HTMLCanvasElement
 export let engine: Engine
 export let scene: Scene
-export let camera: ArcRotateCamera
 let handleResize: any
 
 export const createEngine = (hostCanvas: HTMLCanvasElement) => {
@@ -19,7 +18,6 @@ export const createEngine = (hostCanvas: HTMLCanvasElement) => {
 
   return engine
 }
-
 
 export let floatingPiece: Nullable<PieceMesh> = null
 
@@ -123,6 +121,10 @@ export function createScene() {
     }
     if (kbinfo.type === KeyboardEventTypes.KEYDOWN) {
       switch (kbinfo.event.code) {
+        case 'KeyC':
+          // change camera mode
+          world.toggleCameraMode();
+          break;
         case 'KeyE':
           // end turn
           if (floatingPiece != null)
@@ -190,35 +192,6 @@ export function createScene() {
   });
 
   return scene
-}
-
-export const createArcRotateCamera = () => {
-  const startAlpha = 45 / 180 * Math.PI
-  const startBeta = 60 / 180 * Math.PI
-  const startRadius = 20
-  const startPosition = new Vector3(15, 8, 15)
-
-  camera = new ArcRotateCamera('camera', startAlpha, startBeta, startRadius, startPosition, scene, true)
-  camera.attachControl(canvas, false)
-
-  // Set some basic camera settings
-  camera.minZ = 1
-
-  camera.panningAxis = new Vector3(1, 0, 1) // pan along ground
-  camera.panningSensibility = 100 // how fast do you pan, set to 0 if you don't want to allow panning (smaller value = faster)
-  camera.panningOriginTarget = Vector3.Zero() // where does the panning distance limit originate from
-  camera.panningDistanceLimit = 100 // how far can you pan from the origin
-
-  camera.allowUpsideDown = false // don't allow zooming inverted
-  camera.lowerRadiusLimit = 2 // how close can you zoom
-  camera.upperRadiusLimit = 100 // how far out can you zoom
-  camera.lowerBetaLimit = 0.3 // how high can you move the camera
-  camera.upperBetaLimit = 1.4 // how low down can you move the camera
-
-  camera.checkCollisions = true // make the camera collide with meshes
-  camera.collisionRadius = new Vector3(2, 2, 2) // how close can the camera go to other meshes
-
-  return camera
 }
 
 export const createPBRSkybox = () => {

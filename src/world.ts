@@ -7,12 +7,13 @@
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { createPBRSkybox, createArcRotateCamera, scene, floatingPiece } from "./functions";
+import { createPBRSkybox, scene, floatingPiece } from "./functions";
 import { gridCube, gridPos, has, set } from "./types/Field";
 import { PieceMesh } from "./PieceMesh";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
 import { GameState, identify2, PieceInGame } from "./types/GameState";
 import { debug, flatfield, gameClient, hideopp } from ".";
+import { configureOrthographicCamera, configurePerspectiveCamera, createCamera } from "./cameras";
 
 // y positions of pieces
 export const piece_y_lie = 0.31;
@@ -66,12 +67,15 @@ class World {
   private fieldMesh: Mesh; // used to indicate field size
   private currPlayerMesh: Mesh; // used to indicate current player
   private camera: ArcRotateCamera;
+  private cameraIsOrtho: boolean;
 
   constructor(scene: Scene) {
 
     // add camera and sky
     createPBRSkybox();
-    this.camera = createArcRotateCamera();
+    this.camera = createCamera();
+    this.cameraIsOrtho = true;
+    this.toggleCameraMode();
 
     // add lights
     const light = new HemisphericLight('light', Vector3.Zero(), scene);
@@ -138,6 +142,14 @@ class World {
 
   }
 
+  toggleCameraMode() {
+    this.cameraIsOrtho = !this.cameraIsOrtho;
+    if (this.cameraIsOrtho)
+      configureOrthographicCamera(this.camera);
+    else
+      configurePerspectiveCamera(this.camera);
+  }
+
   addShadow(mesh: Mesh) {
     this.shadowGenerator.addShadowCaster(mesh);
   }
@@ -188,7 +200,7 @@ class World {
         refpoint = { x: fieldsize.br.x, y: fieldsize.tl.z };
         break;
     }
-    return {x: refpoint.x + offset*Math.cos(angle1), y: refpoint.y + offset*Math.sin(angle1)};
+    return { x: refpoint.x + offset * Math.cos(angle1), y: refpoint.y + offset * Math.sin(angle1) };
   }
 
   computeHomeCenter(player_idx: number, offset: number = 0, y: number = 0): Vector3 {
@@ -230,6 +242,8 @@ class World {
       this.camera.radius = distance * 1.25;
     } else
       this.camera.radius = distance * 0.9;
+    if (this.cameraIsOrtho)
+      configureOrthographicCamera(this.camera, distance*1.25);
   }
 
   setCurrPlayer(p: string) {
@@ -244,7 +258,7 @@ class World {
     const frames = 20;
     const posSlide = new Animation("posSlideInd", "position", frameRate, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
     posSlide.setKeys([
-      { frame: 0, value: this.currPlayerMesh.position }, 
+      { frame: 0, value: this.currPlayerMesh.position },
       { frame: frames, value: this.computeHomeCenter(this.curr_player, 10) }
     ]);
     const easingFunction = new CubicEase();

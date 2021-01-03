@@ -44,8 +44,12 @@ The current scores are shown in the document title.
 ### Keyboard shortcuts
 * `p`: place pieces on field
 * `s`: swap pieces on field
+* `c`: toggle between orthographic and perspective camera view
 * `[space]`: move camera to view field
 * `[return]`: move camera to view own pieces
+* arrow keys or left-click: rotate and tilt view
+* ctrl + arrow keys or right-click: pan view
+* alt + up/down or wheel: zoom
 
 For debugging:
 * `[ctrl]+[shift]+x`: open babylon inspector to debug GUI
