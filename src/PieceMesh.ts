@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: PieceMesh.ts 3750 2021-01-02 00:34:01Z zwo $
+// $Id: PieceMesh.ts 3755 2021-01-02 14:36:51Z zwo $
 //
 
 import { Scene, Vector3, Animation, CubicEase, EasingFunction, IAnimationKey, WeightedSound } from "@babylonjs/core";
@@ -66,6 +66,7 @@ export class PieceMesh implements PieceInGame {
     this.mesh.isPickable = false;
     this.mesh.isVisible = false;
     this.setUnveil(false);
+    world.addShadow(this.mesh);
     // this.mesh.checkCollisions = true; -- manual now
   }
 

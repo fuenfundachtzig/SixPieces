@@ -91,7 +91,7 @@ class World {
     // add debug meshes
     this.fieldMesh = fieldBox();
 
-    // add glow (not used (much))
+    // add glow
     var glow_layer = new GlowLayer("glow", scene);
     glow_layer.customEmissiveColorSelector = (function () {
       var x = 20;
@@ -127,6 +127,10 @@ class World {
     this.grid = emptyGrid()
     this.hands = [];
 
+  }
+
+  addShadow(mesh: Mesh) {
+    this.shadowGenerator.addShadowCaster(mesh);
   }
 
   getPlayerID(): number {
