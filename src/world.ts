@@ -239,11 +239,11 @@ class World {
     if (flatfield) {
       // zoom a bit further out to include homes
       this.camera.target.z = this.camera.target.z + 4;
-      this.camera.radius = distance * 1.25;
+      this.camera.radius = distance * 1;
     } else
       this.camera.radius = distance * 0.9;
     if (this.cameraIsOrtho)
-      configureOrthographicCamera(this.camera, distance*1.25);
+      configureOrthographicCamera(this.camera, distance * 1.25);
   }
 
   setCurrPlayer(p: string) {
@@ -259,7 +259,7 @@ class World {
     const posSlide = new Animation("posSlideInd", "position", frameRate, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
     posSlide.setKeys([
       { frame: 0, value: this.currPlayerMesh.position },
-      { frame: frames, value: this.computeHomeCenter(this.curr_player, 10) }
+      { frame: frames, value: this.computeHomeCenter(this.curr_player, flatfield ? 5 : 10) }
     ]);
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
@@ -305,20 +305,28 @@ class World {
           console.log(`hand ${player_idx} has a piece on ${p.home_x}`)
         let angle2 = this.playerToAngle(player_idx) + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
         let angle3 = -angle2 + Math.PI / 2;
-        let refpoint = this.computeHomeCenterXY(player_idx);
-        let x = refpoint.x + 10 * Math.cos(angle2);
-        let y = refpoint.y + 10 * Math.sin(angle2);
+        let x = 0;
+        let y = 0;
+        if (flatfield) {
+          let refpoint = this.computeHomeCenterXY(player_idx, -5);
+          x = refpoint.x - 10 * Math.cos(angle2);
+          y = refpoint.y - 10 * Math.sin(angle2);
+        } else {
+          let refpoint = this.computeHomeCenterXY(player_idx);
+          x = refpoint.x + 10 * Math.cos(angle2);
+          y = refpoint.y + 10 * Math.sin(angle2);
+        }
         if (p.isHand) {
           if (!flatfield)
             p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
           else
             p.homerot = Vector3.Zero();
           if (p.homexy.x == 0) {
-            p.homexy = { x: x, y: y };
+            p.homexy = { x, y };
             p.moveHome(true, true);
           } else {
             // move without drop (e.g. when home center was adjusted because field got larger)
-            p.homexy = { x: x, y: y };
+            p.homexy = { x, y };
             p.moveHome(true, false);
           }
         }
