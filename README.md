@@ -42,7 +42,7 @@ The current scores are shown in the document title.
 
 
 ### Keyboard shortcuts
-* `p`: place pieces on field
+* `e`: place pieces on field
 * `s`: swap pieces on field
 * `c`: toggle between orthographic and perspective camera view
 * `[space]`: move camera to view field
