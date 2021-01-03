@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3754 2021-01-02 12:16:38Z zwo $
+// $Id: index.ts 3757 2021-01-02 15:10:34Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -41,9 +41,6 @@ function SetupScreen(div: HTMLDivElement) {
       button.onclick = () => resolve(playerID);
       div.append(button);
     };
-    div.innerHTML = `<p>Match ID: <input id="matchID" value="default"/></p>
-    <p>Number of players (1-4): <input id="numberOfPlayers" value="2"/></p>
-    <p>Play as</p>`;
     const playerIDs = ["0", "1", "2", "3"];
     playerIDs.forEach(createButton);
   });
@@ -73,8 +70,8 @@ class GameClient {
     this.client = Client({
       game: GameDefinition,
       // multiplayer: Local(),
-      // multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
-      multiplayer: SocketIO({ server: server_url }), // TODO: better way to set path
+      multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
+      // multiplayer: SocketIO({ server: server_url }), // TODO: better way to set path
       numPlayers,
       playerID,
       matchID,
@@ -107,7 +104,6 @@ const divElement = document.getElementById('setup') as HTMLDivElement;
 SetupScreen(divElement).then((playerID: any) => {
 
   divElement.hidden = true;
-  playerID = playerID;
   let matchID = (document.getElementById('matchID') as HTMLInputElement).value;
   let numberOfPlayers = parseInt((document.getElementById('numberOfPlayers') as HTMLInputElement).value);
   console.log(`Playing as ${playerID} in ${matchID}.`);
