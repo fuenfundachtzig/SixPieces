@@ -70,7 +70,7 @@ Alternatively, server and clients can also be run on the same machine for testin
   * display / show number of pieces left in bag
   * improve camera positions (viewHomeCenter, viewCameraCenter)
   * add "?" on pieces on hand of opponents (instead of leaving blank) (drawShape for Shape.Hidden)
-  * add levitating arrow pointing at current player
+  * add levitating arrow pointing at current player (could replace current sphere)
   * add effect for 6-in-a-row bonus
   * add sound
   * improve animations (new Animation in several places)

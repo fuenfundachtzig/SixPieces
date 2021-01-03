@@ -3,9 +3,9 @@
 // 
 // (85)
 //
-// $Id: world.ts 3752 2021-01-02 10:14:55Z zwo $
+// $Id: world.ts 3755 2021-01-02 14:36:51Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, createArcRotateCamera, scene, floatingPiece } from "./functions";
 import { gridCube, gridPos, has, set } from "./types/Field";
@@ -64,6 +64,7 @@ class World {
   private curr_player = 0; // cache of current player
   private light_player: SpotLight; // spotlight showing hand of current player
   private fieldMesh: Mesh; // used to indicate field size
+  private currPlayerMesh: Mesh; // used to indicate current player
   private camera: ArcRotateCamera;
 
   constructor(scene: Scene) {
@@ -123,6 +124,14 @@ class World {
     groundMesh.freezeWorldMatrix() // since we are not going to be moving the ground, we freeze it for better performance
     groundMesh.receiveShadows = true;
 
+    // add indicator for current player
+    this.currPlayerMesh = MeshBuilder.CreateSphere("currPlayer", { diameter: 3 });
+    this.currPlayerMesh.visibility = 0;
+    this.currPlayerMesh.material = new PBRMetallicRoughnessMaterial('currPlayer-material', scene);
+    this.currPlayerMesh.receiveShadows = true;
+    (this.currPlayerMesh.material as PBRMetallicRoughnessMaterial).baseColor = new Color3(0.1, 0.1, 0.2);
+    this.addShadow(this.currPlayerMesh);
+
     // init grid
     this.grid = emptyGrid()
     this.hands = [];
@@ -134,9 +143,64 @@ class World {
   }
 
   getPlayerID(): number {
+    // my player ID (numeric)
     if (gameClient)
       return parseInt(gameClient.playerID);
     return 0;
+  }
+
+  isMe(player_idx: number): boolean {
+    // true if this is me
+    return player_idx === this.getPlayerID();
+  }
+
+  isMyTurn(): boolean {
+    // true if my turn
+    return this.isMe(this.curr_player);
+  }
+
+  playerToAngle(player_idx: number) {
+    // returns angle on field pointing to player
+    return Math.PI / 4 + Math.PI / 2 * player_idx;
+  }
+
+  computeHomeCenterXY(player_idx: number, offset: number = 14): gridPos {
+    // compute center of home position for player
+    let angle1 = this.playerToAngle(player_idx);
+    let fieldsize = this.getFieldSize(5);
+    var refpoint: gridPos;
+    switch (player_idx) {
+      default:
+      case 0:
+        // fieldsizes = [this.grid.grid_maxx, this.grid.grid_maxy];
+        refpoint = { x: fieldsize.br.x, y: fieldsize.br.z };
+        break;
+      case 1:
+        // fieldsizes = [this.grid.grid_minx, this.grid.grid_maxy];
+        refpoint = { x: fieldsize.tl.x, y: fieldsize.br.z };
+        break;
+      case 2:
+        // fieldsizes = [this.grid.grid_minx, this.grid.grid_miny];
+        refpoint = { x: fieldsize.tl.x, y: fieldsize.tl.z };
+        break;
+      case 3:
+        // fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
+        refpoint = { x: fieldsize.br.x, y: fieldsize.tl.z };
+        break;
+    }
+    return {x: refpoint.x + offset*Math.cos(angle1), y: refpoint.y + offset*Math.sin(angle1)};
+  }
+
+  computeHomeCenter(player_idx: number, offset: number = 0, y: number = 0): Vector3 {
+    // compute 3-D home position center
+    let angle1 = this.playerToAngle(player_idx);
+    let refpoint = this.computeHomeCenterXY(player_idx, offset);
+    let homepos3d = new Vector3(
+      refpoint.x + offset * Math.cos(angle1),
+      y,
+      refpoint.y + offset * Math.sin(angle1)
+    );
+    return homepos3d;
   }
 
   viewHomeCenter(player_idx: number = -1) {
@@ -166,64 +230,54 @@ class World {
     // receive update on current player
     console.log("Active player now is " + p);
     this.curr_player = parseInt(p);
-    // // move spotlight...
-    let homeposxy = this.computeHomeCenter(this.curr_player);
-    let homepos3 = new Vector3(
-      homeposxy.x + 40 * Math.cos(this.playerToAngle(this.curr_player)),
-      3,
-      homeposxy.y + 40 * Math.sin(this.playerToAngle(this.curr_player)));
+
+    // compute home position for this player
+
+    // move indicator sphere
+    const frameRate = 10;
+    const frames = 20;
+    const posSlide = new Animation("posSlideInd", "position", frameRate, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    posSlide.setKeys([
+      { frame: 0, value: this.currPlayerMesh.position }, 
+      { frame: frames, value: this.computeHomeCenter(this.curr_player, 10) }
+    ]);
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+    posSlide.setEasingFunction(easingFunction);
+    scene.beginDirectAnimation(this.currPlayerMesh, [posSlide], 0, frames, false, undefined, () => {
+      // at end of movement make visible (so it doesn't look weird on init) and switch color
+      this.currPlayerMesh.visibility = 1;
+      if (this.isMyTurn())
+        (this.currPlayerMesh.material as PBRMetallicRoughnessMaterial).baseColor = new Color3(0.1, 0.5, 0.1);
+      else
+        (this.currPlayerMesh.material as PBRMetallicRoughnessMaterial).baseColor = new Color3(0.1, 0.1, 0.2);
+    });
+    if (!this.isMyTurn())
+      // switch off directly
+      (this.currPlayerMesh.material as PBRMetallicRoughnessMaterial).baseColor = new Color3(0.1, 0.1, 0.2);
+
+
+    // move spotlight...
+    let homepos3 = this.computeHomeCenter(this.curr_player, 40, 3);
     let dirpos3 = new Vector3(
       -Math.cos(this.playerToAngle(this.curr_player)),
       0,
       -Math.sin(this.playerToAngle(this.curr_player))
     );
-    const frameRate = 10;
-    const posSlide = new Animation("posSlide", "position", 10, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
-    const dirSlide = new Animation("dirSlide", "direction", 10, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
-    posSlide.setKeys([{ frame: 0, value: this.light_player.position }, { frame: frameRate, value: homepos3 }]);
-    dirSlide.setKeys([{ frame: 0, value: this.light_player.direction }, { frame: frameRate, value: dirpos3 }]);
-    scene.beginDirectAnimation(this.light_player, [posSlide, dirSlide], 0, frameRate, false);
-  }
-
-  playerToAngle(player_idx: number) {
-    // returns angle on field pointing to player
-    return Math.PI / 4 + Math.PI / 2 * player_idx;
-  }
-
-  computeHomeCenter(player_idx: number): gridPos {
-    // compute center of home position for player
-    let angle1 = this.playerToAngle(player_idx);
-    let fieldsize = this.getFieldSize(5);
-    var refpoint: gridPos;
-    switch (player_idx) {
-      default:
-      case 0:
-        // fieldsizes = [this.grid.grid_maxx, this.grid.grid_maxy];
-        refpoint = { x: fieldsize.br.x, y: fieldsize.br.z };
-        break;
-      case 1:
-        // fieldsizes = [this.grid.grid_minx, this.grid.grid_maxy];
-        refpoint = { x: fieldsize.tl.x, y: fieldsize.br.z };
-        break;
-      case 2:
-        // fieldsizes = [this.grid.grid_minx, this.grid.grid_miny];
-        refpoint = { x: fieldsize.tl.x, y: fieldsize.tl.z };
-        break;
-      case 3:
-        // fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
-        refpoint = { x: fieldsize.br.x, y: fieldsize.tl.z };
-        break;
-    }
-    let x = refpoint.x + Math.cos(angle1) * 14;
-    let y = refpoint.y + Math.sin(angle1) * 14;
-    return { x, y };
+    const posSlideSpot = new Animation("posSlideSpot", "position", frameRate, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    const dirSlideSpot = new Animation("dirSlideSpot", "direction", frameRate, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    posSlideSpot.setKeys([{ frame: 0, value: this.light_player.position }, { frame: frames, value: homepos3 }]);
+    dirSlideSpot.setKeys([{ frame: 0, value: this.light_player.direction }, { frame: frames, value: dirpos3 }]);
+    posSlideSpot.setEasingFunction(easingFunction);
+    dirSlideSpot.setEasingFunction(easingFunction);
+    scene.beginDirectAnimation(this.light_player, [posSlideSpot, dirSlideSpot], 0, frames, false);
   }
 
   updateHandMeshes() {
     // (re-)compute home position for meshes and show hand
     for (let player_idx = 0; player_idx < this.hands.length; ++player_idx) {
       this.hands[player_idx].forEach(p => {
-        let isMine: boolean = player_idx === this.getPlayerID();
+        let isMine = this.isMe(player_idx);
         let isCurr: boolean = player_idx === this.curr_player;
         if (isMine || !hideopp)
           console.log(`hand ${player_idx} has ${identify2(p)}`)
@@ -231,7 +285,7 @@ class World {
           console.log(`hand ${player_idx} has a piece on ${p.home_x}`)
         let angle2 = this.playerToAngle(player_idx) + Math.PI + Math.PI * (p.home_x - 2.5) / 10;
         let angle3 = -angle2 + Math.PI / 2;
-        let refpoint = this.computeHomeCenter(player_idx);
+        let refpoint = this.computeHomeCenterXY(player_idx);
         let x = refpoint.x + 10 * Math.cos(angle2);
         let y = refpoint.y + 10 * Math.sin(angle2);
         if (p.isHand) {
@@ -262,7 +316,7 @@ class World {
         console.log("remove mesh for " + identify2(pm));
         scene.removeMesh(pm.mesh);
         this.pieces.delete(pm.id);
-        unplace(this.grid, pm.gridxy);  
+        unplace(this.grid, pm.gridxy);
       }
     }
 
