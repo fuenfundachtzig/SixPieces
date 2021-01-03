@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3758 2021-01-03 10:49:37Z zwo $
+// $Id: index.ts 3759 2021-01-03 19:22:00Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -26,7 +26,7 @@ export const debug = false; // NOTE: press ctrl+shift+X for debugging webGL obje
 export var playerID: string; // this player's ID
 export const hideopp = true; // hide other players' pieces on hand (not for debugging)
 export const ngeneration = 3; // how often each piece exists, normally 3
-export const flatfield = true; // lie all pieces flat (including the ones in home)
+export var flatfield = true; // lie all pieces flat (including the ones in home)
 
 // setup objects
 const canvas: HTMLCanvasElement = document.getElementById('game_canvas') as HTMLCanvasElement
@@ -116,6 +116,7 @@ SetupScreen(divElement).then((playerID: any) => {
   divElement.hidden = true;
   let matchID = (document.getElementById('matchID') as HTMLInputElement).value;
   let numberOfPlayers = parseInt((document.getElementById('numberOfPlayers') as HTMLInputElement).value);
+  flatfield = (document.getElementById("optionFlatField") as HTMLInputElement).checked;
   console.log(`Playing as ${playerID} in ${matchID}.`);
 
   // construct and start game client and overlay debug panel if debug is set
