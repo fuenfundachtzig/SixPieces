@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3757 2021-01-02 15:10:34Z zwo $
+// $Id: index.ts 3758 2021-01-03 10:49:37Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -16,6 +16,7 @@ import { makeMaterials } from './make_materials'
 import { createWorld } from './world'
 import { GameDefinition } from './game';
 import { _ClientImpl } from 'boardgame.io/dist/types/src/client/client';
+import { Player } from './types/GameState';
 
 // Import stylesheets
 // import './index.css';
@@ -80,6 +81,13 @@ class GameClient {
 
     this.client.subscribe((state) => {
       if (state) {
+        if (state.G && state.G.players) {
+          let s = [];
+          for (let player of state.G.players as Player[]) {
+            s.push(player.score);
+          }
+          document.title = `Scores: ${JSON.stringify(s)}`;
+        }
         if (state.ctx.gameover) {
           divElement.hidden = false;
           let e: string = "<h1>Game ended</h1>";

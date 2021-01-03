@@ -38,6 +38,7 @@ If you complete a row or column you get 6 bonus points.
 Also if the bag is empty and you place the last piece from your deck, you get a final 6 bonus points.
 This ends the game.
 The player with the most points wins.
+The current scores are shown in the document title.
 
 
 ### Keyboard shortcuts
