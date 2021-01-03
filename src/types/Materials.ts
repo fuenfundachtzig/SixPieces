@@ -3,11 +3,11 @@
 // 
 // (85)
 // 
-// $Id$
+// $Id: Materials.ts 3755 2021-01-02 14:36:51Z zwo $
 
 export const colors = [
     "green",
-    "#3040ff", // or RoyalBlue?
+    "#7070ff", // or blue or RoyalBlue?
     "red",
     "yellow",
     "violet",
