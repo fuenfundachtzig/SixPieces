@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id$
+// $Id: cameras.ts 3759 2021-01-03 19:22:00Z zwo $
 
 import { ArcRotateCamera, Camera, Vector3 } from "@babylonjs/core";
 import { scene, canvas, engine } from "./functions";
