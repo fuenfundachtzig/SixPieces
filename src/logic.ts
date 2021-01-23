@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: logic.ts 3755 2021-01-02 14:36:51Z zwo $
+// $Id: logic.ts 3756 2021-01-02 15:04:21Z zwo $
 //
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"

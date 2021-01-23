@@ -17,6 +17,7 @@ import { createWorld } from './world'
 import { GameDefinition } from './game';
 import { _ClientImpl } from 'boardgame.io/dist/types/src/client/client';
 import { Player } from './types/GameState';
+import { LobbyClient } from 'boardgame.io/client';
 
 // Import stylesheets
 // import './index.css';
@@ -35,6 +36,7 @@ const scene = createScene()
 makeMaterials(scene)
 const world = createWorld(scene)
 export var gameClient: GameClient;
+var lobbyClient: LobbyClient;
 
 function SetupScreen(div: HTMLDivElement) {
   return new Promise(resolve => {
@@ -63,12 +65,14 @@ class GameClient {
 
   private client: _ClientImpl;
   public moves: any;
+  private doRename: boolean = true;
 
   constructor(
     public playerID: string = "0",
     public matchID: string = "default",
     public server_url: string,
     public numPlayers: number = 2,
+    public myName: string,
   ) {
     this.client = Client({
       game: GameDefinition,
@@ -84,22 +88,31 @@ class GameClient {
     this.client.subscribe((state) => {
       if (state) {
         if (state.G && state.G.players) {
-          let s = [];
+          let s = "";
           for (let player of state.G.players as Player[]) {
-            s.push(player.score);
+            if (s != "")
+              s += " -- ";
+            s += `${player.name}: ${player.score}`;
           }
-          document.title = `Scores: ${JSON.stringify(s)} -- Bag: ${state.G.bag.length} pieces`;
+          document.title = `Scores: ${s} -- Bag: ${state.G.bag.length} pieces`;
         }
         if (state.ctx.gameover) {
           divElement.hidden = false;
           let e: string = "<h1>Game ended</h1>";
           for (let p of state.G.players) {
-            e = e + `<p>Player ${p.id} has ${p.score} points.</p>`;
+            e = e + `<p>Player ${p.name} has ${p.score} points.</p>`;
           }
           divElement.innerHTML = e;
         }
         world.setCurrPlayer(state.ctx.currentPlayer);
         world.unpack(state.G);
+
+        if ((state.ctx.currentPlayer == this.playerID) && (this.doRename)) {
+          this.doRename = false;
+          console.log("Trying to rename to " + this.myName);
+          this.moves.rename(this.playerID, this.myName);
+        }
+
       }
     });
 
@@ -116,12 +129,20 @@ SetupScreen(divElement).then((playerID: any) => {
   divElement.hidden = true;
   let matchID = (document.getElementById('matchID') as HTMLInputElement).value;
   let numberOfPlayers = parseInt((document.getElementById('numberOfPlayers') as HTMLInputElement).value);
+  let myName = (document.getElementById('playerName') as HTMLInputElement).value;
+  if ((myName == "Player") || (myName == ""))
+    myName = "Player #" + (parseInt(playerID) + 1);
+  else
+    myName = myName.substr(0, 30);
   flatfield = (document.getElementById("optionFlatField") as HTMLInputElement).checked;
-  console.log(`Playing as ${playerID} in ${matchID}.`);
+  console.log(`Playing as #${playerID} in ${matchID}.`);
 
   // construct and start game client and overlay debug panel if debug is set
   let server_url = document.getElementById("server_url")!.getAttribute("content") as string;
-  gameClient = new GameClient(playerID, matchID, server_url, numberOfPlayers);
+  gameClient = new GameClient(playerID, matchID, server_url, numberOfPlayers, myName);
+  // lobbyClient = new LobbyClient({ server: server_url }); -- once we start using the lobby we need to store and use our credentials for all actions (moves etc.), cf. doesMatchRequireAuthentication in master.ts
+  // lobbyClient.joinMatch(...);
+  // lobbyClient.updatePlayer(...myName...);
 
   // start the GUI
   world.viewHomeCenter(parseInt(playerID));

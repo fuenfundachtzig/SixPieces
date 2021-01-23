@@ -71,6 +71,7 @@ npm build
 ```
 
 The server is not included in this repository, although that should be possible in principle. Something on the [to-do list](TODO.md).
+For local testing, run the server locally and set the server address (`server_url`) in [`index.html`](public/index.html) and the argument of `SocketIO` in [`index.ts`](src/index.ts).
 
 ### Contribute
 Feel invited to improve the code and take a look at the [to-do list](TODO.md).

@@ -87,7 +87,7 @@ export const GameDefinition = {
 
       console.log("moves.place...")
       if (!played) {
-        console.log("...illegal: got no  played array :/")
+        console.log("...illegal: got no played array :/")
         return INVALID_MOVE;
       }
 
@@ -132,6 +132,13 @@ export const GameDefinition = {
      console.log("...ended")
      ctx.events!.endTurn!();
 
+    },
+
+    rename: (G: GameState, ctx: Ctx, myID: number, myName: string) => {
+      // this is a "hack" to update the player name
+      console.log("Rename");
+      if ((myID >= 0) && (myID < G.players.length))
+        G.players[myID].name = myName;
     }
   },
 
