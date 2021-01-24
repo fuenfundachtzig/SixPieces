@@ -5,11 +5,11 @@
 //
 // $Id: world.ts 3785 2021-01-24 09:50:20Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, scene, floatingPiece } from "./functions";
 import { gridPos, has, set } from "./types/Field";
-import { PieceMesh } from "./PieceMesh";
+import { easeV, PieceMesh } from "./PieceMesh";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
 import { GameState, identify2, PieceInGame } from "./types/GameState";
 import { debug, flatfield, gameClient, hideopp } from ".";
@@ -257,21 +257,24 @@ class World {
     console.log("Active player now is " + p);
     this.curr_player = parseInt(p);
 
-    // compute home position for this player
-
-    // move indicator sphere
-    const frameRate = 10;
-    const frames = 20;
+    // move indicator sphere...
+    const frameRate = 15;
+    const frames = 30;
+    const steps = 20;
+    const targetPos = this.computeHomeCenter(this.curr_player, flatfield ? 5 : 10);
+    // compute keys
+    let keysPos: IAnimationKey[] = [];
+    for (var x = 0; x <= steps; ++x) {
+      let f = x / steps; // fraction of animation time
+      let pos = easeV(this.currPlayerMesh.position, targetPos, x, steps); // compute interpolated position for frame no. (f*frames)
+      pos.y = pos.y + (1 - 4 * (f - 0.5) * (f - 0.5)) * 3; // add parabola in z-direction
+      keysPos.push({ frame: f * frames, value: pos });
+    }
+    // create animation
     const posSlide = new Animation("posSlideInd", "position", frameRate, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
-    posSlide.setKeys([
-      { frame: 0, value: this.currPlayerMesh.position },
-      { frame: frames, value: this.computeHomeCenter(this.curr_player, flatfield ? 5 : 10) }
-    ]);
-    const easingFunction = new CubicEase();
-    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-    posSlide.setEasingFunction(easingFunction);
+    posSlide.setKeys(keysPos);
     scene.beginDirectAnimation(this.currPlayerMesh, [posSlide], 0, frames, false, undefined, () => {
-      // at end of movement make visible (so it doesn't look weird on init) and switch color
+      //  make visible at end of animation (so it doesn't look weird on init when it comes out of nowhere) and switch color
       this.currPlayerMesh.visibility = 1;
       if (this.isMyTurn())
         (this.currPlayerMesh.material as PBRMetallicRoughnessMaterial).baseColor = new Color3(0.1, 0.5, 0.1);
@@ -279,9 +282,8 @@ class World {
         (this.currPlayerMesh.material as PBRMetallicRoughnessMaterial).baseColor = new Color3(0.1, 0.1, 0.2);
     });
     if (!this.isMyTurn())
-      // switch off directly
+      // switch off immediately at end of turn (i.e. before animation starts)
       (this.currPlayerMesh.material as PBRMetallicRoughnessMaterial).baseColor = new Color3(0.1, 0.1, 0.2);
-
 
     // move spotlight...
     let homepos3 = this.computeHomeCenter(this.curr_player, 40, 3);
@@ -294,6 +296,8 @@ class World {
     const dirSlideSpot = new Animation("dirSlideSpot", "direction", frameRate, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
     posSlideSpot.setKeys([{ frame: 0, value: this.light_player.position }, { frame: frames, value: homepos3 }]);
     dirSlideSpot.setKeys([{ frame: 0, value: this.light_player.direction }, { frame: frames, value: dirpos3 }]);
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
     posSlideSpot.setEasingFunction(easingFunction);
     dirSlideSpot.setEasingFunction(easingFunction);
     scene.beginDirectAnimation(this.light_player, [posSlideSpot, dirSlideSpot], 0, frames, false);

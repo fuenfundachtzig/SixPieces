@@ -12,7 +12,7 @@
   * add simpler shapes that are better visible (e.g. circle with hole or triangle to replace star)
   * improve camera positions (viewHomeCenter, viewCameraCenter)
   * add "?" on pieces on hand of opponents (instead of leaving blank) (drawShape for Shape.Hidden)
-  * improve animation for sphere or add levitating arrow pointing at current player (could replace current sphere)
+  * add levitating arrow pointing at current player (could replace current sphere)?
   * add effect for 6-in-a-row bonus
   * add sound
   * improve animations (cf. Animation in several places)

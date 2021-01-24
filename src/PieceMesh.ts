@@ -24,7 +24,7 @@ function easeInOutCubic(x: number): number {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
-function easeV(v1: Vector3, v2: Vector3, step: number, steps: number): Vector3 {
+export function easeV(v1: Vector3, v2: Vector3, step: number, steps: number): Vector3 {
   let w = easeInOutCubic(step / steps);
   return v1.add(v2.subtract(v1).scale(w));
 }
@@ -86,21 +86,20 @@ export class PieceMesh implements PieceInGame {
       // compute keys
       let keysPos: IAnimationKey[] = [];
       let keysRot: IAnimationKey[] = [];
-      var x;
-      for (x = 0; x <= steps / 2; ++x) {
+      for (var x = 0; x <= steps; ++x) {
         let f = x / steps; // fraction of animation time
         let pos = easeV(this.mesh.position, targetPos, x, steps); // compute interpolated position for frame no. (f*frames)
         pos.y = pos.y + (1 - 4 * (f - 0.5) * (f - 0.5)) * 3; // add parabola in z-direction
         keysPos.push({ frame: f * frames, value: pos });
         keysRot.push({ frame: f * frames, value: easeV(this.mesh.rotation, Vector3.Zero(), x, steps) });
       }
-      for (; x <= steps; ++x) {
-        let f = x / steps;
-        let pos = easeV(this.mesh.position, targetPos, x, steps);
-        pos.y = pos.y + (1 - 4 * (f - 0.5) * (f - 0.5)) * 3;
-        keysPos.push({ frame: f * frames, value: pos });
-        keysRot.push({ frame: f * frames, value: easeV(this.mesh.rotation, Vector3.Zero(), x, steps) });
-      }
+      // for (; x <= steps; ++x) {
+      //   let f = x / steps;
+      //   let pos = easeV(this.mesh.position, targetPos, x, steps);
+      //   pos.y = pos.y + (1 - 4 * (f - 0.5) * (f - 0.5)) * 3;
+      //   keysPos.push({ frame: f * frames, value: pos });
+      //   keysRot.push({ frame: f * frames, value: easeV(this.mesh.rotation, Vector3.Zero(), x, steps) });
+      // }
       posSlide.setKeys(keysPos);
       rotSlide.setKeys(keysRot);
       // posSlide.setKeys([{ frame: 0, value: this.mesh.position }, { frame: frameRate, value: targetPos }]);
