@@ -18,6 +18,7 @@ import { createWorld } from './world'
 import { GameDefinition } from './game';
 import { Player } from './types/GameState';
 import { Shapes1, Shapes2 } from "./types/Materials";
+import packageJson from '../package.json';
 
 // Import stylesheets
 // import './index.css';
@@ -78,8 +79,8 @@ class GameClient {
     this.client = Client({
       game: GameDefinition,
       // multiplayer: Local(),
-      // multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
-      multiplayer: SocketIO({ server: server_url }), // TODO: better way to set path
+      multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
+      // multiplayer: SocketIO({ server: server_url }), // TODO: better way to set path
       numPlayers,
       playerID,
       matchID,
@@ -124,6 +125,7 @@ class GameClient {
   }
 }
 
+document.title = `${packageJson.name} --- v${packageJson.version}`;
 const divElement = document.getElementById('setup') as HTMLDivElement;
 SetupScreen(divElement).then((playerID: any) => {
 
