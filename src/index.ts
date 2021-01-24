@@ -43,7 +43,7 @@ function SetupScreen(div: HTMLDivElement) {
   return new Promise(resolve => {
     const createButton = (playerID: string) => {
       const button = document.createElement('button');
-      button.textContent = 'Player ' + playerID;
+      button.textContent = 'Player ' + (parseInt(playerID) + 1);
       button.onclick = () => resolve(playerID);
       div.append(button);
     };
@@ -130,6 +130,11 @@ SetupScreen(divElement).then((playerID: any) => {
   divElement.hidden = true;
   let matchID = (document.getElementById('matchID') as HTMLInputElement).value;
   let numberOfPlayers = parseInt((document.getElementById('numberOfPlayers') as HTMLInputElement).value);
+  if (numberOfPlayers < 1)
+    numberOfPlayers = 1;
+  if (numberOfPlayers > 4)
+    // we could support more players in principle but would need to rearrange the location of where the pieces on the players' hands is drawn
+    numberOfPlayers = 4;
   let myName = (document.getElementById('playerName') as HTMLInputElement).value;
   if ((myName == "Player") || (myName == ""))
     myName = "Player #" + (parseInt(playerID) + 1);
