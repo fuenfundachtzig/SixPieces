@@ -205,13 +205,4 @@ export const createPBRSkybox = () => {
   return skyboxMesh
 }
 
-export function shuffleArray<T>(array: Array<T>) {
-  // Durstenfeld shuffle, from https://stackoverflow.com/a/12646864/143931
-  for (var i = array.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
-  }
-}
 

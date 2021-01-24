@@ -3,11 +3,8 @@
 //
 // (85)
 //
-// $Id: Field.ts 3741 2020-12-30 10:17:07Z zwo $
+// $Id: Field.ts 3785 2021-01-24 09:50:20Z zwo $
 //
-
-import { Vector3 } from "@babylonjs/core";
-
 
 export interface gridPos {
   x: number;
@@ -17,12 +14,6 @@ export interface gridPos {
 export interface gridRect {
   tl: gridPos; // top left
   br: gridPos; // bottom right
-}
-
-export interface gridCube {
-  // mainly need this because babylon uses the wrong (LH) coordinate system with y pointing up
-  tl: Vector3;
-  br: Vector3;
 }
 
 export function translate(xy: gridPos, dx: number = 0, dy: number = 0): gridPos {

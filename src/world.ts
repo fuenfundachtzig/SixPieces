@@ -3,12 +3,12 @@
 // 
 // (85)
 //
-// $Id: world.ts 3755 2021-01-02 14:36:51Z zwo $
+// $Id: world.ts 3785 2021-01-24 09:50:20Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, scene, floatingPiece } from "./functions";
-import { gridCube, gridPos, has, set } from "./types/Field";
+import { gridPos, has, set } from "./types/Field";
 import { PieceMesh } from "./PieceMesh";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
 import { GameState, identify2, PieceInGame } from "./types/GameState";
@@ -25,6 +25,12 @@ export let world: World;
 export function createWorld(scene: Scene) {
   world = new World(scene);
   return world;
+}
+
+interface gridCube {
+  // mainly need this because babylon uses the wrong (LH) coordinate system with y pointing up
+  tl: Vector3;
+  br: Vector3;
 }
 
 function downgrade(arr: PieceMesh[]): PieceInGame[] {

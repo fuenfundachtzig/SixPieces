@@ -3,17 +3,17 @@
 //
 // (85)
 //
-// $Id: game.ts 3755 2021-01-02 14:36:51Z zwo $
+// $Id: game.ts 3785 2021-01-24 09:50:20Z zwo $
 //
 
 import { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { shuffleArray } from './functions';
 import { emptyGrid, fillHand, isValidMove } from './logic';
-import { createBag } from './types/Bag';
+import { createBag, shuffleArray } from './types/Bag';
 import { set } from './types/Field';
-import { GameState, Piece, PieceInGame, Player } from './types/GameState';
+import { GameState, identify2, Piece, PieceInGame, Player } from './types/GameState';
 
+let limitBag = 999;
 
 export const GameDefinition = {
 
@@ -41,6 +41,8 @@ export const GameDefinition = {
       fillHand(player, bag);
       players.push(player);
     }
+    while (bag.length > limitBag)
+      bag.pop();
     let removed: Piece[] = [];
     return {
       players,
@@ -71,6 +73,7 @@ export const GameDefinition = {
       for (let p1 of toreturn) {
         G.bag.push(p1);
         let idx = player.hand.findIndex((p2) => p1.id === p2.id);
+        console.log(`return ${identify2(p1)}`);
         // for (let px of player.hand)
         //   console.log("before remove " + px.id)
         G.removed.push(player.hand[idx]);
@@ -129,8 +132,9 @@ export const GameDefinition = {
         p.fix = true;
         G.pog.push(p);
       }
-     console.log("...ended")
-     ctx.events!.endTurn!();
+      //console.log(`Pieces on grid: ${JSON.stringify(G.pog)})`);
+      console.log("...ended")
+      ctx.events!.endTurn!();
 
     },
 
