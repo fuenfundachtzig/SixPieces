@@ -45,6 +45,14 @@ The current scores are shown in the document title.
 For debugging:
 * `[ctrl]+[shift]+x`: open babylon inspector to debug GUI
 
+### Pieces
+Two different set of shapes are available, the original and an alternative which is meant to have simpler shapes that are easier to distinguish:
+
+![original shapes](Shapes1small.png)
+![alternative shapes](Shapes2small.png)
+
+Which set should be displayed can be chosen under "Display options" when joining a game.
+
 ### Playing in local mode
 Not tested much. `multiplayer: Local()` does not yet work? Running without `multiplayer` works for debugging.
 
