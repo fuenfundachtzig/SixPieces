@@ -65,9 +65,9 @@ function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
       break;
     case Shape.Clover:
       // clover leaf
-      var open = 0.3;
+      let open = 0.3;
       ctx.translate(texture_w / 2, texture_h / 2);
-      for (var i = 0; i < 4; i++) {
+      for (let i = 0; i < 4; i++) {
         ctx.rotate(Math.PI / 2);
         // ctx.lineTo(Math.cos(Math.PI*open)*(texture_x)/5-texture_x/4,
         //            Math.sin(Math.PI*open)*(texture_x)/5,
@@ -96,7 +96,7 @@ function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
       const len = texture_w / 4;
       ctx.beginPath();
       ctx.translate(128, 128);
-      for (var i = 0; i < 4; ++i) {
+      for (let i = 0; i < 4; ++i) {
         ctx.rotate(i * Math.PI / 2);
         ctx.lineTo(wid, 0);
         ctx.lineTo(wid + len, len);

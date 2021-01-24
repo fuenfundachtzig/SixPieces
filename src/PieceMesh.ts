@@ -6,7 +6,7 @@
 // $Id: PieceMesh.ts 3786 2021-01-24 11:39:32Z zwo $
 //
 
-import { Scene, Vector3, Animation, CubicEase, EasingFunction, IAnimationKey, WeightedSound } from "@babylonjs/core";
+import { Scene, Vector3, Animation, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { Shape } from "./types/Materials";
 import { createSuperEllipsoid } from './superello';

@@ -21,7 +21,7 @@ Each player starts with 6 pieces on their hand, and draws new pieces to again ha
 In each turn you can either place one to six pieces on the board or exchange one or more pieces from your hand with the bag.
 Pan, move and zoom the field by using the mouse.
 Place your pieces by clicking them and then clicking on the board.
-When you have placed all pieces you want to play, press `p` to end your turn.
+When you have placed all pieces you want to play, press `e` to end your turn.
 If pieces are highlighted in red, they cannot be placed here. You can only place pieces in one row or column, and mix either colors or shapes. 
 To return pieces to the bag (swap), place them anywhere on the field as before and press `s`.
 
@@ -36,7 +36,7 @@ The current scores are shown in the document title.
 * `e`: end your turn (place pieces on field)
 * `s`: swap pieces (exchange pieces with bag)
 * `c`: toggle between orthographic and perspective camera view
-* `[space]`: move camera to view field
+* `[space]`: move camera to view whole field
 * `[return]`: move camera to view own pieces
 * arrow keys or left-click: rotate and tilt view
 * ctrl + arrow keys or right-click: pan view
