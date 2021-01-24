@@ -7,8 +7,8 @@
   <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta name="theme-color" content="#000000" />
-  <meta name="server_url" content="https://zwo.uber.space/" id="server_url" />
-  <!-- <meta name="server_url" content="http://localhost:8000" id="server_url"/> -->
+  <!-- <meta name="server_url" content="https://zwo.uber.space/" id="server_url" /> -->
+  <meta name="server_url" content="http://localhost:8000" id="server_url" />
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
   <title>SixPieces</title>
 
@@ -45,7 +45,11 @@
     <p><a href="https://github.com/fuenfundachtzig/SixPieces#how-to-play">How to play.</a></p>
     <p>Match ID: <input id="matchID" value="default" /></p>
     <p>Number of players (1-4): <input id="numberOfPlayers" value="2" /></p>
-    <p>Display option: <input id="optionFlatField" type="checkbox" checked="" /> flat field</p>
+    <p>Display options:
+    <ul>
+      <li><input id="optionFlatField" type="checkbox" checked="checked" /> flat field</li>
+      <li><input id="optionShapes2" type="checkbox" /> high-contrast shapes</li>
+    </ul>
     <p>Your name: <input id="playerName" value="Player" /></p>
     <p>Play as</p>
   </div>

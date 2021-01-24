@@ -3,21 +3,21 @@
 //
 // (85)
 //
-// $Id: index.ts 3759 2021-01-03 19:22:00Z zwo $
+// $Id: index.ts 3786 2021-01-24 11:39:32Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
-import { Client } from 'boardgame.io/client';
+import { Client, LobbyClient } from 'boardgame.io/client';
 // import { Local } from 'boardgame.io/multiplayer'
 import { SocketIO } from 'boardgame.io/multiplayer'
+import { _ClientImpl } from 'boardgame.io/dist/types/src/client/client';
 
 import { createEngine, createScene } from './functions'
 import { makeMaterials } from './make_materials'
 import { createWorld } from './world'
 import { GameDefinition } from './game';
-import { _ClientImpl } from 'boardgame.io/dist/types/src/client/client';
 import { Player } from './types/GameState';
-import { LobbyClient } from 'boardgame.io/client';
+import { Shapes1, Shapes2 } from "./types/Materials";
 
 // Import stylesheets
 // import './index.css';
@@ -28,6 +28,7 @@ export var playerID: string; // this player's ID
 export const hideopp = true; // hide other players' pieces on hand (not for debugging)
 export const ngeneration = 3; // how often each piece exists, normally 3
 export var flatfield = true; // lie all pieces flat (including the ones in home)
+export var shapeSet = Shapes1; // which shapes to use
 
 // setup objects
 const canvas: HTMLCanvasElement = document.getElementById('game_canvas') as HTMLCanvasElement
@@ -77,8 +78,8 @@ class GameClient {
     this.client = Client({
       game: GameDefinition,
       // multiplayer: Local(),
-      multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
-      // multiplayer: SocketIO({ server: server_url }), // TODO: better way to set path
+      // multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
+      multiplayer: SocketIO({ server: server_url }), // TODO: better way to set path
       numPlayers,
       playerID,
       matchID,
@@ -135,6 +136,8 @@ SetupScreen(divElement).then((playerID: any) => {
   else
     myName = myName.substr(0, 30);
   flatfield = (document.getElementById("optionFlatField") as HTMLInputElement).checked;
+  if ((document.getElementById("optionShapes2") as HTMLInputElement).checked)
+    shapeSet = Shapes2;
   console.log(`Playing as #${playerID} in ${matchID}.`);
 
   // construct and start game client and overlay debug panel if debug is set

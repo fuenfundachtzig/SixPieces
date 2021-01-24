@@ -1,6 +1,6 @@
 {
   "name": "SixPieces",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "main": "src/index.ts",
   "private": true,
   "homepage": "/SixPieces",

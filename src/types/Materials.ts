@@ -3,7 +3,7 @@
 // 
 // (85)
 // 
-// $Id: Materials.ts 3755 2021-01-02 14:36:51Z zwo $
+// $Id: Materials.ts 3786 2021-01-24 11:39:32Z zwo $
 
 export const colors = [
     "green",
@@ -23,11 +23,37 @@ export const colors = [
 // }
 // TODO: type shape = "square" | "circle" | ...
 export enum Shape {
+    // default shapes
     Square,
     Circle,
     Star,
     Cross,
     Rhombus,
     Clover,
-    Hidden
+    // empty
+    Hidden,
+    // simplified shapes
+    SmallCircle,
+    Ring,
+    Triangle,
+    Times,
+    Checker,
 }
+
+export const Shapes1 = [
+    Shape.Square,
+    Shape.Circle,
+    Shape.Star,
+    Shape.Cross,
+    Shape.Rhombus,
+    Shape.Clover,
+]
+
+export const Shapes2 = [
+    Shape.Square,
+    Shape.SmallCircle,
+    Shape.Ring,
+    Shape.Triangle,
+    Shape.Times,
+    Shape.Checker,
+]

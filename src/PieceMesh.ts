@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: PieceMesh.ts 3755 2021-01-02 14:36:51Z zwo $
+// $Id: PieceMesh.ts 3786 2021-01-24 11:39:32Z zwo $
 //
 
 import { Scene, Vector3, Animation, CubicEase, EasingFunction, IAnimationKey, WeightedSound } from "@babylonjs/core";
@@ -12,9 +12,10 @@ import { Shape } from "./types/Materials";
 import { createSuperEllipsoid } from './superello';
 import { piece_size, world, piece_y_stand } from "./world";
 import { gridPos } from "./types/Field";
-import { Piece, PieceInGame } from "./types/GameState";
+import { PieceInGame } from "./types/GameState";
 import { scene } from "./functions";
 import { materials } from "./make_materials";
+import { shapeSet } from ".";
 
 // areas where piece cannot be dropped / will return to home
 const InnerRing = 5;
@@ -185,7 +186,7 @@ export class PieceMesh implements PieceInGame {
 
   setUnveil(unveil: boolean) {
     if (unveil)
-      this.mesh.material = materials[this.shape][this.color];
+      this.mesh.material = materials[shapeSet[this.shape]][this.color];
     else
       this.mesh.material = materials[Shape.Hidden][0];
     this.unveil = unveil;

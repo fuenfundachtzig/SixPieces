@@ -9,7 +9,6 @@
 * GUI:
   * improve display of scores and number of pieces left in bag
   * display player names
-  * add simpler shapes that are better visible (e.g. circle with hole or triangle to replace star)
   * improve camera positions (viewHomeCenter, viewCameraCenter)
   * add "?" on pieces on hand of opponents (instead of leaving blank) (drawShape for Shape.Hidden)
   * add levitating arrow pointing at current player (could replace current sphere)?
