@@ -6,7 +6,7 @@ It is written in [TypeScript](https://www.typescriptlang.org/). Its graphical us
 I started developing this end of 2020 to be able to play Qwirkle online with my parents. The only other free implementation I found at that time is [Pont](https://github.com/mkeeter/pont) by Matthew Keeter, who also runs a [server](https://pont.mattkeeter.com/) where you can play his version of Qwirkle for free.
 
 ## Start playing
-![Screenshot](screenshot.png)
+![Screenshot](figures/screenshot.png)
 
 A demo server is running [here](https://zwo.uber.space/SixPieces/).
 
@@ -48,8 +48,8 @@ For debugging:
 ### Pieces
 Two different set of shapes are available, the original and an alternative which is meant to have simpler shapes that are easier to distinguish:
 
-![original shapes](Shapes1small.png)
-![alternative shapes](Shapes2small.png)
+![original shapes](figures/Shapes1small.png)
+![alternative shapes](figures/Shapes2small.png)
 
 Which set should be displayed can be chosen under "Display options" when joining a game.
 
