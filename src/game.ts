@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: game.ts 3785 2021-01-24 09:50:20Z zwo $
+// $Id: game.ts 3794 2021-01-27 21:48:20Z zwo $
 //
 
 import { Ctx } from 'boardgame.io';
@@ -62,7 +62,7 @@ export const GameDefinition = {
         return INVALID_MOVE;
       }
 
-      if (toreturn.length == 0) {
+      if (toreturn.length === 0) {
         // cannot skip move
         console.log("...illegal: have to swap at least one piece (by placing it anywhere in the field).")
         return INVALID_MOVE;

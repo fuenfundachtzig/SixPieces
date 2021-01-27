@@ -32,6 +32,11 @@
       overflow: hidden;
     }
 
+    canvas {
+      width: 96px;
+      height: 96px;
+    }
+
     #game_canvas {
       width: 100%;
       height: 100%;
@@ -53,7 +58,15 @@
     <p>Your name: <input id="playerName" value="Player" /></p>
     <p>Play as</p>
   </div>
-  <canvas id="game_canvas"></canvas>
+  <div id="hud" style="position: absolute; left:100px; bottom: 0%;">
+    <canvas id="chand0" height="256px" width="256px"></canvas>
+    <canvas id="chand1" height="256px" width="256px"></canvas>
+    <canvas id="chand2" height="256px" width="256px"></canvas>
+    <canvas id="chand3" height="256px" width="256px"></canvas>
+    <canvas id="chand4" height="256px" width="256px"></canvas>
+    <canvas id="chand5" height="256px" width="256px"></canvas>
+  </div>
+  <canvas id="game_canvas">Your browser does not support the canvas element.</canvas>  
 </body>
 
 </html>

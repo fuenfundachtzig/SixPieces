@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: make_materials.ts 3786 2021-01-24 11:39:32Z zwo $
+// $Id: make_materials.ts 3794 2021-01-27 21:48:20Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
 import { colors, Shape } from "./types/Materials";
@@ -32,10 +32,11 @@ function drawStar(ctx: CanvasRenderingContext2D, radius: number, symmetry: numbe
     ctx.lineTo(0, 0 + radius);
   }
   ctx.closePath();
+  ctx.translate(-texture_w / 2, -texture_h / 2);
 }
 
 
-function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
+export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
   // draws one of 6 shapes
 
   ctx.beginPath();
@@ -62,6 +63,7 @@ function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
       ctx.rotate(Math.PI / 4);
       const r = 64;
       ctx.rect(-r, -r, r * 2, r * 2);
+      ctx.translate(-texture_w / 2, -texture_h / 2);
       break;
     case Shape.Clover:
       // clover leaf
@@ -75,6 +77,7 @@ function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
         ctx.arc(-texture_w / 4.8, 0, texture_w * 0.14, Math.PI * open, Math.PI * (2 - open))
       }
       ctx.closePath();
+      ctx.translate(-texture_w / 2, -texture_h / 2);
       break;
     case Shape.Hidden:
       // for pieces that player should not see

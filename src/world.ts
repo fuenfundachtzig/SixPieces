@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3785 2021-01-24 09:50:20Z zwo $
+// $Id: world.ts 3794 2021-01-27 21:48:20Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -14,6 +14,8 @@ import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placeP
 import { GameState, identify2, PieceInGame } from "./types/GameState";
 import { debug, flatfield, gameClient, hideopp } from ".";
 import { configureOrthographicCamera, configurePerspectiveCamera, createCamera } from "./cameras";
+import { drawShape } from "./make_materials";
+import { colors } from "./types/Materials";
 
 // y positions of pieces
 export const piece_y_lie = 0.31;
@@ -22,8 +24,8 @@ export const piece_size = 2.0;
 
 export let world: World;
 
-export function createWorld(scene: Scene) {
-  world = new World(scene);
+export function createWorld(scene: Scene, hud: HTMLDivElement) {
+  world = new World(scene, hud);
   return world;
 }
 
@@ -74,8 +76,9 @@ class World {
   private currPlayerMesh: Mesh; // used to indicate current player
   private camera: ArcRotateCamera;
   private cameraIsOrtho: boolean;
+  private hud: HTMLDivElement;
 
-  constructor(scene: Scene) {
+  constructor(scene: Scene, hud: HTMLDivElement) {
 
     // add camera and sky
     createPBRSkybox();
@@ -145,6 +148,9 @@ class World {
     // init grid
     this.grid = emptyGrid()
     this.hands = [];
+
+    // remember hud
+    this.hud = hud;
 
   }
 
@@ -331,7 +337,7 @@ class World {
             p.homerot = new Vector3(-Math.PI / 2, angle3, 0);
           else
             p.homerot = Vector3.Zero();
-          if (p.homexy.x == 0) {
+          if (p.homexy.x === 0) {
             p.homexy = { x, y };
             p.moveHome(true, true);
           } else {
@@ -346,6 +352,22 @@ class World {
         p.mesh.isPickable = !p.fix && isCurr && (isMine || debug);
       });
     };
+
+    // draw hud
+    let myhand =  this.hands[this.getPlayerID()];
+    for (let i = 0; i < myhand.length; ++i) {
+      let canvas: HTMLCanvasElement | null = this.hud.querySelector("#chand"+i);
+      if (canvas) {
+        let ctx = canvas.getContext("2d");
+        if (ctx) {
+          let p = myhand[i];
+          ctx.clearRect(0, 0, 256, 256);
+          ctx.fillStyle = colors[p.color];
+          drawShape(canvas.getContext("2d") as CanvasRenderingContext2D, p.shape);
+        }
+      }
+    }
+
   }
 
   unpack(state: GameState) {
@@ -506,7 +528,7 @@ class World {
       return false;
     // which pieces to swap
     let toreturn = this.hands[this.curr_player].filter(p => !p.isHand);
-    if (toreturn.length == 0) {
+    if (toreturn.length === 0) {
       // cannot skip move
       console.log("Illegal move in world.swap: have to swap at least one piece (by placing it anywhere in the field).")
       return false;

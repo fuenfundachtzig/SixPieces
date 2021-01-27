@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3786 2021-01-24 11:39:32Z zwo $
+// $Id: index.ts 3794 2021-01-27 21:48:20Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -32,11 +32,12 @@ export var flatfield = true; // lie all pieces flat (including the ones in home)
 export var shapeSet = Shapes1; // which shapes to use
 
 // setup objects
-const canvas: HTMLCanvasElement = document.getElementById('game_canvas') as HTMLCanvasElement
-const engine = createEngine(canvas)
-const scene = createScene()
-makeMaterials(scene)
-const world = createWorld(scene)
+const canvas: HTMLCanvasElement = document.getElementById('game_canvas') as HTMLCanvasElement;
+const hud: HTMLDivElement = document.getElementById('hud') as HTMLDivElement;
+const engine = createEngine(canvas);
+const scene = createScene();
+makeMaterials(scene);
+const world = createWorld(scene, hud);
 export var gameClient: GameClient;
 var lobbyClient: LobbyClient;
 
