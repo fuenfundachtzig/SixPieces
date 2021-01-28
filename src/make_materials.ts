@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: make_materials.ts 3794 2021-01-27 21:48:20Z zwo $
+// $Id: make_materials.ts 3795 2021-01-28 07:55:26Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
 import { colors, Shape } from "./types/Materials";
@@ -32,6 +32,7 @@ function drawStar(ctx: CanvasRenderingContext2D, radius: number, symmetry: numbe
     ctx.lineTo(0, 0 + radius);
   }
   ctx.closePath();
+  // normalize
   ctx.translate(-texture_w / 2, -texture_h / 2);
 }
 
@@ -63,6 +64,8 @@ export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
       ctx.rotate(Math.PI / 4);
       const r = 64;
       ctx.rect(-r, -r, r * 2, r * 2);
+      // normalize
+      ctx.rotate(-Math.PI / 4);
       ctx.translate(-texture_w / 2, -texture_h / 2);
       break;
     case Shape.Clover:
@@ -77,6 +80,7 @@ export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
         ctx.arc(-texture_w / 4.8, 0, texture_w * 0.14, Math.PI * open, Math.PI * (2 - open))
       }
       ctx.closePath();
+      // normalize
       ctx.translate(-texture_w / 2, -texture_h / 2);
       break;
     case Shape.Hidden:
@@ -90,9 +94,9 @@ export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
       ctx.arc(texture_w / 2, texture_h / 2, texture_w * 0.18, 0, 2 * Math.PI, false);
       break;
     case Shape.Triangle:
-      ctx.moveTo(texture_w*0.5 , texture_h*0.14);
-      ctx.lineTo(texture_w*0.86, texture_h*0.86);
-      ctx.lineTo(texture_w*0.14, texture_h*0.86);
+      ctx.moveTo(texture_w * 0.5, texture_h * 0.14);
+      ctx.lineTo(texture_w * 0.86, texture_h * 0.86);
+      ctx.lineTo(texture_w * 0.14, texture_h * 0.86);
       break;
     case Shape.Times:
       const wid = texture_w / 6;
@@ -108,8 +112,8 @@ export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
       }
       break;
     case Shape.Checker:
-      ctx.fillRect(texture_w*0.14, texture_h*0.14, texture_w*0.36, texture_h*0.36);
-      ctx.fillRect(texture_w*0.50, texture_h*0.50, texture_w*0.36, texture_h*0.36);
+      ctx.fillRect(texture_w * 0.14, texture_h * 0.14, texture_w * 0.36, texture_h * 0.36);
+      ctx.fillRect(texture_w * 0.50, texture_h * 0.50, texture_w * 0.36, texture_h * 0.36);
       break;
   }
   ctx.fill();

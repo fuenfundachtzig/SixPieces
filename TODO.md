@@ -1,7 +1,7 @@
 ## TODO
 * setup screen, add more options:
   * configure server address (server_url)
-  * rename players (Player.name -- keep playerID numeric strings from 0..3)
+  * (rename players (Player.name -- keep playerID numeric strings from 0..3))
   * (choose size of bag, limitBag)
   * add authentication for players
 * keyboard shortcuts:
@@ -27,3 +27,5 @@
 ### Technical remarks
 * 2-D grid needed for isValidMove and isEmpty
 * 1-D list of pieces needed for updating meshes
+* translating materials back is important so that they are drawn correctly in HUD
+

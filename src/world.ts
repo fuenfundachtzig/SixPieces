@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 3794 2021-01-27 21:48:20Z zwo $
+// $Id: world.ts 3795 2021-01-28 07:55:26Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -12,7 +12,7 @@ import { gridPos, has, set } from "./types/Field";
 import { easeV, PieceMesh } from "./PieceMesh";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
 import { GameState, identify2, PieceInGame } from "./types/GameState";
-import { debug, flatfield, gameClient, hideopp } from ".";
+import { debug, flatfield, gameClient, hideopp, chosenShapeSet } from ".";
 import { configureOrthographicCamera, configurePerspectiveCamera, createCamera } from "./cameras";
 import { drawShape } from "./make_materials";
 import { colors } from "./types/Materials";
@@ -354,16 +354,16 @@ class World {
     };
 
     // draw hud
-    let myhand =  this.hands[this.getPlayerID()];
+    let myhand = this.hands[this.getPlayerID()];
     for (let i = 0; i < myhand.length; ++i) {
-      let canvas: HTMLCanvasElement | null = this.hud.querySelector("#chand"+i);
+      let p = myhand[i];
+      let canvas: HTMLCanvasElement | null = this.hud.querySelector(`#canvashand${p.home_x}`);
       if (canvas) {
         let ctx = canvas.getContext("2d");
         if (ctx) {
-          let p = myhand[i];
           ctx.clearRect(0, 0, 256, 256);
           ctx.fillStyle = colors[p.color];
-          drawShape(canvas.getContext("2d") as CanvasRenderingContext2D, p.shape);
+          drawShape(canvas.getContext("2d") as CanvasRenderingContext2D, chosenShapeSet[p.shape]);
         }
       }
     }

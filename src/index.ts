@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3794 2021-01-27 21:48:20Z zwo $
+// $Id: index.ts 3795 2021-01-28 07:55:26Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -29,7 +29,7 @@ export var playerID: string; // this player's ID
 export const hideopp = true; // hide other players' pieces on hand (not for debugging)
 export const ngeneration = 3; // how often each piece exists, normally 3
 export var flatfield = true; // lie all pieces flat (including the ones in home)
-export var shapeSet = Shapes1; // which shapes to use
+export var chosenShapeSet = Shapes1; // which shapes to use
 
 // setup objects
 const canvas: HTMLCanvasElement = document.getElementById('game_canvas') as HTMLCanvasElement;
@@ -80,7 +80,7 @@ class GameClient {
     this.client = Client({
       game: GameDefinition,
       // multiplayer: Local(),
-      multiplayer: SocketIO({ server: server_url, socketOpts: {path: '/SixPiecesServer/socket.io'} }), // TODO: better way to set path
+      multiplayer: SocketIO({ server: server_url, socketOpts: { path: '/SixPiecesServer/socket.io' } }), // TODO: better way to set path
       // multiplayer: SocketIO({ server: server_url }), // TODO: better way to set path
       numPlayers,
       playerID,
@@ -126,6 +126,13 @@ class GameClient {
   }
 }
 
+function getChecked(id: string, _default: boolean): boolean {
+  let element = document.getElementById(id) as HTMLInputElement;
+  if (element)
+    return (element as HTMLInputElement).checked;
+  return _default;
+}
+
 document.title = `${packageJson.name} --- v${packageJson.version}`;
 const divElement = document.getElementById('setup') as HTMLDivElement;
 SetupScreen(divElement).then((playerID: any) => {
@@ -143,10 +150,20 @@ SetupScreen(divElement).then((playerID: any) => {
     myName = "Player #" + (parseInt(playerID) + 1);
   else
     myName = myName.substr(0, 30);
-  flatfield = (document.getElementById("optionFlatField") as HTMLInputElement).checked;
-  if ((document.getElementById("optionShapes2") as HTMLInputElement).checked)
-    shapeSet = Shapes2;
+  flatfield = getChecked("optionFlatField", false);
+  if (getChecked("optionShapes2", false))
+    chosenShapeSet = Shapes2;
   console.log(`Playing as #${playerID} in ${matchID}.`);
+
+  // created HUD
+  if (getChecked("optionActiveHUD", false)) {
+    for (let i = 0; i < 6; ++i) {
+      const canvas = document.createElement('canvas');
+      canvas.id = `canvashand${i}`;
+      canvas.width = canvas.height = 256; // canvas width and height elements are important so that canvas has correct size for the drawing when scaling it with style.width and style.height
+      hud.append(canvas);
+    }
+  }
 
   // construct and start game client and overlay debug panel if debug is set
   let server_url = document.getElementById("server_url")!.getAttribute("content") as string;
