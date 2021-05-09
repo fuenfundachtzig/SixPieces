@@ -8,7 +8,8 @@
   * select pieces from hand by pressing 1..6
 * GUI:
   * improve display of scores and number of pieces left in bag
-  * display player names
+  * improve alignment of buttons in bottom right corner of screen
+  * (display player names)
   * improve camera positions (viewHomeCenter, viewCameraCenter)
   * add "?" on pieces on hand of opponents (instead of leaving blank) (drawShape for Shape.Hidden)
   * add levitating arrow pointing at current player (could replace current sphere)?
@@ -25,6 +26,7 @@
   * use [lobby API](https://github.com/boardgameio/boardgame.io/blob/master/docs/documentation/api/Lobby.md) for match making
 
 ### Technical remarks
+* [public/index.html](public/index.html) holds the setup screen, [src/index.ts](src/index.ts) is the entry point for the code
 * 2-D grid needed for isValidMove and isEmpty
 * 1-D list of pieces needed for updating meshes
 * translating materials back is important so that they are drawn correctly in HUD

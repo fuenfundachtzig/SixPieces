@@ -54,7 +54,10 @@
 
     .buttonimg {
       max-width:100%;
-      
+    }
+
+    .buttonimg:hover {
+      background-color: lavender;
     }
   </style>
 </head>
@@ -99,10 +102,10 @@
     </p>
   </div>
   <div id="hud" style="position: absolute; left: 0%; bottom: 0%;"></div>
-  <div id="ingamemenu" style="position: fixed; right: 0%; bottom: 0%; width:12%; height: 6%">
-    <div class="stackimg">
+  <div id="ingamemenu" style="position: fixed; right: 0%; bottom: 0%; width:12%; height: 6%; visibility: hidden;">
+    <div class="stackimg" title="open help">
       <a href="https://github.com/fuenfundachtzig/SixPieces#how-to-play" target="_blank">
-        <img id="img_help" src="%PUBLIC_URL%/questionmark.svg" class="buttonimg" title="open help" />
+        <img id="img_help" src="%PUBLIC_URL%/questionmark.svg" class="buttonimg" />
       </a>
     </div>
     <div class="stackimg">

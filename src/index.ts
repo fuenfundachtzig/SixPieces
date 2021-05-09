@@ -120,6 +120,8 @@ class GameClient {
           this.moves.rename(this.playerID, this.myName);
         }
 
+        // hide / show buttons
+        menu.style.visibility = state.ctx.currentPlayer == this.playerID ? "visible" : "hidden";
       }
     });
 
