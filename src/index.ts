@@ -31,9 +31,10 @@ export const ngeneration = 3; // how often each piece exists, normally 3
 export var flatfield = true; // lie all pieces flat (including the ones in home)
 export var chosenShapeSet = Shapes1; // which shapes to use
 
-// setup objects
+// initialize objects
 const canvas: HTMLCanvasElement = document.getElementById('game_canvas') as HTMLCanvasElement;
 const hud: HTMLDivElement = document.getElementById('hud') as HTMLDivElement;
+const menu: HTMLDivElement = document.getElementById('ingamemenu') as HTMLDivElement;
 const engine = createEngine(canvas);
 const scene = createScene();
 makeMaterials(scene);
@@ -41,7 +42,9 @@ const world = createWorld(scene, hud);
 export var gameClient: GameClient;
 var lobbyClient: LobbyClient;
 
+
 function SetupScreen(span: HTMLSpanElement) {
+  // creates 4 buttons labelled "Player n"
   return new Promise(resolve => {
     const createButton = (playerID: string) => {
       const button = document.createElement('button');
@@ -89,6 +92,7 @@ class GameClient {
     });
 
     this.client.subscribe((state) => {
+      // receives update from server
       if (state) {
         if (state.G && state.G.players) {
           let s = "";
@@ -136,8 +140,10 @@ function getChecked(id: string, _default: boolean): boolean {
 document.title = `${packageJson.name} --- v${packageJson.version}`;
 const spanElement = document.getElementById('playerbuttons') as HTMLSpanElement;
 SetupScreen(spanElement).then((playerID: any) => {
+  // hide setup screen
   const divElement = document.getElementById('setup') as HTMLDivElement;
   divElement.hidden = true;
+  // implement setup options
   let matchID = (document.getElementById('matchID') as HTMLInputElement).value;
   let numberOfPlayers = parseInt((document.getElementById('numberOfPlayers') as HTMLInputElement).value);
   if (numberOfPlayers < 1)
@@ -155,8 +161,9 @@ SetupScreen(spanElement).then((playerID: any) => {
     chosenShapeSet = Shapes2;
   console.log(`Playing as #${playerID} in ${matchID}.`);
 
-  // created HUD
+  // create HUD if option selected
   if (getChecked("optionActiveHUD", false)) {
+    // create 6 canvasses with IDs "canvashand0..5" to display the 6 pieces in a player's hand 
     for (let i = 0; i < 6; ++i) {
       const canvas = document.createElement('canvas');
       canvas.id = `canvashand${i}`;
@@ -164,6 +171,12 @@ SetupScreen(spanElement).then((playerID: any) => {
       hud.append(canvas);
     }
   }
+
+  // set click handlers
+  let img = document.getElementById("img_swap") as HTMLImageElement;
+  img.onclick = function() { world.swapCommand() };
+  img = document.getElementById("img_done") as HTMLImageElement;
+  img.onclick = function() { world.placeCommand() };
 
   // construct and start game client and overlay debug panel if debug is set
   let server_url = document.getElementById("server_url")!.getAttribute("content") as string;
