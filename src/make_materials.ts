@@ -38,7 +38,7 @@ function drawStar(ctx: CanvasRenderingContext2D, radius: number, symmetry: numbe
 
 
 export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
-  // draws one of 6 shapes
+  // draws one of 6 (regular or simplified) shapes
 
   ctx.beginPath();
   switch (shape) {
@@ -110,6 +110,8 @@ export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
         ctx.lineTo(len, len + wid);
         ctx.lineTo(0, wid);
       }
+      ctx.translate(-128, -128); // don't forget to move back
+      ctx.closePath();
       break;
     case Shape.Checker:
       ctx.fillRect(texture_w * 0.14, texture_h * 0.14, texture_w * 0.36, texture_h * 0.36);
