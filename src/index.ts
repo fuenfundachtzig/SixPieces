@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3795 2021-01-28 07:55:26Z zwo $
+// $Id: index.ts 3846 2021-05-09 10:24:08Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -104,12 +104,12 @@ class GameClient {
           document.title = `Scores: ${s} -- Bag: ${state.G.bag.length} pieces`;
         }
         if (state.ctx.gameover) {
-          spanElement.hidden = false;
+          divElement.hidden = false;
           let e: string = "<h1>Game ended</h1>";
           for (let p of state.G.players) {
             e = e + `<p>Player ${p.name} has ${p.score} points.</p>`;
           }
-          spanElement.innerHTML = e;
+          divElement.innerHTML = e;
         }
         world.setCurrPlayer(state.ctx.currentPlayer);
         world.unpack(state.G);
@@ -141,9 +141,9 @@ function getChecked(id: string, _default: boolean): boolean {
 
 document.title = `${packageJson.name} --- v${packageJson.version}`;
 const spanElement = document.getElementById('playerbuttons') as HTMLSpanElement;
+const divElement  = document.getElementById('setup') as HTMLDivElement;
 SetupScreen(spanElement).then((playerID: any) => {
   // hide setup screen
-  const divElement = document.getElementById('setup') as HTMLDivElement;
   divElement.hidden = true;
   // implement setup options
   let matchID = (document.getElementById('matchID') as HTMLInputElement).value;

@@ -357,7 +357,7 @@ class World {
     let myhand = this.hands[this.getPlayerID()];
     for (let i = 0; i < myhand.length; ++i) {
       let p = myhand[i];
-      let canvas: HTMLCanvasElement | null = this.hud.querySelector(`#canvashand${p.home_x}`);
+      let canvas: HTMLCanvasElement | null = this.hud.querySelector(`#canvashand${p.home_x}`); // TODO: clean rest of canvasses, so that old pieces are removed when myhand.length < 6
       if (canvas) {
         let ctx = canvas.getContext("2d");
         if (ctx) {
