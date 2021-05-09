@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: make_materials.ts 3795 2021-01-28 07:55:26Z zwo $
+// $Id: make_materials.ts 3846 2021-05-09 10:24:08Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
 import { colors, Shape } from "./types/Materials";
@@ -33,6 +33,7 @@ function drawStar(ctx: CanvasRenderingContext2D, radius: number, symmetry: numbe
   }
   ctx.closePath();
   // normalize
+  ctx.rotate(-rotate);
   ctx.translate(-texture_w / 2, -texture_h / 2);
 }
 
