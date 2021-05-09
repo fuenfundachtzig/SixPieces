@@ -41,23 +41,51 @@
       width: 100%;
       height: 100%;
     }
+
+    .help {
+      font-size: small;
+      font-style: italic;
+    }
   </style>
 </head>
 
 <body>
   <div id="setup">
-    <h1>SixPieces</h1>
-    <p><a href="https://github.com/fuenfundachtzig/SixPieces#how-to-play">How to play.</a></p>
-    <p>Match ID: <input id="matchID" value="default" /></p>
-    <p>Number of players (1-4): <input id="numberOfPlayers" value="2" /></p>
-    <p>Display options:
+    <h1>Welcome to SixPieces!</h1>
+    <p><a href="https://github.com/fuenfundachtzig/SixPieces#how-to-play">How to play.</a>
+    <div class="help">Find out how to play this game, the rules and keyboard shortcuts under this link.</div>
+    </p>
+    <p>Name of your game table: <input id="matchID" value="default" />
+    <div class="help">
+      This name (also called match ID) must be the same for all players who want to join the same game.
+      Decide on a common and creative name for your game table.
+      Players can rejoin at any time using this name.
+    </div>
+    </p>
+    <p>Number of players (1-4): <input id="numberOfPlayers" value="2" />
+    <div class="help">Choose the total number of players in your game here. This number can no longer be changed after the game has started by any player.</div>
+    </p>
+    <p>Your name: <input id="playerName" value="Player" />
+    <div class="help">Pick a nickname for yourself.</div>
+    </p>
+    <p>Play as
+      <span id="playerbuttons"></span>
+    <div class="help">Every player needs to play in a different seat, so discuss with the others who takes which number.
+    </div>
+    </p>
+    <p>Advanced options:
     <ul>
-      <li><input id="optionFlatField" type="checkbox" checked="checked" /> flat field (pieces in your hand lie flat of standing)</li>
-      <li><input id="optionActiveHUD" type="checkbox" /> show HUD (pieces in your hand are shown in 2-D in addition)</li>
-      <li><input id="optionShapes2" type="checkbox" /> high-contrast shapes (uses an alternative set of shapes)</li>
+      <li><input id="optionFlatField" type="checkbox" checked="checked" />flat field 
+        <div class="help">(pieces in your hand lie flat of standing)</div>
+      </li>
+      <li><input id="optionActiveHUD" type="checkbox" />show HUD 
+        <div class="help">(pieces in your hand are shown in 2-D in addition)</div>
+      </li>
+      <li><input id="optionShapes2" type="checkbox" />high-contrast shapes 
+        <div class="help">(uses an alternative set of shapes)</div>
+      </li>
     </ul>
-    <p>Your name: <input id="playerName" value="Player" /></p>
-    <p>Play as</p>
+    </p>
   </div>
   <div id="hud" style="position: absolute; left: 0%; bottom: 0%;"></div>
   <canvas id="game_canvas">Your browser does not support the canvas element.</canvas>

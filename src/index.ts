@@ -41,13 +41,13 @@ const world = createWorld(scene, hud);
 export var gameClient: GameClient;
 var lobbyClient: LobbyClient;
 
-function SetupScreen(div: HTMLDivElement) {
+function SetupScreen(span: HTMLSpanElement) {
   return new Promise(resolve => {
     const createButton = (playerID: string) => {
       const button = document.createElement('button');
       button.textContent = 'Player ' + (parseInt(playerID) + 1);
       button.onclick = () => resolve(playerID);
-      div.append(button);
+      span.append(button);
     };
     const playerIDs = ["0", "1", "2", "3"];
     playerIDs.forEach(createButton);
@@ -100,12 +100,12 @@ class GameClient {
           document.title = `Scores: ${s} -- Bag: ${state.G.bag.length} pieces`;
         }
         if (state.ctx.gameover) {
-          divElement.hidden = false;
+          spanElement.hidden = false;
           let e: string = "<h1>Game ended</h1>";
           for (let p of state.G.players) {
             e = e + `<p>Player ${p.name} has ${p.score} points.</p>`;
           }
-          divElement.innerHTML = e;
+          spanElement.innerHTML = e;
         }
         world.setCurrPlayer(state.ctx.currentPlayer);
         world.unpack(state.G);
@@ -134,9 +134,9 @@ function getChecked(id: string, _default: boolean): boolean {
 }
 
 document.title = `${packageJson.name} --- v${packageJson.version}`;
-const divElement = document.getElementById('setup') as HTMLDivElement;
-SetupScreen(divElement).then((playerID: any) => {
-
+const spanElement = document.getElementById('playerbuttons') as HTMLSpanElement;
+SetupScreen(spanElement).then((playerID: any) => {
+  const divElement = document.getElementById('setup') as HTMLDivElement;
   divElement.hidden = true;
   let matchID = (document.getElementById('matchID') as HTMLInputElement).value;
   let numberOfPlayers = parseInt((document.getElementById('numberOfPlayers') as HTMLInputElement).value);
