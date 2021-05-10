@@ -355,9 +355,11 @@ class World {
 
     // draw hud
     let myhand = this.hands[this.getPlayerID()];
+    let newhand = Array();
     for (let i = 0; i < myhand.length; ++i) {
       let p = myhand[i];
-      let canvas: HTMLCanvasElement | null = this.hud.querySelector(`#canvashand${p.home_x}`); // TODO: clean rest of canvasses, so that old pieces are removed when myhand.length < 6
+      let canvas: HTMLCanvasElement | null = this.hud.querySelector(`#canvashand${p.home_x}`);
+      newhand.push(p.home_x);
       if (canvas) {
         let ctx = canvas.getContext("2d");
         if (ctx) {
@@ -367,7 +369,20 @@ class World {
         }
       }
     }
-
+    // clear rest of canvasses, so that old pieces are removed when myhand.length < 6
+    if (myhand.length < 6) {
+      for (let i = 0; i < 6; ++i) {
+        if (!newhand.includes(i)) {
+          let canvas: HTMLCanvasElement | null = this.hud.querySelector(`#canvashand${i}`);
+          if (canvas) {
+            let ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.clearRect(0, 0, 256, 256);
+            }
+          }     
+        }
+      }
+    }
   }
 
   unpack(state: GameState) {
