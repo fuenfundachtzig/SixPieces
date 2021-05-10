@@ -181,7 +181,8 @@ export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | numbe
         console.log(`invalid ${isrow ? "row" : "column"} for ${identify2(piece)}`);
         console.log("shapes " + shapes);
         console.log("colors " + colors);
-        piece.invalid = true;
+        for (let pieceall of played) // TODO: could mark only duplicate piece(s)?
+          pieceall.invalid = true;
         return false;
       }
       // piece is in valid row / column => get points!
