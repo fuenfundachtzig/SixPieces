@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3846 2021-05-09 10:24:08Z zwo $
+// $Id: index.ts 3848 2021-05-12 13:16:07Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -142,6 +142,13 @@ function getChecked(id: string, _default: boolean): boolean {
 document.title = `${packageJson.name} --- v${packageJson.version}`;
 const spanElement = document.getElementById('playerbuttons') as HTMLSpanElement;
 const divElement  = document.getElementById('setup') as HTMLDivElement;
+
+// fill match ID from URL parameter
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+if (urlParams.has('matchID'))
+  (document.getElementById('matchID') as HTMLInputElement).value = urlParams.get('matchID') as string;
+
 SetupScreen(spanElement).then((playerID: any) => {
   // hide setup screen
   divElement.hidden = true;
