@@ -14,8 +14,11 @@ Most of the coding was done end of 2020 to be able to play Qwirkle online. (Ther
 
 ## How to play
 ### Starting / joining a new game
-Enter a new unique match ID to create a new game.
-Other players can join (and rejoin) the game by using the same match ID. (No authentication is done. You can send a link to others to a particular match with the suffix `?matchID=`[your match ID] in the URL, e.g. [https://zwo.uber.space/SixPieces/?matchID=20210604](https://zwo.uber.space/SixPieces/?matchID=20210604). This will prefill the match ID in the game setup screen.)
+Open the link to the [demo server](https://zwo.uber.space/SixPieces/) (or run your own as described below) and enter a new unique *match ID* to create a new game in the field that looks like this:
+
+![screenshot of form](figures/form_gameid.png)
+
+Other players can join (and rejoin) the game by using the same *match ID*. (No authentication is done. You can send a link to others including the *match ID* by using the suffix `?matchID=`*match ID* in the URL, e.g. [https://zwo.uber.space/SixPieces/?matchID=20210604](https://zwo.uber.space/SixPieces/?matchID=20210604). This will prefill the *match ID* in the game setup screen so that others know which is the right game to join.)
 
 ### Actions in the game
 Players take turns. 
@@ -47,8 +50,12 @@ The current scores are shown in the document title.
 * ctrl + arrow keys or right-click: pan view
 * alt + up/down or wheel: zoom
 
-For debugging:
-* `[ctrl]+[shift]+x`: open babylon inspector to debug GUI
+### Mouse navigation
+* wheel: zoom in + out
+* left click + drag: rotate view
+* right click + drag: pan view
+
+This means that **to move a piece on the board click to select it and click again to place it**, do not try to drag the piece, that won't work :)
 
 ### Alternative pieces
 Two different set of shapes are available, the original and an alternative which is meant to have simpler shapes that are easier to distinguish:
@@ -78,6 +85,9 @@ npm build
 
 The server is not included in this repository, although that should be possible in principle. Something on the [to-do list](TODO.md).
 For local testing, run the server locally and set the server address (`server_url`) in [`index.html`](public/index.html) and the argument of `SocketIO` in [`index.ts`](src/index.ts).
+
+### Debugging
+* `[ctrl]+[shift]+x`: open babylon inspector to debug GUI
 
 ### Playing in local mode
 Not tested much. `multiplayer: Local()` does not yet work? Running without `multiplayer` works for debugging.
