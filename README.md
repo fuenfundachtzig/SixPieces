@@ -3,12 +3,14 @@
 SixPieces is a multiplayer online game based on the boardgame ["Qwirkle"](https://en.wikipedia.org/wiki/Qwirkle) by Susan McKinley Ross.
 
 It is written in [TypeScript](https://www.typescriptlang.org/). Its graphical user interface is rendered in 3-D using [`babylon.js`](https://www.babylonjs.com/) with HTML5 and WebGL. It uses [`boardgame.io`](https://boardgame.io/), an open-source engine for turn-based games, to synchronize the game state between server and clients. 
-I started developing this end of 2020 to be able to play Qwirkle online with my parents. The only other free implementation I found at that time is [Pont](https://github.com/mkeeter/pont) by Matthew Keeter, who also runs a [server](https://pont.mattkeeter.com/) where you can play his version of Qwirkle for free.
+Most of the coding was done end of 2020 to be able to play Qwirkle online. (There is another free implementation called [Pont](https://github.com/mkeeter/pont) by Matthew Keeter.)
 
 ## Start playing
-![Screenshot](figures/screenshot.png)
+[A demo server is running here.](https://zwo.uber.space/SixPieces/) Read below how to setup and play the game.
 
-A demo server is running [here](https://zwo.uber.space/SixPieces/).
+[![Play now!](figures/playnow.svg)](https://zwo.uber.space/SixPieces/)
+
+![Screenshot](figures/screenshot.png)
 
 ## How to play
 ### Starting / joining a new game
