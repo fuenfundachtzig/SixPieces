@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: cameras.ts 3787 2021-01-26 08:29:18Z zwo $
+// $Id: cameras.ts 3846 2021-05-09 10:24:08Z zwo $
 
 import { ArcRotateCamera, Camera, Vector3 } from "@babylonjs/core";
 import { scene, canvas } from "./functions";
@@ -29,7 +29,8 @@ export function createCamera(): ArcRotateCamera {
   camera.allowUpsideDown = false // don't allow zooming inverted
   // camera.inertia = 0.2;
   // camera.panningInertia = 0.2;
-  camera.wheelPrecision = 100;
+  // camera.wheelPrecision = 100;
+  camera.wheelDeltaPercentage = 0.01;
 
   return camera;
   
