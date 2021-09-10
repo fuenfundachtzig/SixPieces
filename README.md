@@ -83,9 +83,6 @@ A standalone version that can run in (hopefully) any recent web browser can be b
 npm build
 ```
 
-The server is not included in this repository, although that should be possible in principle. Something on the [to-do list](TODO.md).
-For local testing, run the server locally and set the server address (`server_url`) in [`index.html`](public/index.html) and the argument of `SocketIO` in [`index.ts`](src/index.ts).
-
 ### Debugging
 * `[ctrl]+[shift]+x`: open babylon inspector to debug GUI
 
@@ -93,8 +90,22 @@ For local testing, run the server locally and set the server address (`server_ur
 Not tested much. `multiplayer: Local()` does not yet work? Running without `multiplayer` works for debugging.
 
 ### Playing in server/client mode
-This requires a server to be setup with [`SixPiecesServer`](https://github.com/fuenfundachtzig/SixPiecesServer/) that can be accessed from the web. 
+This requires a server to be setup with that can be accessed from the web. 
 Alternatively, server and clients can also be run on the same machine for testing. The server address is currently configured in `public/index.html`.  
+
+Installation of the server requires `npm`, the Node.js package manager, to be installed. To install the packages required for the server do
+```
+npm install
+```
+Then build and run the server with:
+```
+npm run buildserver
+npm run serve
+```
+
+For local testing, run the server locally and set the server address (`server_url`) in [`index.html`](public/index.html) and the argument of `SocketIO` in [`index.ts`](src/index.ts).
+
+The number of the port the server listens on can be set in `src/server.js` (or `src/server.ts` before compilation).
 
 ### Contribute
 Feel invited to improve the code and take a look at the [to-do list](TODO.md).

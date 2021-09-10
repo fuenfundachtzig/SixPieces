@@ -29,7 +29,14 @@ export const GameDefinition = {
     // create contents of gamestate G
     console.log("Init")
     let bag = createBag();
+    // init board
     let pog: PieceInGame[] = [];
+    // // debug: show all pieces
+    // let id = 1000;
+    // for (let i = 0; i < 6; ++i)
+    //   for (let j = 0; j < 6; ++j)
+    //     pog.push({gridxy: {x: i, y: j}, isHand: false, home_x: 0, invalid: false, fix: true, id: id++, color: i, shape: j});
+    // init players
     const players: Player[] = [];
     for (let p = 0; p < ctx.numPlayers; p++) {
       let player = {

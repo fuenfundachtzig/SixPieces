@@ -1,6 +1,6 @@
 {
   "name": "SixPieces",
-  "version": "0.4.9",
+  "version": "0.5.0",
   "main": "src/index.ts",
   "private": true,
   "homepage": "/SixPieces",
@@ -8,13 +8,16 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "buildserver": "npx tsc src/server.ts --esModuleInterop",
+    "serve": "node -r esm src/server.js"
   },
   "dependencies": {
     "@babylonjs/core": "^4.1.0",
     "@babylonjs/inspector": "^4.1.0",
     "@babylonjs/loaders": "^4.1.0",
     "boardgame.io": "^0.42.2",
+    "esm": "^3.2.25",
     "pepjs": "^0.5.2",
     "source-map-explorer": "^2.5.1"
   },
