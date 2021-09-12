@@ -3,11 +3,11 @@
 //
 // (85)
 //
-// $Id: index.ts 3848 2021-05-12 13:16:07Z zwo $
+// $Id: index.ts 3866 2021-07-29 08:21:17Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
-import { Client, LobbyClient } from 'boardgame.io/client';
+import { Client } from 'boardgame.io/client';
 // import { Local } from 'boardgame.io/multiplayer'
 import { SocketIO } from 'boardgame.io/multiplayer'
 import { _ClientImpl } from 'boardgame.io/dist/types/src/client/client';
@@ -40,7 +40,7 @@ const scene = createScene();
 makeMaterials(scene);
 const world = createWorld(scene, hud);
 export var gameClient: GameClient;
-var lobbyClient: LobbyClient;
+// var lobbyClient: LobbyClient;
 
 
 function SetupScreen(span: HTMLSpanElement) {
@@ -97,7 +97,7 @@ class GameClient {
         if (state.G && state.G.players) {
           let s = "";
           for (let player of state.G.players as Player[]) {
-            if (s != "")
+            if (s !== "")
               s += " -- ";
             s += `${player.name}: ${player.score}`;
           }
@@ -114,14 +114,14 @@ class GameClient {
         world.setCurrPlayer(state.ctx.currentPlayer);
         world.unpack(state.G);
 
-        if ((state.ctx.currentPlayer == this.playerID) && (this.doRename)) {
+        if ((state.ctx.currentPlayer === this.playerID) && (this.doRename)) {
           this.doRename = false;
           console.log("Trying to rename to " + this.myName);
           this.moves.rename(this.playerID, this.myName);
         }
 
         // hide / show buttons
-        menu.style.visibility = state.ctx.currentPlayer == this.playerID ? "visible" : "hidden";
+        menu.style.visibility = state.ctx.currentPlayer === this.playerID ? "visible" : "hidden";
       }
     });
 
@@ -161,7 +161,7 @@ SetupScreen(spanElement).then((playerID: any) => {
     // we could support more players in principle but would need to rearrange the location of where the pieces on the players' hands is drawn
     numberOfPlayers = 4;
   let myName = (document.getElementById('playerName') as HTMLInputElement).value;
-  if ((myName == "Player") || (myName == ""))
+  if ((myName === "Player") || (myName === ""))
     myName = "Player #" + (parseInt(playerID) + 1);
   else
     myName = myName.substr(0, 30);

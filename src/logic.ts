@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: logic.ts 3756 2021-01-02 15:04:21Z zwo $
+// $Id: logic.ts 3848 2021-05-12 13:16:07Z zwo $
 //
 
 import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
@@ -109,7 +109,7 @@ export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | numbe
   let maxx = Math.max(...xarray);
   let miny = Math.min(...yarray);
   let maxy = Math.max(...yarray);
-  if ((minx != maxx) && (miny != maxy)) {
+  if ((minx !== maxx) && (miny !== maxy)) {
     console.log(`diagonal ${minx} ${maxx} ${miny} ${maxy}`);
     played.forEach(p => { p.invalid = true });
     return false;
@@ -143,7 +143,7 @@ export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | numbe
   function mismatch(p1: Piece | undefined, p2: Piece | undefined) {
     if ((p1 === undefined) || (p2 === undefined))
       return false;
-    return (p1.shape != p2.shape) == (p1.color != p2.color);
+    return (p1.shape !== p2.shape) === (p1.color !== p2.color);
   }
   for (var p of played) {
     for (var disp of neighbors) {
@@ -173,7 +173,7 @@ export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | numbe
           xy = translate(xy, ...dir);
         }
       }
-      let isrow = dir[0] != 0;
+      let isrow = dir[0] !== 0;
       let ushapes = new Set(shapes); // if set is smaller than array, there's a duplicate -- which is fine as long as they are *all* the same (i.e. ushapes has onyly 1 entry)
       let ucolors = new Set(colors); // same rule here
       if (((ushapes.size < shapes.length) && (ushapes.size > 1)) ||
@@ -191,7 +191,7 @@ export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | numbe
           if (!rows_counted.includes(piece.gridxy.y)) {
             rows_counted.push(piece.gridxy.y);
             score += shapes.length;
-            if (shapes.length == 6)
+            if (shapes.length === 6)
               score += 6;
             // console.log(shapes.length);
           }
@@ -199,7 +199,7 @@ export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | numbe
           if (!cols_counted.includes(piece.gridxy.x)) {
             cols_counted.push(piece.gridxy.x);
             score += shapes.length;
-            if (shapes.length == 6)
+            if (shapes.length === 6)
               score += 6;
             // console.log(shapes.length);
           }
@@ -217,7 +217,7 @@ export function getFreeHandSlot(hand: PieceInGame[]): number {
       if (hand[idx].home_x === i)
         break;
     }
-    if (idx == hand.length)
+    if (idx === hand.length)
       return i;
   }
   console.log("getFreeHandSlot: couldn't find free slot??")

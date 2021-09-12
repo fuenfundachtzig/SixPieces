@@ -114,7 +114,7 @@ export class PieceMesh implements PieceInGame {
   }
 
   moveHome(animate: boolean = false, animate_drop: boolean = false) {
-    // compute home position for meshes
+    // compute and set hand position for meshes 
     let homepos = new Vector3(this.homexy.x, piece_y_stand, this.homexy.y);
     if (!animate) {
       this.mesh.position = homepos;
@@ -176,10 +176,12 @@ export class PieceMesh implements PieceInGame {
         this.isHand = false;
       }
     } else if (world.withinField(newPosition, OuterRing)) {
+      // freely float (don't snap) between field and outer ring
       this.mesh.rotation = Vector3.Zero();
       this.mesh.position = newPosition;
       this.isHand = true;
     } else {
+      // if even further out: move piece back to hand
       this.moveHome();
     }
   }
