@@ -100,6 +100,12 @@ function pointerMovePiece() {
   floatingPiece.updatePos(currentGPos);
 }
 
+function dropFloatingPiece() {
+  // drop floating piece
+  floatingPiece = null;
+  world.enableCameraDrag();
+}
+
 // export const createScene = () => {
 export function createScene() {
   scene = new Scene(engine)
@@ -152,6 +158,7 @@ export function createScene() {
   );
 
   scene.onPointerObservable.add((pointerInfo) => {
+    // handle mouse click
     /*   		
     // TODO: this allows to drag tiles -- re-enable for a future version with more animations?
     switch (pointerInfo.type) {
@@ -173,15 +180,19 @@ export function createScene() {
         if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh && pointerInfo.pickInfo.pickedMesh.metadata) {
           // click on piece to select (or place)
           let p = pointerInfo.pickInfo.pickedMesh.metadata as PieceMesh;
-          if (p.click())
+          if (p.click()) {
             floatingPiece = p;
-          else
-            floatingPiece = null;
+            setTimeout(function () {
+              // do not drag camera
+              world.disableCameraDrag();
+            }, 0)
+          } else
+            dropFloatingPiece();
         } else {
           // when clicking on empty space, drop piece
           if (floatingPiece) {
             if (!floatingPiece.click()) // do this by virtually clicking on piece so that world can handle it
-              floatingPiece = null;
+              dropFloatingPiece();
           }
         }
         break
@@ -195,6 +206,7 @@ export function createScene() {
 }
 
 export const createPBRSkybox = () => {
+  // global background
   const environmentTexture = CubeTexture.CreateFromPrefilteredData(
     'https://assets.babylonjs.com/environments/environmentSpecular.env',
     scene,

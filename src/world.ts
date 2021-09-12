@@ -3,11 +3,11 @@
 // 
 // (85)
 //
-// $Id: world.ts 3795 2021-01-28 07:55:26Z zwo $
+// $Id: world.ts 3848 2021-05-12 13:16:07Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { createPBRSkybox, scene, floatingPiece } from "./functions";
+import { createPBRSkybox, scene, floatingPiece, canvas } from "./functions";
 import { gridPos, has, set } from "./types/Field";
 import { easeV, PieceMesh } from "./PieceMesh";
 import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
@@ -21,6 +21,7 @@ import { colors } from "./types/Materials";
 export const piece_y_lie = 0.31;
 export const piece_y_stand = 1;
 export const piece_size = 2.0;
+const dragWhileSelected = false;
 
 export let world: World;
 
@@ -105,7 +106,7 @@ class World {
     // add debug meshes
     this.fieldMesh = fieldBox();
 
-    // add glow
+    // add glow layer
     var glow_layer = new GlowLayer("glow", scene);
     glow_layer.customEmissiveColorSelector = (function () {
       var x = 20;
@@ -162,6 +163,16 @@ class World {
       configurePerspectiveCamera(this.camera);
   }
 
+  enableCameraDrag() {
+    this.camera.attachControl(canvas);
+  }
+
+  disableCameraDrag() {
+    // do not drag camera with mouse
+    if (!dragWhileSelected)
+      this.camera.detachControl(canvas);
+  }
+
   addShadow(mesh: Mesh) {
     this.shadowGenerator.addShadowCaster(mesh);
   }
@@ -174,7 +185,7 @@ class World {
   }
 
   isMe(player_idx: number): boolean {
-    // true if this is me
+    // true if this player_idx is me
     return player_idx === this.getPlayerID();
   }
 
@@ -189,7 +200,7 @@ class World {
   }
 
   computeHomeCenterXY(player_idx: number, offset: number = 14): gridPos {
-    // compute center of home position for player
+    // compute center of home position for player, taking into account growing size of field
     let angle1 = this.playerToAngle(player_idx);
     let fieldsize = this.getFieldSize(5);
     var refpoint: gridPos;
@@ -355,7 +366,7 @@ class World {
 
     // draw hud
     let myhand = this.hands[this.getPlayerID()];
-    let newhand = Array();
+    let newhand = [];
     for (let i = 0; i < myhand.length; ++i) {
       let p = myhand[i];
       let canvas: HTMLCanvasElement | null = this.hud.querySelector(`#canvashand${p.home_x}`);
@@ -398,7 +409,6 @@ class World {
         unplace(this.grid, pm.gridxy);
       }
     }
-
 
     let added = 0;
     for (let p of state.pog) {
@@ -513,17 +523,20 @@ class World {
   placeCommand() {
     // check if move is valid
     if (floatingPiece)
+      // cannot end turn if any piece still floating
       return;
+
     let played = this.hands[this.curr_player].filter(p => !p.isHand);
     let score = isValidMove(this.grid, played);
     if (score === false)
+      // move invalid
       return false;
 
     // move is valid => disable pieces on hand
     this.hands[this.curr_player].forEach(p => {
       p.mesh.isPickable = false;
     });
-    // move meshes from hands array to field and update field size
+    // move meshes from hands array to field
     played.forEach((p) => {
       p.fix = true;
       p.isHand = false;
@@ -531,7 +544,7 @@ class World {
       // updateGridSize(this.grid, p.gridxy); NOTE: should not do this here because move could still be rejected (only if it's not our turn?)
     });
     this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
-    // end turn
+    // end turn, broadcast move
     gameClient.moves.place(downgrade(played));
 
     console.log("placeCommand ended")
