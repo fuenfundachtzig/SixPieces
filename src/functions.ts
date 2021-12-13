@@ -176,16 +176,27 @@ export function createScene() {
     }
     */
     switch (pointerInfo.type) {
+      case PointerEventTypes.POINTERDOWN:
+        if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh && pointerInfo.pickInfo.pickedMesh.name !== "ground") {
+          // do not drag camera
+          world.disableCameraDrag();
+        }
+        break;
+      case PointerEventTypes.POINTERUP:
+        // reallow drag
+        if (!floatingPiece)
+          world.enableCameraDrag();
+        break;
       case PointerEventTypes.POINTERPICK:
         if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh && pointerInfo.pickInfo.pickedMesh.metadata) {
           // click on piece to select (or place)
           let p = pointerInfo.pickInfo.pickedMesh.metadata as PieceMesh;
           if (p.click()) {
             floatingPiece = p;
-            setTimeout(function () {
-              // do not drag camera
-              world.disableCameraDrag();
-            }, 0)
+            // setTimeout(function () {
+            //   // do not drag camera
+            //   world.disableCameraDrag();
+            // }, 0)
           } else
             dropFloatingPiece();
         } else {

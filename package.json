@@ -1,6 +1,6 @@
 {
   "name": "SixPieces",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "main": "src/index.ts",
   "private": true,
   "homepage": "/SixPieces",
@@ -9,7 +9,7 @@
     "build": "react-scripts build",
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "test": "react-scripts test",
-    "buildserver": "npx tsc src/server.ts --esModuleInterop",
+    "buildserver": "npx tsc src/game.ts src/server.ts --esModuleInterop",
     "serve": "node -r esm src/server.js"
   },
   "dependencies": {

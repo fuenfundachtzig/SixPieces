@@ -80,7 +80,7 @@ Note that npm7 takes offense with some dependencies. npm6 doesn't.
 
 A standalone version that can run in (hopefully) any recent web browser can be be created with
 ```
-npm build
+npm run build
 ```
 
 ### Debugging
