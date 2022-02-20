@@ -95,6 +95,7 @@ class GameClient {
       // receives update from server
       if (state) {
         if (state.G && state.G.players) {
+          // display scores in title bar
           let s = "";
           for (let player of state.G.players as Player[]) {
             if (s !== "")
@@ -104,6 +105,7 @@ class GameClient {
           document.title = `Scores: ${s} -- Bag: ${state.G.bag.length} pieces`;
         }
         if (state.ctx.gameover) {
+          // display "Game Over" message
           divElement.hidden = false;
           let e: string = "<h1>Game ended</h1>";
           for (let p of state.G.players) {
@@ -120,7 +122,7 @@ class GameClient {
           this.moves.rename(this.playerID, this.myName);
         }
 
-        // hide / show buttons
+        // hide / show buttons depending on whether it's my turn or not
         menu.style.visibility = state.ctx.currentPlayer === this.playerID ? "visible" : "hidden";
       }
     });
@@ -128,11 +130,12 @@ class GameClient {
     this.moves = this.client.moves;
     this.client.start();
 
-    console.log(`GameCient for ${numPlayers} created and started.`);
+    console.log(`GameClient for ${numPlayers} created and started.`);
   }
 }
 
 function getChecked(id: string, _default: boolean): boolean {
+  // read value of HTML checkbox with default
   let element = document.getElementById(id) as HTMLInputElement;
   if (element)
     return (element as HTMLInputElement).checked;
@@ -143,12 +146,15 @@ document.title = `${packageJson.name} --- v${packageJson.version}`;
 const spanElement = document.getElementById('playerbuttons') as HTMLSpanElement;
 const divElement  = document.getElementById('setup') as HTMLDivElement;
 
-// fill match ID from URL parameter
+// fill match ID from URL parameter (otherwise use current date)
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 if (urlParams.has('matchID'))
   (document.getElementById('matchID') as HTMLInputElement).value = urlParams.get('matchID') as string;
+else if ((document.getElementById('matchID') as HTMLInputElement).value === "default")
+  (document.getElementById('matchID') as HTMLInputElement).value = new Date().toISOString().slice(0,-14);
 
+// call SetupScreen function and then initialize game based on return value
 SetupScreen(spanElement).then((playerID: any) => {
   // hide setup screen
   divElement.hidden = true;
@@ -164,7 +170,7 @@ SetupScreen(spanElement).then((playerID: any) => {
   if ((myName === "Player") || (myName === ""))
     myName = "Player #" + (parseInt(playerID) + 1);
   else
-    myName = myName.substr(0, 30);
+    myName = myName.substring(0, 30);
   flatfield = getChecked("optionFlatField", false);
   if (getChecked("optionShapes2", false))
     chosenShapeSet = Shapes2;
