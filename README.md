@@ -5,6 +5,8 @@ SixPieces is a multiplayer online game based on the boardgame ["Qwirkle"](https:
 It is written in [TypeScript](https://www.typescriptlang.org/). Its graphical user interface is rendered in 3-D using [`babylon.js`](https://www.babylonjs.com/) with HTML5 and WebGL. It uses [`boardgame.io`](https://boardgame.io/), an open-source engine for turn-based games, to synchronize the game state between server and clients. 
 Most of the coding was done end of 2020 to be able to play Qwirkle online. (There is another free implementation called [Pont](https://github.com/mkeeter/pont) by Matthew Keeter.)
 
+There currently is no AI, i.e. the game can only be played human vs. human. 
+
 ## Start playing
 [A demo server is running here.](https://zwo.uber.space/SixPieces/) Read below how to setup and play the game.
 
@@ -70,15 +72,17 @@ To run your own server or contribute to the development, follow these instructio
 
 Installation requires `npm`, the Node.js package manager, to be installed. To run do
 ```
+git clone https://github.com/fuenfundachtzig/SixPieces.git
+cd SixPieces/
 npm install
 npm start
 ```
 If the installation (first step) was successful, the second step will open a web browser and navigate to `localhost:3000`.
 Both take some time.
 
-Note that npm7 takes offense with some dependencies. npm6 doesn't.
+Note that npm7 takes offense with some dependencies. The rather old version 6.14.4 doesn't.
 
-A standalone version that can run in (hopefully) any recent web browser can be be created with
+A standalone version that can run in (hopefully) any recent web browser can be created with
 ```
 npm run build
 ```
