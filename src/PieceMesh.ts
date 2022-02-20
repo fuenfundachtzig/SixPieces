@@ -142,7 +142,7 @@ export class PieceMesh implements PieceInGame {
   }
 
   click() {
-    world.click(this);
+    world.clickPiece(this);
     return this.isSelected;
   }
 
@@ -165,7 +165,7 @@ export class PieceMesh implements PieceInGame {
     // move piece (mesh)
     if (!this.mesh)
       return;
-    if (world.withinField(newPosition, InnerRing)) { // TODO global offset that moves ground, lights and homes (but not pieces and camera)
+    if (world.isWithinField(newPosition, InnerRing)) { // TODO global offset that moves ground, lights and homes (but not pieces and camera)
       // is within field: check if can snap to empty field
       let xy = world.snap(newPosition);
       if (world.isEmpty(xy)) {
@@ -175,7 +175,7 @@ export class PieceMesh implements PieceInGame {
         // console.log("set gridxy " + xy.x + ","+ xy.y)
         this.isHand = false;
       }
-    } else if (world.withinField(newPosition, OuterRing)) {
+    } else if (world.isWithinField(newPosition, OuterRing)) {
       // freely float (don't snap) between field and outer ring
       this.mesh.rotation = Vector3.Zero();
       this.mesh.position = newPosition;

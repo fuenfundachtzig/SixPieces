@@ -48,8 +48,8 @@ function downgrade(arr: PieceMesh[]): PieceInGame[] {
   return res;
 }
 
-function fieldBox(from = Vector3.Zero(), to = Vector3.One()) {
-  // return a box from to (instead of center and scale / size as babalon.js uses)
+function createFieldBox(from = Vector3.Zero(), to = Vector3.One()) {
+  // create and return a box (CreateBox) from to (instead of center and scale / size as babalon.js uses)
   let size = to.subtract(from);
   // console.log("fieldBox: size " + size.x +" " +  size.y + " " + size.z)
   let box = MeshBuilder.CreateBox("fieldMesh", { width: size.x, height: size.y, depth: size.z });
@@ -104,7 +104,7 @@ class World {
     this.shadowGenerator.useExponentialShadowMap = true;
 
     // add debug meshes
-    this.fieldMesh = fieldBox();
+    this.fieldMesh = createFieldBox();
 
     // add glow layer
     var glow_layer = new GlowLayer("glow", scene);
@@ -440,7 +440,7 @@ class World {
 
     // draw field box
     scene.removeMesh(this.fieldMesh);
-    this.fieldMesh = fieldBox(
+    this.fieldMesh = createFieldBox(
       this.toGroundCoord({ x: this.grid.grid_minx - 5.5, y: this.grid.grid_miny - 5.5 }),
       this.toGroundCoord({ x: this.grid.grid_maxx + 5.5, y: this.grid.grid_maxy + 5.5 })
     );
@@ -473,7 +473,7 @@ class World {
 
   }
 
-  click(p: PieceMesh) {
+  clickPiece(p: PieceMesh) {
     // handle when piece has been clicked on
     if (this.sel_piece) {
       this.sel_piece.unselect();
@@ -509,7 +509,7 @@ class World {
     return { tl: this.toGroundCoord(r.tl), br: this.toGroundCoord(r.br) };
   }
 
-  withinField(coord: Vector3, margin: number = 5): boolean {
+  isWithinField(coord: Vector3, margin: number = 5): boolean {
     let fieldsize = this.getFieldSize(margin);
     return (coord.x > fieldsize.tl.x) && (coord.x < fieldsize.br.x) &&
       (coord.z > fieldsize.tl.z) && (coord.z < fieldsize.br.z);
