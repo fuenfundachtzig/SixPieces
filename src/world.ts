@@ -364,8 +364,15 @@ class World {
       });
     };
 
-    // draw hud
+    // draw HUD for current player
     let myhand = this.hands[this.getPlayerID()];
+    if (myhand) {
+      this.DrawHUD(myhand);
+    }
+  }
+
+  private DrawHUD(myhand: PieceMesh[]) {
+    // draw HUD for a player
     let newhand = [];
     for (let i = 0; i < myhand.length; ++i) {
       let p = myhand[i];
@@ -390,7 +397,7 @@ class World {
             if (ctx) {
               ctx.clearRect(0, 0, 256, 256);
             }
-          }     
+          }
         }
       }
     }
