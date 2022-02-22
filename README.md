@@ -80,8 +80,6 @@ npm start
 If the installation (first step) was successful, the second step will open a web browser and navigate to `localhost:3000`.
 Both take some time.
 
-Note that npm7 takes offense with some dependencies. The rather old version 6.14.4 doesn't.
-
 A standalone version that can run in (hopefully) any recent web browser can be created with
 ```
 npm run build
