@@ -160,15 +160,20 @@ export function createScene() {
     }
     if (kbinfo.type === KeyboardEventTypes.KEYDOWN) {
       console.log("key:" + kbinfo.event.code);
+      world.unglow();
       if (kbinfo.event.code.startsWith("Digit")) {
         let num = parseInt(kbinfo.event.code.charAt(5));
         if (num <= 6) {
           let picked = world.getHand()[num-1];
           if (floatingPiece)
-            if (floatingPiece !== picked) 
+            if (floatingPiece !== picked) {
               dropFloatingPiece();
+            }
           floatingPiece = picked;
-          floatingPiece.select();
+          if (!picked.isHand) {
+            unplace(thegrid, picked.gridxy);
+          }
+          floatingPiece.select();          
           console.log("picked: " + picked);
         }
       } else switch (kbinfo.event.code) {
@@ -236,6 +241,7 @@ export function createScene() {
       case PointerEventTypes.POINTERPICK:
         if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh && pointerInfo.pickInfo.pickedMesh.metadata) {
           // click on piece to select (or place)
+          world.unglow();
           let p = pointerInfo.pickInfo.pickedMesh.metadata as PieceMesh;
           if (floatingPiece) {
             dropFloatingPiece();
