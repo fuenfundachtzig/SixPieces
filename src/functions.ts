@@ -1,7 +1,17 @@
+// 
+// User interactions: click and move tiles
+// 
+// (85)
+//
+// $Id: functions.ts 4033 2022-03-22 17:03:35Z zwo $
+
 import { Engine, Scene, CubeTexture, Color4, Nullable, KeyboardEventTypes } from '@babylonjs/core'
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import '@babylonjs/inspector' // for ctrl+alt+X
+import { thegrid } from '.'
 import { PieceMesh } from "./PieceMesh"
+import { Grid, gridPos, placePiece, remove, set, unplace } from './types/Field'
+import { identify1 } from './types/GameState'
 import { world } from './world'
 
 export let canvas: HTMLCanvasElement
@@ -102,8 +112,31 @@ function pointerMovePiece() {
 
 function dropFloatingPiece() {
   // drop floating piece
-  floatingPiece = null;
+  if (floatingPiece) {
+    if (floatingPiece.isHand) {
+      floatingPiece.moveHome();
+    } else {
+      placePiece(thegrid, floatingPiece, floatingPiece.gridxy);
+    }
+    floatingPiece.unselect();
+    floatingPiece = null;
+  }
   world.enableCameraDrag();
+}    
+
+export function endAndPlace() {
+  if (floatingPiece)
+    // cannot end turn if any piece still floating
+    // TODO: notify player that piece needs to be set
+    return;
+  world.placeCommand();
+}
+
+export function endAndSwap() {
+  if (floatingPiece != null)
+    // TODO: notify player that piece needs to be set
+    return;
+  world.swapCommand();
 }
 
 // export const createScene = () => {
@@ -116,7 +149,7 @@ export function createScene() {
   scene.autoClear = false
   scene.autoClearDepthAndStencil = false
 
-  // show the inspector when pressing shift + alt + I
+  // show the inspector when pressing shift + alt + x
   scene.onKeyboardObservable.add((kbinfo) => {
     if (kbinfo.event.ctrlKey && kbinfo.event.shiftKey && kbinfo.event.code === 'KeyX') {
       if (scene.debugLayer.isVisible()) {
@@ -126,24 +159,37 @@ export function createScene() {
       }
     }
     if (kbinfo.type === KeyboardEventTypes.KEYDOWN) {
-      switch (kbinfo.event.code) {
+      console.log("key:" + kbinfo.event.code);
+      if (kbinfo.event.code.startsWith("Digit")) {
+        let num = parseInt(kbinfo.event.code.charAt(5));
+        if (num <= 6) {
+          let picked = world.getHand()[num-1];
+          if (floatingPiece)
+            if (floatingPiece !== picked) 
+              dropFloatingPiece();
+          floatingPiece = picked;
+          floatingPiece.select();
+          console.log("picked: " + picked);
+        }
+      } else switch (kbinfo.event.code) {
         case 'KeyC':
           // change camera mode
           world.toggleCameraMode();
           break;
         case 'KeyE':
           // end turn
-          if (floatingPiece != null)
-            // TODO: notify player that piece needs to be set
-            return;
-          world.placeCommand();
+          endAndPlace();
           break;
         case 'KeyS':
           // end turn
-          if (floatingPiece != null)
-            // TODO: notify player that piece needs to be set
-            return;
-          world.swapCommand();
+          endAndSwap();
+          break;
+        case 'KeyR':
+          // return piece
+          if (floatingPiece) {
+            floatingPiece.moveHome();
+            dropFloatingPiece();
+          }
           break;
         case 'Space':
           world.viewCameraCenter();
@@ -191,20 +237,19 @@ export function createScene() {
         if (pointerInfo.pickInfo && pointerInfo.pickInfo.pickedMesh && pointerInfo.pickInfo.pickedMesh.metadata) {
           // click on piece to select (or place)
           let p = pointerInfo.pickInfo.pickedMesh.metadata as PieceMesh;
-          if (p.click()) {
-            floatingPiece = p;
-            // setTimeout(function () {
-            //   // do not drag camera
-            //   world.disableCameraDrag();
-            // }, 0)
-          } else
+          if (floatingPiece) {
             dropFloatingPiece();
+          } else {
+            floatingPiece = p;
+            if (!p.isHand) {
+              unplace(thegrid, p.gridxy);
+            }
+            p.select();
+          }
         } else {
           // when clicking on empty space, drop piece
-          if (floatingPiece) {
-            if (!floatingPiece.click()) // do this by virtually clicking on piece so that world can handle it
-              dropFloatingPiece();
-          }
+          if (floatingPiece) 
+            dropFloatingPiece();
         }
         break
       case PointerEventTypes.POINTERMOVE:
@@ -227,5 +272,4 @@ export const createPBRSkybox = () => {
 
   return skyboxMesh
 }
-
 

@@ -27,3 +27,10 @@ node_modules
 package-lock.json
 src/*.js
 src/types/*.js
+
+.svnignore
+figures/Shapes1.png
+figures/Shapes1screenshotPos.txt
+figures/Shapes2.png
+src/.svnignore
+src/types/.svnignore

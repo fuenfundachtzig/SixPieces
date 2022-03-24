@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 3866 2021-07-29 08:21:17Z zwo $
+// $Id: index.ts 4033 2022-03-22 17:03:35Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -12,13 +12,17 @@ import { Client } from 'boardgame.io/client';
 import { SocketIO } from 'boardgame.io/multiplayer'
 import { _ClientImpl } from 'boardgame.io/dist/types/src/client/client';
 
-import { createEngine, createScene } from './functions'
+import { createEngine, createScene, endAndPlace, endAndSwap } from './functions'
 import { makeMaterials } from './make_materials'
 import { createWorld } from './world'
 import { GameDefinition } from './game';
-import { Player } from './types/GameState';
+import { PieceInGame, Player } from './types/GameState';
 import { Shapes1, Shapes2 } from "./types/Materials";
 import packageJson from '../package.json';
+import { emptyGrid, Grid, GridWithBounds } from './types/Field';
+
+// of course, emptyGrid() is not a function, as it is obviously a function, so I'll just paste the code here
+export var thegrid = emptyGrid();
 
 // Import stylesheets
 // import './index.css';
@@ -84,7 +88,6 @@ class GameClient {
       game: GameDefinition,
       // multiplayer: Local(),
       multiplayer: SocketIO({ server: server_url, socketOpts: { path: '/SixPiecesServer/socket.io' } }), // TODO: better way to set path
-      // multiplayer: SocketIO({ server: server_url }), // TODO: better way to set path
       numPlayers,
       playerID,
       matchID,
@@ -189,9 +192,9 @@ SetupScreen(spanElement).then((playerID: any) => {
 
   // set click handlers
   let img = document.getElementById("img_swap") as HTMLImageElement;
-  img.onclick = function() { world.swapCommand() };
+  img.onclick = function() { endAndPlace(); };
   img = document.getElementById("img_done") as HTMLImageElement;
-  img.onclick = function() { world.placeCommand() };
+  img.onclick = function() { endAndSwap() };
 
   // construct and start game client and overlay debug panel if debug is set
   let server_url = document.getElementById("server_url")!.getAttribute("content") as string;

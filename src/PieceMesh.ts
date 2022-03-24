@@ -1,9 +1,9 @@
 //
-// Class to describe a piece in the game.
+// Class to describe a tile (piece) in the game including its graphical representation as a mesh.
 //
 // (85)
 //
-// $Id: PieceMesh.ts 3795 2021-01-28 07:55:26Z zwo $
+// $Id: PieceMesh.ts 4033 2022-03-22 17:03:35Z zwo $
 //
 
 import { Scene, Vector3, Animation, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
@@ -72,7 +72,7 @@ export class PieceMesh implements PieceInGame {
   }
 
   setGrid(xy: gridPos, animate: boolean = false) {
-    // set mesh on field
+    // place mesh on board
     let targetPos = world.toGroundCoord(xy);
     let diff = targetPos.subtract(this.mesh.position);
     if ((diff.length() < 0.1) || !animate) {
@@ -139,11 +139,6 @@ export class PieceMesh implements PieceInGame {
       scene.beginDirectAnimation(this.mesh, [posSlide], 0, frames, false);
     }
     this.isHand = true;
-  }
-
-  click() {
-    world.clickPiece(this);
-    return this.isSelected;
   }
 
   select() {

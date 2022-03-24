@@ -3,14 +3,14 @@
 //
 // (85)
 //
-// $Id: game.ts 3794 2021-01-27 21:48:20Z zwo $
+// $Id: game.ts 4033 2022-03-22 17:03:35Z zwo $
 //
 
 import { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { emptyGrid, fillHand, isValidMove } from './logic';
+import { fillHand, isValidMove } from './logic';
 import { createBag, shuffleArray } from './types/Bag';
-import { set } from './types/Field';
+import { set, emptyGrid } from './types/Field';
 import { GameState, identify2, Piece, PieceInGame, Player } from './types/GameState';
 
 let limitBag = 999;

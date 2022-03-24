@@ -3,51 +3,18 @@
 //
 // (85)
 //
-// $Id: logic.ts 3848 2021-05-12 13:16:07Z zwo $
+// $Id: logic.ts 4033 2022-03-22 17:03:35Z zwo $
 //
 
-import { create, get, getN, Grid, gridPos, gridRect, has, neighbors, remove, set, translate } from "./types/Field"
+import { get, getN, gridPos, gridRect, Grid, GridWithBounds, has, neighbors, translate } from "./types/Field"
 import { Bag } from "./types/Bag";
 import { identify1, identify2, Piece, PieceInGame, Player } from "./types/GameState";
-
-type GridGame = Grid<PieceInGame>;
-
-export interface GridBound extends GridGame {
-  inited: boolean; // whether sizes are valid
-  grid_minx: number; // size of fixed pieces
-  grid_miny: number;
-  grid_maxx: number;
-  grid_maxy: number;
-}
-
-export function emptyGrid(): GridBound {
-  let grid: Grid<PieceInGame> = create();
-  return {
-    inited: false,
-    grid: grid.grid,
-    count: grid.count,
-    grid_minx: 0,
-    grid_miny: 0,
-    grid_maxx: 0,
-    grid_maxy: 0,
-  }
-}
-
-export function placePiece(g: GridGame, p: Piece, xy: gridPos) {
-  console.log("place " + identify1(p) + " on " + xy.x + "," + xy.y)
-  set(g, xy, p);
-}
-
-export function unplace(g: GridGame, xy: gridPos) {
-  console.log("unplace on " + xy.x + "," + xy.y)
-  remove(g, xy);
-}
 
 // function isEmpty(g: GridGame, xy: gridPos): boolean {
 //   return !has(g, xy);
 // }
 
-export function updateGridSize(g: GridBound, xy: gridPos) {
+export function updateGridSize(g: GridWithBounds, xy: gridPos) {
   // updates the cached grid size with a xy position (note: there is no way to undo this)
   // console.log("updateGridSize " + g.inited + " " + g.count + " " + xy.x + "," + xy.y)
   if (!g.inited) {
@@ -86,13 +53,13 @@ export function updateGridSize(g: GridBound, xy: gridPos) {
   }
 }
 
-export function getGridSize(g: GridBound, margin: number): gridRect {
+export function getGridSize(g: GridWithBounds, margin: number): gridRect {
   let tl = { x: g.grid_minx - margin, y: g.grid_miny - margin };
   let br = { x: g.grid_maxx + margin, y: g.grid_maxy + margin };
   return { tl: tl, br: br }
 }
 
-export function isValidMove(g: GridGame, played: PieceInGame[]): boolean | number {
+export function isValidMove(g: GridWithBounds, played: PieceInGame[]): boolean | number {
   // check if move valid
 
   // no piece played

@@ -4,8 +4,6 @@
   * (rename players (Player.name -- keep playerID numeric strings from 0..3))
   * (choose size of bag, limitBag)
 * add authentication for players
-* keyboard shortcuts:
-  * select pieces from hand by pressing 1..6
 * GUI:
   * improve display of scores and number of pieces left in bag
   * improve alignment of buttons in bottom right corner of screen
@@ -24,6 +22,7 @@
   * add license information
   * make linter happy
   * add favicon
+  * https://en.wikipedia.org/wiki/Ingenious_(board_game)
 
 ### Technical remarks
 * [public/index.html](public/index.html) holds the setup screen, [src/index.ts](src/index.ts) is the entry point for the code
@@ -33,5 +32,5 @@
 
 ## TODO (server)
 * add matchID to debug output
-* handle port already in use more gracefully
 * clean up debug output
+* handle "port already in use" more gracefully

@@ -1,10 +1,12 @@
 //
-// Container for 2-D field  (grid).
+// Container for 2-D board (grid).
 //
 // (85)
 //
-// $Id: Field.ts 3785 2021-01-24 09:50:20Z zwo $
+// $Id: Field.ts 4033 2022-03-22 17:03:35Z zwo $
 //
+
+import { identify1, Piece, PieceInGame } from "./GameState";
 
 export interface gridPos {
   x: number;
@@ -29,7 +31,7 @@ export interface Grid<T> {
   count: number;
 }
 
-export function create<T>(): Grid<T> {
+function makeGrid<T>(): Grid<T> {
   let g: Grid<T> = {grid: [[]], count: 0};
   for (let i = 0; i < maxsize; ++i)
     g.grid.push(new Array<T>(maxsize));
@@ -88,5 +90,37 @@ export function empty<T>(g: Grid<T>): boolean {
 export function getN<T>(g: Grid<T>): number {
   return g.count;
 }
+
+export interface GridWithBounds extends Grid<PieceInGame> {
+  inited: boolean; // whether sizes are valid
+  grid_minx: number; // size of fixed pieces
+  grid_miny: number;
+  grid_maxx: number;
+  grid_maxy: number;
+}
+
+export function emptyGrid(): GridWithBounds {
+  let grid: Grid<PieceInGame> = makeGrid();
+  return {
+    inited: false,
+    grid: grid.grid,
+    count: grid.count,
+    grid_minx: 0,
+    grid_miny: 0,
+    grid_maxx: 0,
+    grid_maxy: 0,
+  }
+}
+
+export function placePiece(g: GridWithBounds, p: PieceInGame, xy: gridPos) {
+  console.log("place " + identify1(p) + " on " + xy.x + "," + xy.y)
+  set(g, xy, p);
+}
+
+export function unplace(g: GridWithBounds, xy: gridPos): void {
+  console.log("unplace on " + xy.x + "," + xy.y)
+  remove(g, xy);
+}
+
 
 

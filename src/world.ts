@@ -1,18 +1,18 @@
 // 
-// Container for objects.
+// Controls the rendering and handles user interactions.
 // 
 // (85)
 //
-// $Id: world.ts 3848 2021-05-12 13:16:07Z zwo $
+// $Id: world.ts 4033 2022-03-22 17:03:35Z zwo $
 
-import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, Nullable, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
+import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
-import { createPBRSkybox, scene, floatingPiece, canvas } from "./functions";
-import { gridPos, has, set } from "./types/Field";
+import { createPBRSkybox, scene, canvas } from "./functions";
+import { gridPos, has, set, GridWithBounds, unplace, } from "./types/Field";
 import { easeV, PieceMesh } from "./PieceMesh";
-import { emptyGrid, getFreeHandSlot, getGridSize, GridBound, isValidMove, placePiece, unplace, updateGridSize } from "./logic";
+import { getFreeHandSlot, getGridSize, isValidMove, updateGridSize } from "./logic";
 import { GameState, identify2, PieceInGame } from "./types/GameState";
-import { debug, flatfield, gameClient, hideopp, chosenShapeSet } from ".";
+import { debug, flatfield, gameClient, hideopp, chosenShapeSet, thegrid } from ".";
 import { configureOrthographicCamera, configurePerspectiveCamera, createCamera } from "./cameras";
 import { drawShape } from "./make_materials";
 import { colors } from "./types/Materials";
@@ -67,9 +67,7 @@ function createFieldBox(from = Vector3.Zero(), to = Vector3.One()) {
 class World {
 
   private pieces = new Map<number, PieceMesh>(); // pieces for which meshes have been created in scene
-  private sel_piece: Nullable<PieceMesh> = null; // currently selected piece (by player, for moving)
   private shadowGenerator: ShadowGenerator;
-  private grid: GridBound; // cache of grid
   private hands: Array<Array<PieceMesh>>; // cache of hands
   private curr_player = 0; // cache of current player
   private light_player: SpotLight; // spotlight showing hand of current player
@@ -146,15 +144,14 @@ class World {
     (this.currPlayerMesh.material as PBRMetallicRoughnessMaterial).baseColor = new Color3(0.1, 0.1, 0.2);
     this.addShadow(this.currPlayerMesh);
 
-    // init grid
-    this.grid = emptyGrid()
+    // init hand
     this.hands = [];
 
     // remember hud
     this.hud = hud;
 
   }
-
+ 
   toggleCameraMode() {
     this.cameraIsOrtho = !this.cameraIsOrtho;
     if (this.cameraIsOrtho)
@@ -184,6 +181,10 @@ class World {
     return 0;
   }
 
+  getHand(): Array<PieceMesh>{
+    return this.hands[this.curr_player];
+  }
+
   isMe(player_idx: number): boolean {
     // true if this player_idx is me
     return player_idx === this.getPlayerID();
@@ -207,19 +208,19 @@ class World {
     switch (player_idx) {
       default:
       case 0:
-        // fieldsizes = [this.grid.grid_maxx, this.grid.grid_maxy];
+        // fieldsizes = [thegrid.grid_maxx, thegrid.grid_maxy];
         refpoint = { x: fieldsize.br.x, y: fieldsize.br.z };
         break;
       case 1:
-        // fieldsizes = [this.grid.grid_minx, this.grid.grid_maxy];
+        // fieldsizes = [thegrid.grid_minx, thegrid.grid_maxy];
         refpoint = { x: fieldsize.tl.x, y: fieldsize.br.z };
         break;
       case 2:
-        // fieldsizes = [this.grid.grid_minx, this.grid.grid_miny];
+        // fieldsizes = [thegrid.grid_minx, thegrid.grid_miny];
         refpoint = { x: fieldsize.tl.x, y: fieldsize.tl.z };
         break;
       case 3:
-        // fieldsizes = [this.grid.grid_maxx, this.grid.grid_miny];
+        // fieldsizes = [thegrid.grid_maxx, thegrid.grid_miny];
         refpoint = { x: fieldsize.br.x, y: fieldsize.tl.z };
         break;
     }
@@ -413,7 +414,7 @@ class World {
         pm.mesh.visibility = 0; // we might otherwise be leaving shadows behind??
         scene.removeMesh(pm.mesh);
         this.pieces.delete(pm.id);
-        unplace(this.grid, pm.gridxy);
+        unplace(thegrid, pm.gridxy);
       }
     }
 
@@ -431,21 +432,21 @@ class World {
       }
       Object.assign(pm, p);
       console.log(`...add to grid: ${identify2(pm)} at ${JSON.stringify(pm.gridxy)}`);
-      set(this.grid, pm.gridxy, pm);
+      set(thegrid, pm.gridxy, pm);
       pm.setUnveil(true);
       pm.mesh.isVisible = true;
       pm.setGrid(pm.gridxy, true);
-      updateGridSize(this.grid, p.gridxy);
+      updateGridSize(thegrid, p.gridxy);
     }
 
     // draw field box
     scene.removeMesh(this.fieldMesh);
     this.fieldMesh = createFieldBox(
-      this.toGroundCoord({ x: this.grid.grid_minx - 5.5, y: this.grid.grid_miny - 5.5 }),
-      this.toGroundCoord({ x: this.grid.grid_maxx + 5.5, y: this.grid.grid_maxy + 5.5 })
+      this.toGroundCoord({ x: thegrid.grid_minx - 5.5, y: thegrid.grid_miny - 5.5 }),
+      this.toGroundCoord({ x: thegrid.grid_maxx + 5.5, y: thegrid.grid_maxy + 5.5 })
     );
 
-    console.log(`unpack: added meshes for ${added} new pieces in field, grid size = ${this.grid.grid_minx}-${this.grid.grid_maxx}, ${this.grid.grid_miny}-${this.grid.grid_maxy}`);
+    console.log(`unpack: added meshes for ${added} new pieces in field, grid size = ${thegrid.grid_minx}-${thegrid.grid_maxx}, ${thegrid.grid_miny}-${thegrid.grid_maxy}`);
 
     // update hands
     added = 0;
@@ -473,29 +474,7 @@ class World {
 
   }
 
-  clickPiece(p: PieceMesh) {
-    // handle when piece has been clicked on
-    if (this.sel_piece) {
-      this.sel_piece.unselect();
-      // handle unselect
-      // if (this.withinField(this.sel_piece.mesh.position, InnerRing)) {
-      if (!this.sel_piece.isHand) {
-        // check
-        placePiece(this.grid, this.sel_piece, this.sel_piece.gridxy);
-      } else {
-        this.sel_piece.moveHome();
-      }
-      if (this.sel_piece === p) {
-        // clicked on selected piece -> don't select again
-        this.sel_piece = null;
-        return;
-      }
-    }
-    // select clicked piece
-    this.sel_piece = p;
-    p.select();
-    if (!p.isHand)
-      unplace(this.grid, p.gridxy);
+  unglow() {
     // unset glow effect for all pieces
     this.hands[this.curr_player].forEach(p => { p.invalid = false });
   }
@@ -505,7 +484,7 @@ class World {
   }
 
   getFieldSize(margin: number): gridCube {
-    let r = getGridSize(this.grid, margin);
+    let r = getGridSize(thegrid, margin);
     return { tl: this.toGroundCoord(r.tl), br: this.toGroundCoord(r.br) };
   }
 
@@ -524,17 +503,16 @@ class World {
   }
 
   isEmpty(xy: gridPos): boolean {
-    return !has(this.grid, xy);
+    return !has(thegrid, xy);
   }
 
   placeCommand() {
-    // check if move is valid
-    if (floatingPiece)
-      // cannot end turn if any piece still floating
-      return;
+    // end turn by placing tiles on board. returns false if not possible
+    // can be called via click on button (img_swap) or 'E' key
 
+    // check if move is valid
     let played = this.hands[this.curr_player].filter(p => !p.isHand);
-    let score = isValidMove(this.grid, played);
+    let score = isValidMove(thegrid, played);
     if (score === false)
       // move invalid
       return false;
@@ -548,19 +526,18 @@ class World {
       p.fix = true;
       p.isHand = false;
       // p.mesh.isPickable = false; // would be overwritten later
-      // updateGridSize(this.grid, p.gridxy); NOTE: should not do this here because move could still be rejected (only if it's not our turn?)
+      // updateGridSize(thegrid, p.gridxy); NOTE: should not do this here because move could still be rejected (only if it's not our turn?)
     });
     this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
     // end turn, broadcast move
     gameClient.moves.place(downgrade(played));
 
-    console.log("placeCommand ended")
+    console.log("placeCommand ended");
   }
 
   swapCommand() {
-    // returns false if not possible or the collection of pieces to be swapped
-    if (floatingPiece)
-      return false;
+    // swap tiles. returns false if not possible
+
     // which pieces to swap
     let toreturn = this.hands[this.curr_player].filter(p => !p.isHand);
     if (toreturn.length === 0) {
@@ -579,7 +556,7 @@ class World {
       console.log("remove mesh for " + identify2(p));
       scene.removeMesh(p.mesh);
       this.pieces.delete(p.id);
-      unplace(this.grid, p.gridxy);
+      unplace(thegrid, p.gridxy);
     });
     */
     this.hands[this.curr_player] = this.hands[this.curr_player].filter(p => p.isHand);
