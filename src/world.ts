@@ -3,12 +3,12 @@
 // 
 // (85)
 //
-// $Id: world.ts 4034 2022-03-24 21:55:14Z zwo $
+// $Id: world.ts 4036 2022-03-29 13:00:31Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { createPBRSkybox, scene, canvas } from "./functions";
-import { gridPos, has, set, GridWithBounds, unplace, } from "./types/Field";
+import { gridPos, has, set, unplace, } from "./types/Field";
 import { easeV, PieceMesh } from "./PieceMesh";
 import { getFreeHandSlot, getGridSize, isValidMove, updateGridSize } from "./logic";
 import { GameState, identify2, PieceInGame } from "./types/GameState";
@@ -388,7 +388,7 @@ class World {
           // add number (which is also the shortkey)
           ctx.font = "50px Arial";
           ctx.textBaseline = "bottom";
-          ctx.fillText('' + (i + 1), 10, 256-10);
+          ctx.fillText('' + (p.home_x + 1), 10, 256-10);
         }
       }
     }

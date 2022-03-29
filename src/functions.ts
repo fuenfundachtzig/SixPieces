@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: functions.ts 4033 2022-03-22 17:03:35Z zwo $
+// $Id: functions.ts 4036 2022-03-29 13:00:31Z zwo $
 
 import { Engine, Scene, CubeTexture, Color4, Nullable, KeyboardEventTypes } from '@babylonjs/core'
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
@@ -164,17 +164,33 @@ export function createScene() {
       if (kbinfo.event.code.startsWith("Digit")) {
         let num = parseInt(kbinfo.event.code.charAt(5));
         if (num <= 6) {
-          let picked = world.getHand()[num-1];
-          if (floatingPiece)
-            if (floatingPiece !== picked) {
-              dropFloatingPiece();
+          // find tile with this number on hand
+          let picked: PieceMesh | null = null;
+          for (picked of world.getHand()) {
+            if (picked.home_x === num - 1) {
+              break
             }
-          floatingPiece = picked;
-          if (!picked.isHand) {
-            unplace(thegrid, picked.gridxy);
           }
-          floatingPiece.select();          
-          console.log("picked: " + picked);
+          if (picked) {
+            if (picked.mesh.isPickable) {
+              let same = false;
+              if (floatingPiece) {
+                if (floatingPiece === picked)
+                  same = true;
+                dropFloatingPiece();
+              } 
+              if (!same) {
+                // same number: drop piece but do not pick it up again
+                floatingPiece = picked;
+                if (!picked.isHand) {
+                  unplace(thegrid, picked.gridxy);
+                }
+                floatingPiece.select();          
+                pointerMovePiece(); // redraw tile at pointer position
+                console.log("picked: " + picked);
+              }
+            }
+          }
         }
       } else switch (kbinfo.event.code) {
         case 'KeyC':

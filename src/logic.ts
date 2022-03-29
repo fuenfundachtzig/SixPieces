@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: logic.ts 4033 2022-03-22 17:03:35Z zwo $
+// $Id: logic.ts 4036 2022-03-29 13:00:31Z zwo $
 //
 
 import { get, getN, gridPos, gridRect, Grid, GridWithBounds, has, neighbors, translate } from "./types/Field"
@@ -148,8 +148,9 @@ export function isValidMove(g: GridWithBounds, played: PieceInGame[]): boolean |
         console.log(`invalid ${isrow ? "row" : "column"} for ${identify2(piece)}`);
         console.log("shapes " + shapes);
         console.log("colors " + colors);
-        for (let pieceall of played) // TODO: could mark only duplicate piece(s)?
-          pieceall.invalid = true;
+        // for (let pieceall of played) // TODO: could mark only duplicate piece(s)?
+          // pieceall.invalid = true;
+        piece.invalid = true;
         return false;
       }
       // piece is in valid row / column => get points!
@@ -179,13 +180,13 @@ export function isValidMove(g: GridWithBounds, played: PieceInGame[]): boolean |
 
 export function getFreeHandSlot(hand: PieceInGame[]): number {
   // find empty slot on hand and return index
-  for (let i = 0; i < 6; ++i) {
+  for (let slot = 0; slot < 6; ++slot) {
     for (var idx = 0; idx < hand.length; ++idx) {
-      if (hand[idx].home_x === i)
+      if (hand[idx].home_x === slot)
         break;
     }
     if (idx === hand.length)
-      return i;
+      return slot;
   }
   console.log("getFreeHandSlot: couldn't find free slot??")
   return -1;
