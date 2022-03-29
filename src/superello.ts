@@ -1,14 +1,14 @@
 //
-// This creates a rounded cube to babylon.js as a mesh.
+// This creates a mesh for a rounded cube to be used in babylon.js.
 // Note that this is not a cube with bevel but a "superellipsoid" -- which means that it doesn't have flat surfaces, but they are slightly curved.
 // 
 // Original idea ("superello1") taken from https://www.babylonjs-playground.com/#14VFYX#37
-// Improved by reducing number of vertices and removing overlaps (basically rewriting the creating of the UV sphere).
+// Improved by reducing number of vertices and removing overlaps (basically rewriting how the UV sphere is created).
 // Also added uv maps for textures.
 //
 // (85)
 // 
-// $Id: superello.ts 3741 2020-12-30 10:17:07Z zwo $
+// $Id: superello.ts 4033 2022-03-22 17:03:35Z zwo $
 
 import { Vector3 } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -43,7 +43,7 @@ function calculateNormal(phi: number, beta: number, n1: number, n2: number, scal
     return normal;
 }
 
-
+/*
 export function createSuperEllipsoid1(samples: number, exp1: any, exp2: any, scalex: any, scaley: any, scalez: any, scene: any) {
     // old function -- use createSuperEllipsoid instead
 
@@ -102,7 +102,7 @@ export function createSuperEllipsoid1(samples: number, exp1: any, exp2: any, sca
     shapeReturned.applyToMesh(superello);
     return superello;
 }
-
+*/
 
 export function createSuperEllipsoid(samples: number, exp1: any, exp2: any, scalex: any, scaley: any, scalez: any, scene: any, flat: boolean = false) {
 

@@ -3,7 +3,7 @@
 // 
 // (85)
 //
-// $Id: world.ts 4033 2022-03-22 17:03:35Z zwo $
+// $Id: world.ts 4034 2022-03-24 21:55:14Z zwo $
 
 import { Color3, Color4, DirectionalLight, GlowLayer, HemisphericLight, Material, MeshBuilder, PBRMetallicRoughnessMaterial, Scene, ShadowGenerator, SpotLight, SubMesh, Vector3, Animation, ArcRotateCamera, CubicEase, EasingFunction, IAnimationKey } from "@babylonjs/core";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
@@ -368,11 +368,11 @@ class World {
     // draw HUD for current player
     let myhand = this.hands[this.getPlayerID()];
     if (myhand) {
-      this.DrawHUD(myhand);
+      this.drawHUD(myhand);
     }
   }
 
-  private DrawHUD(myhand: PieceMesh[]) {
+  private drawHUD(myhand: PieceMesh[]) {
     // draw HUD for a player
     let newhand = [];
     for (let i = 0; i < myhand.length; ++i) {
@@ -385,6 +385,10 @@ class World {
           ctx.clearRect(0, 0, 256, 256);
           ctx.fillStyle = colors[p.color];
           drawShape(canvas.getContext("2d") as CanvasRenderingContext2D, chosenShapeSet[p.shape]);
+          // add number (which is also the shortkey)
+          ctx.font = "50px Arial";
+          ctx.textBaseline = "bottom";
+          ctx.fillText('' + (i + 1), 10, 256-10);
         }
       }
     }

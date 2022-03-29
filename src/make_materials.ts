@@ -1,9 +1,9 @@
 // 
-// Creates the materials for the upper facets of the pieces.
+// Creates the materials for the upper facets of the tiles.
 // 
 // (85)
 //
-// $Id: make_materials.ts 3846 2021-05-09 10:24:08Z zwo $
+// $Id: make_materials.ts 4033 2022-03-22 17:03:35Z zwo $
 
 import { DynamicTexture, Scene, StandardMaterial } from "@babylonjs/core";
 import { colors, Shape } from "./types/Materials";
