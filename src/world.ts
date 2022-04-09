@@ -386,9 +386,13 @@ class World {
           ctx.fillStyle = colors[p.color];
           drawShape(canvas.getContext("2d") as CanvasRenderingContext2D, chosenShapeSet[p.shape]);
           // add number (which is also the shortkey)
-          ctx.font = "50px Arial";
+          let text = '' + (p.home_x + 1);
+          ctx.font = "65px Sans-serif";
           ctx.textBaseline = "bottom";
-          ctx.fillText('' + (p.home_x + 1), 10, 256-10);
+          ctx.strokeStyle  = "black";
+          ctx.lineWidth = 5;
+          ctx.strokeText(text, 10, 256-10);
+          ctx.fillText(text, 10, 256-10);
         }
       }
     }
