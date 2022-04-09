@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 4033 2022-03-22 17:03:35Z zwo $
+// $Id: index.ts 4034 2022-03-24 21:55:14Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -109,12 +109,12 @@ class GameClient {
         }
         if (state.ctx.gameover) {
           // display "Game Over" message
-          divElement.hidden = false;
           let e: string = "<h1>Game ended</h1>";
           for (let p of state.G.players) {
             e = e + `<p>Player ${p.name} has ${p.score} points.</p>`;
           }
-          divElement.innerHTML = e;
+          htmlGameOptions.innerHTML = e;
+          htmlGameOptions.hidden = false;
         }
         world.setCurrPlayer(state.ctx.currentPlayer);
         world.unpack(state.G);
@@ -146,8 +146,8 @@ function getChecked(id: string, _default: boolean): boolean {
 }
 
 document.title = `${packageJson.name} --- v${packageJson.version}`;
-const spanElement = document.getElementById('playerbuttons') as HTMLSpanElement;
-const divElement  = document.getElementById('setup') as HTMLDivElement;
+const htmlPlayerButtons = document.getElementById('playerbuttons') as HTMLSpanElement;
+const htmlGameOptions   = document.getElementById('gameOptions') as HTMLDivElement;
 
 // fill match ID from URL parameter (otherwise use current date)
 const queryString = window.location.search;
@@ -158,9 +158,9 @@ else if ((document.getElementById('matchID') as HTMLInputElement).value === "def
   (document.getElementById('matchID') as HTMLInputElement).value = new Date().toISOString().slice(0,-14);
 
 // call SetupScreen function and then initialize game based on return value
-SetupScreen(spanElement).then((playerID: any) => {
+SetupScreen(htmlPlayerButtons).then((playerID: any) => {
   // hide setup screen
-  divElement.hidden = true;
+  htmlGameOptions.hidden = true;
   // implement setup options
   let matchID = (document.getElementById('matchID') as HTMLInputElement).value;
   let numberOfPlayers = parseInt((document.getElementById('numberOfPlayers') as HTMLInputElement).value);
