@@ -3,7 +3,7 @@
 //
 // (85)
 //
-// $Id: index.ts 4034 2022-03-24 21:55:14Z zwo $
+// $Id: index.ts 4040 2022-04-09 09:40:48Z zwo $
 
 // import 'pepjs' -- needed for pointer interactions says the babylon doc?
 
@@ -192,9 +192,9 @@ SetupScreen(htmlPlayerButtons).then((playerID: any) => {
 
   // set click handlers
   let img = document.getElementById("img_swap") as HTMLImageElement;
-  img.onclick = function() { endAndPlace(); };
+  img.onclick = function() { endAndSwap(); };
   img = document.getElementById("img_done") as HTMLImageElement;
-  img.onclick = function() { endAndSwap() };
+  img.onclick = function() { endAndPlace() };
 
   // construct and start game client and overlay debug panel if debug is set
   let server_url = document.getElementById("server_url")!.getAttribute("content") as string;
