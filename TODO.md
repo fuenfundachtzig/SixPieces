@@ -5,6 +5,8 @@
   * (choose size of bag, limitBag)
 * add authentication for players
 * GUI:
+  * add button to put all placed pieces back to hand to discard move
+  * enable right-click to drag field when piece is hovering
   * improve display of scores and number of pieces left in bag
   * improve alignment of buttons in bottom right corner of screen
   * (display player names)

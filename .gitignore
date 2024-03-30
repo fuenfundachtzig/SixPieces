@@ -29,8 +29,6 @@ src/*.js
 src/types/*.js
 
 .svnignore
-figures/Shapes1.png
-figures/Shapes1screenshotPos.txt
-figures/Shapes2.png
+figures/
 src/.svnignore
 src/types/.svnignore

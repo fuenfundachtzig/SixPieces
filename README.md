@@ -14,6 +14,8 @@ There currently is no AI, i.e. the game can only be played human vs. human.
 
 ![Screenshot](figures/screenshot.png)
 
+The screenshot above shows the board in the middle to which pieces can be added, your pieces at the bottom left, your opponent's pieces (you don't see which these are, of course), and a green ball that indicates that it is your turn.
+
 ## How to play
 ### Starting / joining a new game
 Open the link to the [demo server](https://zwo.uber.space/SixPieces/) (or run your own as described below) and enter a new unique *match ID* to create a new game in the field that looks like this:
@@ -31,7 +33,7 @@ In each turn you can either place one to six pieces on the board or exchange one
 Pan, move and zoom the field by using the mouse.
 Place your pieces by clicking them and then clicking on the board.
 When you have placed all pieces you want to play, press `e` to end your turn.
-If pieces are highlighted in red, they cannot be placed here. You can only place pieces in one row or column, and mix either colors or shapes. 
+If pieces are highlighted in red, they cannot be placed here. **You can only place pieces in one row or column, and mix either colors or shapes.**
 To return pieces to the bag (swap), place them anywhere on the field as before and press `s`.
 (For ending the turn or swapping pieces, there are also icons in the bottom right corner of the screen. This is particularly useful when playing on a screen-only device without a keyboard.)
 
@@ -70,15 +72,19 @@ Which set should be displayed can be chosen under "Display options" when joining
 ## Installation 
 To run your own server or contribute to the development, follow these instructions.
 
-Installation requires `npm`, the Node.js package manager, to be installed. To run do
+Installation requires `npm`, the [Node.js package manager](https://en.wikipedia.org/wiki/Npm), to be installed. First, create a local copy of the repository
 ```
 git clone https://github.com/fuenfundachtzig/SixPieces.git
 cd SixPieces/
+```
+
+Then, install 
+```
 npm install
 npm start
 ```
-If the installation (first step) was successful, the second step will open a web browser and navigate to `localhost:3000`.
-Both take some time.
+If the installation (first step) was successful, the second step will open a web browser and navigate to `localhost:3000`. 
+The "start" step may take a minute or so.
 
 A standalone version that can run in (hopefully) any recent web browser can be created with
 ```
